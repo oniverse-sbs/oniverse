@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHINIGAMI - Modern Comic Catalog & Reader</title>
+  <meta name="description" content="Katalog komik, manhwa, manga, dan manhua modern dengan data terupdate dari Shinigami.">
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Background Glow & Mesh -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  
+  <!-- Navbar -->
+  <header class="navbar" id="main-header">
+    <div class="nav-container">
+      <a href="#" class="brand-logo" id="logo-home">
+        <div class="logo-icon">
+          <i class="fa-solid fa-fire-flame-curved"></i>
+        </div>
+        <span class="logo-text">SHINIGAMI<span class="logo-accent">.VERSE</span></span>
+      </a>
+
+      <div class="nav-search">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-input" placeholder="Cari judul komik, genre, atau author..." autocomplete="off">
+        <button id="clear-search-btn" class="clear-btn hidden"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-link active" id="nav-explore"><i class="fa-solid fa-compass"></i> Explore</button>
+        <button class="nav-link" id="nav-bookmarks"><i class="fa-solid fa-bookmark"></i> Bookmark <span class="badge-count" id="bookmark-badge">0</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="app-container">
+    
+    <!-- Hero Spotlight Carousel -->
+    <section class="hero-section" id="hero-section">
+      <div class="hero-card" id="hero-card">
+        <div class="hero-bg" id="hero-bg"></div>
+        <div class="hero-content">
+          <div class="hero-badges">
+            <span class="badge badge-hot"><i class="fa-solid fa-fire"></i> FEATURED</span>
+            <span class="badge badge-type" id="hero-type">MANHWA</span>
+            <span class="badge badge-rating" id="hero-rating"><i class="fa-solid fa-star"></i> 9.8</span>
+          </div>
+          <h1 class="hero-title" id="hero-title">Loading Featured Comic...</h1>
+          <p class="hero-synopsis" id="hero-synopsis">Memuat data komik pilihan dari Shinigami...</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="hero-read-btn"><i class="fa-solid fa-book-open"></i> Baca Sekarang</button>
+            <button class="btn btn-glass" id="hero-bookmark-btn"><i class="fa-regular fa-bookmark"></i> Bookmark</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter & Sort Bar -->
+    <section class="filter-section">
+      <div class="filter-header">
+        <div class="section-title-wrap">
+          <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Catalog Komik</h2>
+          <span class="catalog-count" id="catalog-count">Showing 0 Series</span>
+        </div>
+
+        <div class="filter-controls">
+          <div class="select-wrapper">
+            <select id="filter-type">
+              <option value="all">Semua Tipe</option>
+              <option value="Manhwa">Manhwa (Korea)</option>
+              <option value="Manga">Manga (Jepang)</option>
+              <option value="Manhua">Manhua (China)</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-icon"></i>
+          </div>
+
+          <div class="select-wrapper">
+            <select id="filter-genre">
+              <option value="all">Semua Genre</option>
+              <option value="Action">Action</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Fantasy">Fantasy</option>
+              <option value="System">System</option>
+              <option value="Reincarnation">Reincarnation</option>
+              <option value="Romance">Romance</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-icon"></i>
+          </div>
+
+          <div class="select-wrapper">
+            <select id="filter-status">
+              <option value="all">Semua Status</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="Completed">Completed</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-icon"></i>
+          </div>
+
+          <div class="select-wrapper">
+            <select id="sort-by">
+              <option value="rating">Rating Tertinggi</option>
+              <option value="views">Paling Populer</option>
+              <option value="bookmarks">Paling Banyak Bookmark</option>
+              <option value="latest">Terbaru Updated</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-icon"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comic Cards Grid -->
+    <section class="grid-section">
+      <div class="comic-grid" id="comic-grid">
+        <!-- Skeleton Cards during loading -->
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+
+      <div class="empty-state hidden" id="empty-state">
+        <i class="fa-solid fa-ghost empty-icon"></i>
+        <h3>Tidak ada komik ditemukan</h3>
+        <p>Coba ubah filter atau kata kunci pencarian Anda.</p>
+        <button class="btn btn-glass" id="reset-filter-btn">Reset Filter</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Series Detail Modal -->
+  <div class="modal-overlay hidden" id="detail-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+
+      <div class="modal-body" id="modal-body">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Reader View Modal / Overlay -->
+  <div class="reader-overlay hidden" id="reader-overlay">
+    <div class="reader-header">
+      <button class="btn-icon" id="close-reader-btn"><i class="fa-solid fa-arrow-left"></i> Kembali</button>
+      <div class="reader-info">
+        <h4 id="reader-series-title">Series Title</h4>
+        <span id="reader-chapter-title">Chapter 1</span>
+      </div>
+      <div class="reader-actions">
+        <button class="btn btn-sm btn-glass" id="prev-chapter-btn"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+        <button class="btn btn-sm btn-glass" id="next-chapter-btn">Next <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <div class="reader-content" id="reader-content">
+      <div class="reader-placeholder">
+        <i class="fa-solid fa-book-open-reader placeholder-icon"></i>
+        <h3 id="reader-msg-title">Modul Reader Chapter</h3>
+        <p id="reader-msg-desc">Daftar halaman komik dari Shinigami siap ditampilkan.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="logo-text">SHINIGAMI<span class="logo-accent">.VERSE</span></span>
+        <p>Data dikumpulkan secara realtime dari Shinigami.asia. Dibuat dengan desain visual modern.</p>
+      </div>
+      <div class="footer-info" id="footer-scraped-info">
+        <span id="footer-count"><i class="fa-solid fa-database"></i> 0 Komik Terdata</span>
+        <span id="footer-time"><i class="fa-solid fa-clock"></i> Updated: --</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
