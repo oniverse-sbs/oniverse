@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "shinigami-verse",
+  "name": "komik-verse",
   "builds": [
     {
       "src": "**/*",
