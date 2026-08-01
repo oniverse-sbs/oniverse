@@ -796,15 +796,31 @@
       });
     });
 
-    // Sidebar nav
-    $$('.sidebar-item').forEach(item => {
-      item.addEventListener('click', e => {
-        e.preventDefault();
-        $$('.sidebar-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        closeMobileSidebar();
-      });
-    });
+    // Navigation click bindings
+    $('#nav-beranda')?.addEventListener('click', e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    $('#sb-beranda')?.addEventListener('click', e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); closeMobileSidebar(); });
+
+    $('#nav-komik')?.addEventListener('click', e => { e.preventDefault(); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); });
+    $('#sb-semua')?.addEventListener('click', e => { e.preventDefault(); $('#filter-type').value = 'all'; applyFilters(); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); closeMobileSidebar(); });
+
+    $('#nav-update')?.addEventListener('click', e => { e.preventDefault(); $('#sort-by').value = 'latest'; applyFilters(); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); });
+    $('#sb-update')?.addEventListener('click', e => { e.preventDefault(); $('#sort-by').value = 'latest'; applyFilters(); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); closeMobileSidebar(); });
+
+    $('#sb-populer')?.addEventListener('click', e => { e.preventDefault(); $('#sort-by').value = 'views'; applyFilters(); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); closeMobileSidebar(); });
+
+    $('#nav-ranking')?.addEventListener('click', e => { e.preventDefault(); document.getElementById('trending-section')?.scrollIntoView({ behavior: 'smooth' }); });
+    $('#sb-ranking')?.addEventListener('click', e => { e.preventDefault(); document.getElementById('trending-section')?.scrollIntoView({ behavior: 'smooth' }); closeMobileSidebar(); });
+    $('#see-ranking')?.addEventListener('click', e => { e.preventDefault(); document.getElementById('trending-section')?.scrollIntoView({ behavior: 'smooth' }); });
+    $('#btn-ranking-full')?.addEventListener('click', e => { e.preventDefault(); document.getElementById('trending-section')?.scrollIntoView({ behavior: 'smooth' }); });
+
+    $('#sb-bookmark')?.addEventListener('click', e => { e.preventDefault(); showBookmarkList(); closeMobileSidebar(); });
+    $('#sb-history')?.addEventListener('click', e => { e.preventDefault(); document.getElementById('continue-section')?.scrollIntoView({ behavior: 'smooth' }); closeMobileSidebar(); });
+
+    // Buttons
+    $('#login-btn')?.addEventListener('click', () => showToast('Fitur Akun / Login segera hadir!', 'info'));
+    $('#notif-btn')?.addEventListener('click', () => showToast('Belum ada notifikasi baru.', 'info'));
+    $('#donasi-btn')?.addEventListener('click', () => showToast('Terima kasih atas dukunganmu pada OniVerse! 💜', 'success'));
+    $('#discord-btn')?.addEventListener('click', e => { e.preventDefault(); showToast('Komunitas Discord OniVerse segera dibuka!', 'info'); });
 
     // Logo home
     $('#logo-home')?.addEventListener('click', e => {
