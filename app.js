@@ -428,9 +428,12 @@
   //  HERO SLIDER
   // ==========================================================================
   function renderHero() {
-    const featured = STATE.allSeries
-      .filter(s => parseFloat(s.rating) >= 8)
-      .sort(() => Math.random() - 0.5)
+    const featured = [...STATE.allSeries]
+      .sort((a, b) => {
+        const da = a.last_updated || a.updated || '';
+        const db = b.last_updated || b.updated || '';
+        return db.localeCompare(da);
+      })
       .slice(0, 5);
 
     if (!featured.length) return;
