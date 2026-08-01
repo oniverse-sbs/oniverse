@@ -98,6 +98,14 @@
   //  DATA LOAD
   // ==========================================================================
   async function loadData() {
+    if (window.SERIES_DATA && Array.isArray(window.SERIES_DATA) && window.SERIES_DATA.length > 0) {
+      console.log('Loaded data instantly from window.SERIES_DATA:', window.SERIES_DATA.length);
+      STATE.allSeries = window.SERIES_DATA;
+      STATE.filtered = [...STATE.allSeries];
+      onDataReady();
+      return;
+    }
+
     const candidates = [
       'series.json',
       'data/series.json',
