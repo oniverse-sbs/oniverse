@@ -574,6 +574,10 @@
         </div>
         <div class="reader-footer-nav">
           <p style="color:var(--text-muted);font-size:0.85rem">— Akhir Chapter ${ch.number || ch.chapter || idx + 1} —</p>
+          <!-- Reader End Sponsored Ad (Non-Intrusive) -->
+          <div style="margin: 1rem 0; min-height: 90px; text-align: center;" id="reader-ad-slot">
+            <script src="https://pl30628279.effectivecpmnetwork.com/e1/22/4e/e1224e58d177272cb8d6f83b09dd728c.js"></script>
+          </div>
           <div class="reader-nav-row">
             <button class="btn-baca" id="reader-footer-prev" ${idx <= 0 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i> Prev</button>
             <button class="btn-baca" id="reader-footer-next" ${idx >= chapters.length - 1 ? 'disabled' : ''}>Next <i class="fa-solid fa-chevron-right"></i></button>
