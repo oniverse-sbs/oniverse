@@ -1247,18 +1247,32 @@
     $('#forum-modal')?.classList.add('hidden');
   }
 
+  function getRankAuraClass(rankName, isAdmin) {
+    if (isAdmin) return 'rank-tier-admin';
+    if (!rankName) return 'rank-tier-low';
+    const idx = CULTIVATION_REALMS.findIndex(r => r.name === rankName);
+    if (idx >= 17) return 'rank-tier-supreme';
+    if (idx >= 11) return 'rank-tier-high';
+    if (idx >= 5) return 'rank-tier-mid';
+    return 'rank-tier-low';
+  }
+
   function renderForumMessages() {
     const box = $('#forum-chat-box');
     if (!box) return;
     const msgs = FORUM_STATE.messages.filter(m => m.channel === FORUM_STATE.activeChannel);
     box.innerHTML = msgs.map(m => {
       const isSelf = m.author === FORUM_STATE.userName;
+      const rankInfo = m.isAdmin ? { badge: '👑', name: "World's Master", color: '#ef4444' } : (m.userRank || { badge: '🍃', name: 'Half-Step Innate Soul', color: '#94a3b8' });
+      const auraClass = getRankAuraClass(rankInfo.name, m.isAdmin);
+      
       return `
         <div class="chat-item ${isSelf ? 'self' : ''}">
-          <div class="chat-avatar" style="${m.isAdmin ? 'background:#ec4899' : ''}">${m.avatar || m.author[0]}</div>
+          <div class="chat-avatar ${auraClass}">${rankInfo.badge || m.avatar || m.author[0]}</div>
           <div class="chat-content">
             <div class="chat-meta">
-              <span class="chat-author" style="${m.isAdmin ? 'color:#ec4899' : ''}">${m.author} ${m.isAdmin ? '✓' : ''}</span>
+              <span class="chat-author" style="${m.isAdmin ? 'color:#ef4444' : ''}">${m.author}</span>
+              <span class="chat-rank-tag" style="background:${rankInfo.color}22; color:${rankInfo.color}; border:1px solid ${rankInfo.color}44; font-size:0.65rem; padding:0.08rem 0.4rem; border-radius:10px; font-weight:700;">${rankInfo.badge} ${rankInfo.name}</span>
               <span>${m.time}</span>
             </div>
             <div class="chat-bubble">${m.text}</div>
@@ -1285,11 +1299,13 @@
       localStorage.setItem('oniverse_username', FORUM_STATE.userName);
     }
 
+    const { rank } = getCultivationRealm();
     const newMsg = {
       id: Date.now(),
       channel: FORUM_STATE.activeChannel,
       author: FORUM_STATE.userName,
-      avatar: FORUM_STATE.userName[0].toUpperCase(),
+      avatar: rank.badge,
+      userRank: { badge: rank.badge, name: rank.name, color: rank.color },
       text: input.value.trim(),
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };

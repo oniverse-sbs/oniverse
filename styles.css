@@ -1928,6 +1928,47 @@ ul, ol { list-style: none; }
   font-weight: 700;
   font-size: 0.8rem;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+/* Cultivation Rank Aura Effects for Chat Comments */
+.chat-avatar.rank-tier-low {
+  border: 2px solid #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.chat-avatar.rank-tier-mid {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+}
+
+.chat-avatar.rank-tier-high {
+  border: 2px solid #f59e0b;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.7);
+  animation: pulseAura 2s infinite ease-in-out;
+}
+
+.chat-avatar.rank-tier-supreme {
+  border: 2px solid #a855f7;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.85);
+  animation: cosmicAura 2s infinite linear;
+}
+
+.chat-avatar.rank-tier-admin {
+  border: 2px solid #ef4444;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.9);
+}
+
+@keyframes pulseAura {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.6); }
+  50% { transform: scale(1.06); box-shadow: 0 0 18px rgba(245, 158, 11, 0.9); }
+}
+
+@keyframes cosmicAura {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
 }
 
 .chat-content {
