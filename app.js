@@ -1,365 +1,689 @@
 /* ==========================================================================
-   Shinigami Verse - Application Frontend Script
+   OniVerse.SBS — Main Application Script
    ========================================================================== */
 
-let rawDataset = null;
+// ============================================================
+// STATE
+// ============================================================
 let allSeries = [];
-let bookmarks = JSON.parse(localStorage.getItem('shinigami_bookmarks') || '[]');
-let currentFilter = {
-  search: '',
-  type: 'all',
-  genre: 'all',
-  status: 'all',
-  sort: 'rating',
-  view: 'explore' // 'explore' or 'bookmarks'
-};
+let rawDataset = null;
+let bookmarks = JSON.parse(localStorage.getItem('oniverse_bookmarks') || '[]');
+let readHistory = JSON.parse(localStorage.getItem('oniverse_history') || '[]');
 let selectedSeries = null;
 let currentChapterIdx = -1;
+let currentFilter = { search: '', type: 'all', genre: 'all', sort: 'latest', view: 'home' };
+let heroSlides = [];
+let heroIdx = 0;
+let heroTimer = null;
 
-// DOM Elements
-const searchInput = document.getElementById('search-input');
-const clearSearchBtn = document.getElementById('clear-search-btn');
-const filterType = document.getElementById('filter-type');
-const filterGenre = document.getElementById('filter-genre');
-const filterStatus = document.getElementById('filter-status');
-const sortBy = document.getElementById('sort-by');
-const comicGrid = document.getElementById('comic-grid');
-const emptyState = document.getElementById('empty-state');
-const resetFilterBtn = document.getElementById('reset-filter-btn');
-const catalogCount = document.getElementById('catalog-count');
+// ============================================================
+// DOM REFS
+// ============================================================
+const searchInput      = document.getElementById('search-input');
+const clearSearchBtn   = document.getElementById('clear-search-btn');
+const filterType       = document.getElementById('filter-type');
+const filterGenre      = document.getElementById('filter-genre');
+const sortBy           = document.getElementById('sort-by');
+const comicGrid        = document.getElementById('comic-grid');
+const updateList       = document.getElementById('update-list');
+const emptyState       = document.getElementById('empty-state');
+const resetFilterBtn   = document.getElementById('reset-filter-btn');
+const catalogCount     = document.getElementById('catalog-count');
+const catalogTitle     = document.getElementById('catalog-title');
 
-const navExplore = document.getElementById('nav-explore');
-const navBookmarks = document.getElementById('nav-bookmarks');
-const bookmarkBadge = document.getElementById('bookmark-badge');
+const heroTitle        = document.getElementById('hero-title');
+const heroRating       = document.getElementById('hero-rating');
+const heroChapter      = document.getElementById('hero-chapter');
+const heroViews        = document.getElementById('hero-views');
+const heroGenres       = document.getElementById('hero-genres');
+const heroSynopsis     = document.getElementById('hero-synopsis');
+const heroReadBtn      = document.getElementById('hero-read-btn');
+const heroBookmarkBtn  = document.getElementById('hero-bookmark-btn');
+const heroSliderDots   = document.getElementById('slider-dots');
+const heroSlidesEl     = document.getElementById('hero-slides');
+const sliderPrev       = document.getElementById('slider-prev');
+const sliderNext       = document.getElementById('slider-next');
 
-const heroSection = document.getElementById('hero-section');
-const heroBg = document.getElementById('hero-bg');
-const heroTitle = document.getElementById('hero-title');
-const heroSynopsis = document.getElementById('hero-synopsis');
-const heroType = document.getElementById('hero-type');
-const heroRating = document.getElementById('hero-rating');
-const heroReadBtn = document.getElementById('hero-read-btn');
-const heroBookmarkBtn = document.getElementById('hero-bookmark-btn');
+const trendingRow      = document.getElementById('trending-row');
+const trendingPrev     = document.getElementById('trending-prev');
+const trendingNext     = document.getElementById('trending-next');
+const continueGrid     = document.getElementById('continue-grid');
+const emptyContinue    = document.getElementById('empty-continue');
+const rankingList      = document.getElementById('ranking-list');
+const bookmarkCount    = document.getElementById('bookmark-count');
+const footerTotal      = document.getElementById('footer-total');
+const footerUpdated    = document.getElementById('footer-updated');
 
-const detailModal = document.getElementById('detail-modal');
-const modalBody = document.getElementById('modal-body');
-const closeModalBtn = document.getElementById('close-modal-btn');
+const detailModal      = document.getElementById('detail-modal');
+const modalBody        = document.getElementById('modal-body');
+const closeModalBtn    = document.getElementById('close-modal-btn');
 
-const readerOverlay = document.getElementById('reader-overlay');
-const closeReaderBtn = document.getElementById('close-reader-btn');
-const readerSeriesTitle = document.getElementById('reader-series-title');
-const readerChapterTitle = document.getElementById('reader-chapter-title');
-const prevChapterBtn = document.getElementById('prev-chapter-btn');
-const nextChapterBtn = document.getElementById('next-chapter-btn');
-const readerContent = document.getElementById('reader-content');
+const readerOverlay    = document.getElementById('reader-overlay');
+const closeReaderBtn   = document.getElementById('close-reader-btn');
+const readerSeriesTitle= document.getElementById('reader-series-title');
+const readerChTitle    = document.getElementById('reader-chapter-title');
+const prevChBtn        = document.getElementById('prev-chapter-btn');
+const nextChBtn        = document.getElementById('next-chapter-btn');
+const readerContent    = document.getElementById('reader-content');
 
-const footerCount = document.getElementById('footer-count');
-const footerTime = document.getElementById('footer-time');
+const mobileMenuBtn    = document.getElementById('mobile-menu-btn');
+const sidebarLeft      = document.getElementById('sidebar-left');
+const themeToggle      = document.getElementById('theme-toggle');
+const btnRankingFull   = document.getElementById('btn-ranking-full');
 
-// Initialize Application
+// ============================================================
+// INIT
+// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-  initApp();
+  setupEventListeners();
+  updateBookmarkBadge();
+  loadData();
 });
 
-async function initApp() {
-  updateBookmarkBadge();
-  setupEventListeners();
-
+async function loadData() {
   try {
     const res = await fetch('scraped_data/series.json');
-    if (!res.ok) throw new Error('Data file not found');
+    if (!res.ok) throw new Error('Data tidak ditemukan');
     rawDataset = await res.json();
     allSeries = rawDataset.series || [];
-    
-    // Update footer info
-    if (rawDataset.metadata) {
-      footerCount.innerHTML = `<i class="fa-solid fa-database"></i> ${rawDataset.metadata.total_series} Komik Terdata`;
-      footerTime.innerHTML = `<i class="fa-solid fa-clock"></i> Updated: ${rawDataset.metadata.scraped_at}`;
+
+    // Footer stats
+    if (footerTotal) footerTotal.textContent = allSeries.length.toLocaleString() + '+';
+    if (footerUpdated && rawDataset.metadata) {
+      footerUpdated.textContent = 'Data: ' + (rawDataset.metadata.scraped_at || '');
     }
 
-    // Setup Featured Hero
-    setupHeroSpotlight();
-
-    // Populate Genres dropdown dynamically
+    // Populate genre dropdown
     populateGenreDropdown();
 
-    // Render Grid
-    renderGrid();
+    // Render all sections
+    renderHeroSlider();
+    renderTrending();
+    renderContinueReading();
+    renderUpdateList();
+    renderRanking();
+
   } catch (err) {
-    console.error('Failed to load dataset:', err);
-    comicGrid.innerHTML = `
-      <div class="empty-state">
-        <i class="fa-solid fa-triangle-exclamation empty-icon" style="color: #ef4444;"></i>
-        <h3>Gagal Memuat Data</h3>
-        <p>File data scraped_data/series.json belum tersedia atau gagal dimuat.</p>
-      </div>
-    `;
+    console.error('Gagal memuat data:', err);
+    showDataError();
   }
 }
 
-// Setup Event Listeners
-function setupEventListeners() {
-  // Search
-  searchInput.addEventListener('input', (e) => {
-    currentFilter.search = e.target.value.toLowerCase().trim();
-    clearSearchBtn.classList.toggle('hidden', currentFilter.search === '');
-    renderGrid();
-  });
-
-  clearSearchBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    currentFilter.search = '';
-    clearSearchBtn.classList.add('hidden');
-    renderGrid();
-  });
-
-  // Filters
-  filterType.addEventListener('change', (e) => {
-    currentFilter.type = e.target.value;
-    renderGrid();
-  });
-
-  filterGenre.addEventListener('change', (e) => {
-    currentFilter.genre = e.target.value;
-    renderGrid();
-  });
-
-  filterStatus.addEventListener('change', (e) => {
-    currentFilter.status = e.target.value;
-    renderGrid();
-  });
-
-  sortBy.addEventListener('change', (e) => {
-    currentFilter.sort = e.target.value;
-    renderGrid();
-  });
-
-  resetFilterBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    filterType.value = 'all';
-    filterGenre.value = 'all';
-    filterStatus.value = 'all';
-    sortBy.value = 'rating';
-    currentFilter = { search: '', type: 'all', genre: 'all', status: 'all', sort: 'rating', view: 'explore' };
-    clearSearchBtn.classList.add('hidden');
-    renderGrid();
-  });
-
-  // Navigation
-  navExplore.addEventListener('click', () => {
-    currentFilter.view = 'explore';
-    navExplore.classList.add('active');
-    navBookmarks.classList.remove('active');
-    heroSection.classList.remove('hidden');
-    renderGrid();
-  });
-
-  navBookmarks.addEventListener('click', () => {
-    currentFilter.view = 'bookmarks';
-    navBookmarks.classList.add('active');
-    navExplore.classList.remove('active');
-    heroSection.classList.add('hidden');
-    renderGrid();
-  });
-
-  // Modals
-  closeModalBtn.addEventListener('click', () => {
-    detailModal.classList.add('hidden');
-  });
-
-  detailModal.addEventListener('click', (e) => {
-    if (e.target === detailModal) detailModal.classList.add('hidden');
-  });
-
-  // Reader
-  closeReaderBtn.addEventListener('click', () => {
-    readerOverlay.classList.add('hidden');
-  });
+function showDataError() {
+  if (updateList) updateList.innerHTML = `
+    <div class="empty-state">
+      <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444"></i>
+      <h3>Gagal Memuat Data</h3>
+      <p>File scraped_data/series.json tidak ditemukan.</p>
+    </div>`;
 }
 
-// Hero Spotlight Setup
-function setupHeroSpotlight() {
-  if (!allSeries || allSeries.length === 0) return;
+// ============================================================
+// HERO SLIDER
+// ============================================================
+function renderHeroSlider() {
+  if (!allSeries.length) return;
 
-  const featured = allSeries[0];
-  heroBg.style.backgroundImage = `url('${featured.cover_image_url || featured.cover_portrait_url}')`;
-  heroTitle.textContent = featured.title;
-  heroSynopsis.textContent = featured.description || 'Tidak ada deskripsi.';
-  heroType.textContent = (featured.type || 'MANHWA').toUpperCase();
-  heroRating.innerHTML = `<i class="fa-solid fa-star"></i> ${featured.user_rate ? featured.user_rate.toFixed(1) : '8.8'}`;
+  // Ambil 5 komik terpopuler untuk slide
+  heroSlides = [...allSeries]
+    .sort((a, b) => (b.bookmark_count || 0) - (a.bookmark_count || 0))
+    .slice(0, 5);
 
-  updateHeroBookmarkBtn(featured.id);
+  // Build slides HTML
+  heroSlidesEl.innerHTML = heroSlides.map((s, i) => {
+    const cover = s.cover_landscape_url || s.cover_image_url || s.cover_portrait_url || '';
+    return `
+      <div class="hero-slide ${i === 0 ? 'active' : ''}" data-idx="${i}">
+        <div class="hero-bg" style="background-image:url('${cover}')"></div>
+        <div class="hero-overlay"></div>
+      </div>`;
+  }).join('');
 
-  heroReadBtn.onclick = () => openDetailModal(featured);
+  // Build dots
+  heroSliderDots.innerHTML = heroSlides.map((_, i) =>
+    `<span class="dot ${i === 0 ? 'active' : ''}" data-dot="${i}"></span>`
+  ).join('');
+
+  // Render hero content for first slide
+  renderHeroContent(0);
+
+  // Dot click
+  heroSliderDots.querySelectorAll('.dot').forEach(dot => {
+    dot.addEventListener('click', () => goToSlide(parseInt(dot.dataset.dot)));
+  });
+
+  // Auto-slide
+  startHeroTimer();
+}
+
+function goToSlide(idx) {
+  const slides = heroSlidesEl.querySelectorAll('.hero-slide');
+  const dots   = heroSliderDots.querySelectorAll('.dot');
+
+  slides[heroIdx]?.classList.remove('active');
+  dots[heroIdx]?.classList.remove('active');
+
+  heroIdx = (idx + heroSlides.length) % heroSlides.length;
+
+  slides[heroIdx]?.classList.add('active');
+  dots[heroIdx]?.classList.add('active');
+
+  renderHeroContent(heroIdx);
+  resetHeroTimer();
+}
+
+function renderHeroContent(idx) {
+  const s = heroSlides[idx];
+  if (!s) return;
+
+  heroTitle.textContent   = s.title || 'Judul Tidak Tersedia';
+  heroRating.textContent  = s.user_rate ? s.user_rate.toFixed(1) : 'N/A';
+  heroChapter.textContent = s.latest_chapter_number ? s.latest_chapter_number + ' Chapter' : 'Ongoing';
+  heroViews.textContent   = formatCount(s.view_count || 0) + ' Views';
+  heroSynopsis.textContent = s.description || 'Tidak ada deskripsi tersedia.';
+
+  // Genre tags
+  heroGenres.innerHTML = (s.genres || []).slice(0, 4).map(g =>
+    `<span class="hero-genre-tag">${g}</span>`
+  ).join('');
+
+  // Bookmark state
+  updateHeroBookmarkBtn(s.id);
+
+  heroReadBtn.onclick = () => openDetailModal(s);
   heroBookmarkBtn.onclick = () => {
-    toggleBookmark(featured.id);
-    updateHeroBookmarkBtn(featured.id);
+    toggleBookmark(s.id);
+    updateHeroBookmarkBtn(s.id);
   };
 }
 
-function updateHeroBookmarkBtn(seriesId) {
-  const isBookmarked = bookmarks.includes(seriesId);
-  heroBookmarkBtn.innerHTML = isBookmarked 
-    ? `<i class="fa-solid fa-bookmark" style="color: var(--accent-pink);"></i> Bookmarked`
+function updateHeroBookmarkBtn(id) {
+  const isBkm = bookmarks.includes(id);
+  heroBookmarkBtn.innerHTML = isBkm
+    ? `<i class="fa-solid fa-bookmark"></i> Bookmarked`
     : `<i class="fa-regular fa-bookmark"></i> Bookmark`;
+  heroBookmarkBtn.classList.toggle('bookmarked', isBkm);
 }
 
-// Dynamic Genre Populator
-function populateGenreDropdown() {
-  const genreSet = new Set();
-  allSeries.forEach(s => {
-    if (s.genres) s.genres.forEach(g => genreSet.add(g));
-  });
-
-  const sortedGenres = Array.from(genreSet).sort();
-  filterGenre.innerHTML = `<option value="all">Semua Genre (${sortedGenres.length})</option>`;
-  sortedGenres.forEach(g => {
-    const opt = document.createElement('option');
-    opt.value = g;
-    opt.textContent = g;
-    filterGenre.appendChild(opt);
-  });
+function startHeroTimer() {
+  heroTimer = setInterval(() => goToSlide(heroIdx + 1), 5000);
 }
 
-// Filter and Sort Engine
-function getFilteredSeries() {
-  return allSeries.filter(item => {
-    // Bookmarks View Filter
-    if (currentFilter.view === 'bookmarks' && !bookmarks.includes(item.id)) {
-      return false;
-    }
+function resetHeroTimer() {
+  clearInterval(heroTimer);
+  startHeroTimer();
+}
 
-    // Search filter
-    if (currentFilter.search) {
-      const q = currentFilter.search;
-      const titleMatch = item.title && item.title.toLowerCase().includes(q);
-      const altMatch = item.alternative_title && item.alternative_title.toLowerCase().includes(q);
-      const genreMatch = item.genres && item.genres.some(g => g.toLowerCase().includes(q));
-      if (!titleMatch && !altMatch && !genreMatch) return false;
-    }
+// ============================================================
+// TRENDING
+// ============================================================
+function renderTrending() {
+  if (!allSeries.length) return;
 
-    // Type filter
-    if (currentFilter.type !== 'all' && item.type !== currentFilter.type) {
-      return false;
-    }
+  const trending = [...allSeries]
+    .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
+    .slice(0, 15);
 
-    // Genre filter
-    if (currentFilter.genre !== 'all' && (!item.genres || !item.genres.includes(currentFilter.genre))) {
-      return false;
-    }
+  trendingRow.innerHTML = trending.map((s, i) => {
+    const cover  = s.cover_portrait_url || s.cover_image_url || '';
+    const rating = s.user_rate ? s.user_rate.toFixed(1) : '8.5';
+    return `
+      <div class="trending-card" data-id="${s.id}" title="${s.title}">
+        <span class="trending-rank">${i + 1}</span>
+        <div class="trending-poster">
+          <img src="${cover}" alt="${s.title}" loading="lazy"
+               onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300'">
+        </div>
+        <div class="trending-info">
+          <div class="trending-title">${s.title}</div>
+          <div class="trending-rating"><i class="fa-solid fa-star"></i> ${rating}</div>
+        </div>
+      </div>`;
+  }).join('');
 
-    // Status filter
-    if (currentFilter.status !== 'all' && item.status !== currentFilter.status) {
-      return false;
-    }
-
-    return true;
-  }).sort((a, b) => {
-    if (currentFilter.sort === 'rating') {
-      return (b.user_rate || 0) - (a.user_rate || 0);
-    } else if (currentFilter.sort === 'views') {
-      return (b.view_count || 0) - (a.view_count || 0);
-    } else if (currentFilter.sort === 'bookmarks') {
-      return (b.bookmark_count || 0) - (a.bookmark_count || 0);
-    } else if (currentFilter.sort === 'latest') {
-      return (b.latest_chapter_number || 0) - (a.latest_chapter_number || 0);
-    }
-    return 0;
+  // Click
+  trendingRow.querySelectorAll('.trending-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const found = allSeries.find(s => s.id === card.dataset.id);
+      if (found) openDetailModal(found);
+    });
   });
 }
 
-// Render Grid
-function renderGrid() {
-  const filtered = getFilteredSeries();
+// ============================================================
+// CONTINUE READING
+// ============================================================
+function renderContinueReading() {
+  if (!readHistory.length) {
+    emptyContinue.classList.remove('hidden');
+    return;
+  }
 
-  catalogCount.textContent = currentFilter.view === 'bookmarks'
-    ? `Menampilkan ${filtered.length} Komik Di-bookmark`
-    : `Menampilkan ${filtered.length} dari ${allSeries.length} Series`;
+  emptyContinue.classList.add('hidden');
+  const items = readHistory.slice(0, 5).map(h => {
+    const s = allSeries.find(x => x.id === h.id);
+    if (!s) return '';
+    const cover = s.cover_portrait_url || s.cover_image_url || '';
+    return `
+      <div class="continue-card" data-id="${s.id}">
+        <div class="continue-poster">
+          <img src="${cover}" alt="${s.title}" loading="lazy"
+               onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300'">
+        </div>
+        <div class="continue-progress-wrap">
+          <div class="continue-title">${s.title}</div>
+          <div class="continue-chapter">Ch. ${h.chapter || 1}</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" style="width:${h.progress || 30}%"></div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 
-  if (filtered.length === 0) {
+  continueGrid.innerHTML = items + continueGrid.innerHTML;
+
+  continueGrid.querySelectorAll('.continue-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const found = allSeries.find(s => s.id === card.dataset.id);
+      if (found) openDetailModal(found);
+    });
+  });
+}
+
+// ============================================================
+// UPDATE LIST (Baru Diupdate)
+// ============================================================
+function renderUpdateList(series) {
+  const list = series || [...allSeries]
+    .sort((a, b) => (b.latest_chapter_number || 0) - (a.latest_chapter_number || 0))
+    .slice(0, 12);
+
+  updateList.innerHTML = list.map(s => {
+    const cover   = s.cover_portrait_url || s.cover_image_url || '';
+    const chNum   = s.latest_chapter_number ? `Chapter ${s.latest_chapter_number}` : 'Ongoing';
+    const timeAgo = randomTimeAgo();
+    const isNew   = Math.random() > 0.4;
+    return `
+      <div class="update-item" data-id="${s.id}">
+        <img class="update-thumb" src="${cover}" alt="${s.title}" loading="lazy"
+             onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=200'">
+        <div class="update-info">
+          <div class="update-title">${s.title}</div>
+          <div class="update-chapter">${chNum}</div>
+          <div class="update-time">${timeAgo}</div>
+        </div>
+        ${isNew ? '<span class="update-new-badge">NEW</span>' : ''}
+      </div>`;
+  }).join('');
+
+  updateList.querySelectorAll('.update-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const found = allSeries.find(s => s.id === item.dataset.id);
+      if (found) openDetailModal(found);
+    });
+  });
+}
+
+// ============================================================
+// RANKING (Sidebar)
+// ============================================================
+function renderRanking() {
+  if (!allSeries.length) return;
+
+  const top10 = [...allSeries]
+    .sort((a, b) => (b.user_rate || 0) - (a.user_rate || 0))
+    .slice(0, 10);
+
+  rankingList.innerHTML = top10.map((s, i) => {
+    const cover  = s.cover_portrait_url || s.cover_image_url || '';
+    const rating = s.user_rate ? s.user_rate.toFixed(1) : '8.5';
+    const chNum  = s.latest_chapter_number ? s.latest_chapter_number + ' Chapter' : 'Ongoing';
+    const cls    = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+    return `
+      <li class="ranking-item" data-id="${s.id}">
+        <span class="rank-num ${cls}">${i + 1}</span>
+        <img class="rank-thumb" src="${cover}" alt="${s.title}" loading="lazy"
+             onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=200'">
+        <div class="rank-info">
+          <div class="rank-title">${s.title}</div>
+          <div class="rank-chapter">${chNum}</div>
+          <div class="rank-score"><i class="fa-solid fa-star"></i> ${rating}</div>
+        </div>
+      </li>`;
+  }).join('');
+
+  rankingList.querySelectorAll('.ranking-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const found = allSeries.find(s => s.id === item.dataset.id);
+      if (found) openDetailModal(found);
+    });
+  });
+}
+
+// ============================================================
+// COMIC GRID (Browse / Search)
+// ============================================================
+function renderComicGrid(series) {
+  // Switch to grid view
+  updateList.classList.add('hidden');
+  comicGrid.classList.remove('hidden');
+
+  catalogCount.textContent = `${series.length} dari ${allSeries.length} Series`;
+
+  if (!series.length) {
     comicGrid.innerHTML = '';
     emptyState.classList.remove('hidden');
     return;
   }
 
   emptyState.classList.add('hidden');
-  comicGrid.innerHTML = filtered.map(item => createComicCardHTML(item)).join('');
+  comicGrid.innerHTML = series.map(s => {
+    const cover  = s.cover_portrait_url || s.cover_image_url || '';
+    const rating = s.user_rate ? s.user_rate.toFixed(1) : '8.5';
+    const chNum  = s.latest_chapter_number ? `Ch. ${s.latest_chapter_number}` : 'Ongoing';
+    const type   = s.type || 'Manhwa';
+    return `
+      <div class="comic-card" data-id="${s.id}">
+        <div class="card-poster">
+          <img src="${cover}" alt="${s.title}" loading="lazy"
+               onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300'">
+          <div class="poster-overlay">
+            <span class="card-badge">${type}</span>
+            <span class="card-rating"><i class="fa-solid fa-star"></i> ${rating}</span>
+          </div>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">${s.title}</h3>
+          <div class="card-meta">
+            <span class="card-chapter">${chNum}</span>
+            <i class="fa-${bookmarks.includes(s.id) ? 'solid' : 'regular'} fa-bookmark"
+               style="color:${bookmarks.includes(s.id) ? 'var(--pink)' : 'var(--text-dim)'}"></i>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 
-  // Attach card click handlers
-  document.querySelectorAll('.comic-card').forEach(card => {
+  comicGrid.querySelectorAll('.comic-card').forEach(card => {
     card.addEventListener('click', () => {
-      const id = card.dataset.id;
-      const found = allSeries.find(s => s.id === id);
+      const found = allSeries.find(s => s.id === card.dataset.id);
       if (found) openDetailModal(found);
     });
   });
 }
 
-// Create Card HTML
-function createComicCardHTML(item) {
-  const cover = item.cover_portrait_url || item.cover_image_url || 'https://via.placeholder.com/300x400';
-  const rating = item.user_rate ? item.user_rate.toFixed(1) : '8.5';
-  const chNum = item.latest_chapter_number ? `Ch. ${item.latest_chapter_number}` : 'Ongoing';
-  const typeStr = item.type || 'Manhwa';
-  const isBookmarked = bookmarks.includes(item.id);
-
-  return `
-    <div class="comic-card" data-id="${item.id}">
-      <div class="card-poster">
-        <img src="${cover}" alt="${item.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400'">
-        <div class="poster-overlay">
-          <span class="card-badge">${typeStr}</span>
-          <span class="card-rating"><i class="fa-solid fa-star"></i> ${rating}</span>
-        </div>
-      </div>
-      <div class="card-content">
-        <h3 class="card-title">${item.title}</h3>
-        <div class="card-meta">
-          <span class="card-chapter">${chNum}</span>
-          <span><i class="fa-solid fa-bookmark" style="color: ${isBookmarked ? 'var(--accent-pink)' : 'var(--text-dim)'}"></i></span>
-        </div>
-      </div>
-    </div>
-  `;
+function switchToHomeView() {
+  catalogTitle.innerHTML = '<i class="fa-solid fa-layer-group"></i> Baru Diupdate';
+  catalogCount.textContent = '';
+  comicGrid.classList.add('hidden');
+  emptyState.classList.add('hidden');
+  updateList.classList.remove('hidden');
+  renderUpdateList();
 }
 
-// Open Series Detail Modal
+function switchToBrowseView(title = 'Semua Komik', icon = 'fa-grid-2') {
+  catalogTitle.innerHTML = `<i class="fa-solid ${icon}"></i> ${title}`;
+  const filtered = getFilteredSeries();
+  renderComicGrid(filtered);
+}
+
+// ============================================================
+// FILTER / SORT ENGINE
+// ============================================================
+function getFilteredSeries() {
+  return allSeries.filter(item => {
+    if (currentFilter.search) {
+      const q = currentFilter.search;
+      const m = (item.title || '').toLowerCase().includes(q)
+             || (item.alternative_title || '').toLowerCase().includes(q)
+             || (item.genres || []).some(g => g.toLowerCase().includes(q));
+      if (!m) return false;
+    }
+    if (currentFilter.type !== 'all' && item.type !== currentFilter.type) return false;
+    if (currentFilter.genre !== 'all' && !(item.genres || []).includes(currentFilter.genre)) return false;
+    return true;
+  }).sort((a, b) => {
+    if (currentFilter.sort === 'rating') return (b.user_rate || 0) - (a.user_rate || 0);
+    if (currentFilter.sort === 'views')  return (b.view_count || 0) - (a.view_count || 0);
+    if (currentFilter.sort === 'latest') return (b.latest_chapter_number || 0) - (a.latest_chapter_number || 0);
+    return 0;
+  });
+}
+
+function populateGenreDropdown() {
+  const genreSet = new Set();
+  allSeries.forEach(s => (s.genres || []).forEach(g => genreSet.add(g)));
+  const sorted = Array.from(genreSet).sort();
+  filterGenre.innerHTML = `<option value="all">Semua Genre</option>`
+    + sorted.map(g => `<option value="${g}">${g}</option>`).join('');
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+function setupEventListeners() {
+  // Search
+  searchInput.addEventListener('input', e => {
+    currentFilter.search = e.target.value.toLowerCase().trim();
+    clearSearchBtn.classList.toggle('hidden', !currentFilter.search);
+    if (currentFilter.search) {
+      switchToBrowseView('Hasil Pencarian: "' + e.target.value + '"', 'fa-magnifying-glass');
+    } else {
+      switchToHomeView();
+    }
+  });
+
+  clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    currentFilter.search = '';
+    clearSearchBtn.classList.add('hidden');
+    switchToHomeView();
+  });
+
+  // "/" shortcut for search
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    if (e.key === 'Escape') {
+      if (!readerOverlay.classList.contains('hidden')) {
+        readerOverlay.classList.add('hidden');
+      } else if (!detailModal.classList.contains('hidden')) {
+        detailModal.classList.add('hidden');
+      }
+    }
+  });
+
+  // Filters
+  filterType.addEventListener('change', e => {
+    currentFilter.type = e.target.value;
+    switchToBrowseView();
+  });
+
+  filterGenre.addEventListener('change', e => {
+    currentFilter.genre = e.target.value;
+    if (e.target.value !== 'all') {
+      switchToBrowseView(e.target.value, 'fa-tag');
+    } else {
+      switchToHomeView();
+    }
+  });
+
+  sortBy.addEventListener('change', e => {
+    currentFilter.sort = e.target.value;
+    if (!comicGrid.classList.contains('hidden')) switchToBrowseView();
+  });
+
+  resetFilterBtn.addEventListener('click', () => {
+    currentFilter = { search: '', type: 'all', genre: 'all', sort: 'latest', view: 'home' };
+    searchInput.value = '';
+    filterType.value = 'all';
+    filterGenre.value = 'all';
+    sortBy.value = 'latest';
+    clearSearchBtn.classList.add('hidden');
+    switchToHomeView();
+  });
+
+  // Hero slider
+  sliderPrev.addEventListener('click', () => goToSlide(heroIdx - 1));
+  sliderNext.addEventListener('click', () => goToSlide(heroIdx + 1));
+
+  // Trending scroll
+  trendingPrev.addEventListener('click', () => {
+    trendingRow.scrollBy({ left: -400, behavior: 'smooth' });
+  });
+  trendingNext.addEventListener('click', () => {
+    trendingRow.scrollBy({ left: 400, behavior: 'smooth' });
+  });
+
+  // Sidebar Nav
+  document.getElementById('sb-beranda').addEventListener('click', e => {
+    e.preventDefault();
+    setSidebarActive('sb-beranda');
+    switchToHomeView();
+  });
+  document.getElementById('sb-semua').addEventListener('click', e => {
+    e.preventDefault();
+    setSidebarActive('sb-semua');
+    currentFilter = { ...currentFilter, genre: 'all', type: 'all', sort: 'rating' };
+    switchToBrowseView('Semua Komik', 'fa-grid-2');
+  });
+  document.getElementById('sb-populer').addEventListener('click', e => {
+    e.preventDefault();
+    setSidebarActive('sb-populer');
+    currentFilter = { ...currentFilter, sort: 'views' };
+    switchToBrowseView('Paling Populer', 'fa-fire-flame-curved');
+  });
+  document.getElementById('sb-ranking').addEventListener('click', e => {
+    e.preventDefault();
+    setSidebarActive('sb-ranking');
+    currentFilter = { ...currentFilter, sort: 'rating' };
+    switchToBrowseView('Top Ranking', 'fa-trophy');
+  });
+  document.getElementById('sb-update').addEventListener('click', e => {
+    e.preventDefault();
+    setSidebarActive('sb-update');
+    currentFilter = { ...currentFilter, sort: 'latest' };
+    switchToBrowseView('Update Terbaru', 'fa-clock');
+  });
+  document.getElementById('sb-bookmark').addEventListener('click', e => {
+    e.preventDefault();
+    setSidebarActive('sb-bookmark');
+    const bkmSeries = allSeries.filter(s => bookmarks.includes(s.id));
+    catalogTitle.innerHTML = '<i class="fa-solid fa-bookmark"></i> Bookmark Saya';
+    renderComicGrid(bkmSeries);
+  });
+
+  // Genre sidebar items
+  document.querySelectorAll('.sidebar-genre-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const genre = item.dataset.genre;
+      currentFilter.genre = genre;
+      filterGenre.value = genre;
+      switchToBrowseView(genre, 'fa-tag');
+      document.querySelectorAll('.sidebar-genre-item').forEach(g => g.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // Ranking full button
+  btnRankingFull.addEventListener('click', () => {
+    setSidebarActive('sb-ranking');
+    currentFilter.sort = 'rating';
+    switchToBrowseView('Top Ranking', 'fa-trophy');
+  });
+
+  // Nav links
+  document.getElementById('nav-komik').addEventListener('click', e => {
+    e.preventDefault(); switchToBrowseView();
+  });
+  document.getElementById('nav-ranking').addEventListener('click', e => {
+    e.preventDefault();
+    currentFilter.sort = 'rating';
+    switchToBrowseView('Top Ranking', 'fa-trophy');
+  });
+  document.getElementById('nav-update').addEventListener('click', e => {
+    e.preventDefault();
+    currentFilter.sort = 'latest';
+    switchToBrowseView('Update Terbaru', 'fa-clock');
+  });
+  document.getElementById('nav-beranda').addEventListener('click', e => {
+    e.preventDefault(); switchToHomeView();
+  });
+
+  // Modal close
+  closeModalBtn.addEventListener('click', () => detailModal.classList.add('hidden'));
+  detailModal.addEventListener('click', e => {
+    if (e.target === detailModal) detailModal.classList.add('hidden');
+  });
+
+  // Reader close
+  closeReaderBtn.addEventListener('click', () => readerOverlay.classList.add('hidden'));
+
+  // Mobile sidebar toggle
+  mobileMenuBtn.addEventListener('click', () => {
+    sidebarLeft.classList.toggle('open');
+  });
+
+  // Theme toggle (cosmetic for now)
+  themeToggle.addEventListener('click', () => {
+    const icon = document.getElementById('theme-icon');
+    icon.classList.toggle('fa-moon');
+    icon.classList.toggle('fa-sun');
+  });
+}
+
+function setSidebarActive(id) {
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+// ============================================================
+// DETAIL MODAL
+// ============================================================
 function openDetailModal(item) {
   selectedSeries = item;
-  const isBookmarked = bookmarks.includes(item.id);
-  const cover = item.cover_portrait_url || item.cover_image_url;
-  const rating = item.user_rate ? item.user_rate.toFixed(1) : 'N/A';
-  const views = item.view_count ? item.view_count.toLocaleString() : '0';
-  const bks = item.bookmark_count ? item.bookmark_count.toLocaleString() : '0';
-
-  const genresHTML = (item.genres || []).map(g => `<span class="genre-tag">${g}</span>`).join('');
+  const cover    = item.cover_portrait_url || item.cover_image_url || '';
+  const rating   = item.user_rate ? item.user_rate.toFixed(1) : 'N/A';
+  const views    = formatCount(item.view_count || 0);
+  const bks      = formatCount(item.bookmark_count || 0);
   const chapters = item.chapters || [];
+  const isBkm    = bookmarks.includes(item.id);
+  const genresHTML = (item.genres || []).map(g =>
+    `<span class="detail-badge genre">${g}</span>`).join('');
 
   modalBody.innerHTML = `
-    <div class="detail-header-grid">
+    <div class="detail-grid">
       <div>
-        <img src="${cover}" alt="${item.title}" class="detail-cover" onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400'">
-        <button class="btn ${isBookmarked ? 'btn-glass' : 'btn-primary'}" id="modal-bookmark-btn" style="width: 100%; margin-top: 1rem;">
-          <i class="fa-solid fa-bookmark" style="${isBookmarked ? 'color: var(--accent-pink);' : ''}"></i>
-          ${isBookmarked ? 'Di-bookmark' : 'Tambah Bookmark'}
-        </button>
+        <img src="${cover}" alt="${item.title}" class="detail-cover"
+             onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400'">
+        <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.85rem">
+          <button class="btn-baca" id="modal-read-btn" style="justify-content:center">
+            <i class="fa-solid fa-book-open"></i> Baca Sekarang
+          </button>
+          <button class="btn-bookmark-hero ${isBkm ? 'bookmarked' : ''}" id="modal-bkm-btn"
+                  style="justify-content:center;border-radius:var(--radius-full)">
+            <i class="fa-${isBkm ? 'solid' : 'regular'} fa-bookmark"></i>
+            ${isBkm ? 'Di-bookmark' : 'Tambah Bookmark'}
+          </button>
+        </div>
       </div>
 
       <div class="detail-info">
         <h2>${item.title}</h2>
-        ${item.alternative_title ? `<p class="detail-alt-title"><i class="fa-solid fa-globe"></i> ${item.alternative_title}</p>` : ''}
-        
-        <div class="detail-tags">
-          <span class="badge badge-hot">${item.status}</span>
-          <span class="badge badge-type">${item.type}</span>
-          <span class="badge badge-rating"><i class="fa-solid fa-star"></i> ${rating}</span>
-          <span class="genre-tag"><i class="fa-solid fa-eye"></i> ${views} Views</span>
-          <span class="genre-tag"><i class="fa-solid fa-bookmark"></i> ${bks} Bookmarks</span>
-        </div>
+        ${item.alternative_title ? `<p class="detail-alt"><i class="fa-solid fa-globe"></i> ${item.alternative_title}</p>` : ''}
 
         <div class="detail-tags">
-          ${genresHTML}
+          <span class="detail-badge status">${item.status || 'Ongoing'}</span>
+          <span class="detail-badge type">${item.type || 'Manhwa'}</span>
+          <span class="detail-badge rating"><i class="fa-solid fa-star"></i> ${rating}</span>
+          <span class="detail-badge views"><i class="fa-solid fa-eye"></i> ${views} Views</span>
+          <span class="detail-badge views"><i class="fa-solid fa-bookmark"></i> ${bks} Bookmark</span>
         </div>
+
+        <div class="detail-tags">${genresHTML}</div>
 
         <p class="detail-synopsis">${item.description || 'Tidak ada sinopsis tersedia.'}</p>
       </div>
@@ -367,150 +691,181 @@ function openDetailModal(item) {
 
     <div class="chapter-section">
       <div class="chapter-header">
-        <h3><i class="fa-solid fa-list-ol"></i> Daftar Chapter (${chapters.length > 0 ? chapters.length : 'Terbaru'})</h3>
-        <input type="text" id="chapter-search-input" placeholder="Cari chapter..." style="padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-glass); background: var(--bg-card); color: #fff; font-size: 0.85rem;">
+        <h3><i class="fa-solid fa-list-ol"></i> Daftar Chapter (${chapters.length || 0})</h3>
+        <input type="text" id="ch-search" class="chapter-search" placeholder="Cari chapter...">
       </div>
-
-      <div class="chapter-grid" id="chapter-list-grid">
-        ${chapters.length > 0 ? chapters.map((ch, idx) => `
-          <div class="chapter-item" data-idx="${idx}">
-            <span class="ch-num">Chapter ${ch.chapter_number}</span>
-            <span class="ch-date">${ch.release_date ? new Date(ch.release_date).toLocaleDateString('id-ID') : 'Latest'}</span>
-          </div>
-        `).join('') : '<p style="color: var(--text-dim); padding: 1rem;">Chapter list siap dibaca melalui aplikasi web.</p>'}
+      <div class="chapter-grid" id="chapter-grid">
+        ${chapters.length > 0
+          ? chapters.map((ch, idx) => `
+              <div class="chapter-item" data-idx="${idx}">
+                <span class="ch-num">Chapter ${ch.chapter_number}</span>
+                <span class="ch-date">${ch.release_date ? new Date(ch.release_date).toLocaleDateString('id-ID') : ''}</span>
+              </div>`).join('')
+          : '<p style="color:var(--text-dim);padding:1rem;grid-column:1/-1">Baca langsung via tombol Baca Sekarang.</p>'
+        }
       </div>
-    </div>
-  `;
+    </div>`;
 
-  // Filter chapters search
-  const chSearch = document.getElementById('chapter-search-input');
+  // Handlers
+  document.getElementById('modal-read-btn').addEventListener('click', () => {
+    if (chapters.length > 0) openReader(0);
+  });
+
+  const bkmBtn = document.getElementById('modal-bkm-btn');
+  bkmBtn.addEventListener('click', () => {
+    toggleBookmark(item.id);
+    const now = bookmarks.includes(item.id);
+    bkmBtn.innerHTML = `<i class="fa-${now ? 'solid' : 'regular'} fa-bookmark"></i> ${now ? 'Di-bookmark' : 'Tambah Bookmark'}`;
+    bkmBtn.classList.toggle('bookmarked', now);
+    updateHeroBookmarkBtn(item.id);
+  });
+
+  // Chapter search
+  const chSearch = document.getElementById('ch-search');
   if (chSearch) {
-    chSearch.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
+    chSearch.addEventListener('input', e => {
+      const q = e.target.value.toLowerCase();
       document.querySelectorAll('.chapter-item').forEach(el => {
-        const text = el.innerText.toLowerCase();
-        el.style.display = text.includes(q) ? 'flex' : 'none';
+        el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none';
       });
     });
   }
 
-  // Attach modal handlers
-  const modalBkmBtn = document.getElementById('modal-bookmark-btn');
-  modalBkmBtn.addEventListener('click', () => {
-    toggleBookmark(item.id);
-    const nowBkm = bookmarks.includes(item.id);
-    modalBkmBtn.className = `btn ${nowBkm ? 'btn-glass' : 'btn-primary'}`;
-    modalBkmBtn.innerHTML = `<i class="fa-solid fa-bookmark" style="${nowBkm ? 'color: var(--accent-pink);' : ''}"></i> ${nowBkm ? 'Di-bookmark' : 'Tambah Bookmark'}`;
-    updateHeroBookmarkBtn(item.id);
-    renderGrid();
-  });
-
-  // Chapter items handler
+  // Chapter click
   document.querySelectorAll('.chapter-item').forEach(el => {
-    el.addEventListener('click', () => {
-      const idx = parseInt(el.dataset.idx);
-      openReader(idx);
-    });
+    el.addEventListener('click', () => openReader(parseInt(el.dataset.idx)));
   });
 
   detailModal.classList.remove('hidden');
+
+  // Save to history
+  addToHistory(item.id, 1);
 }
 
-// Open Reader Overlay & Render Page Images
+// ============================================================
+// READER
+// ============================================================
 async function openReader(chapterIdx) {
-  if (!selectedSeries || !selectedSeries.chapters || selectedSeries.chapters.length === 0) return;
-  
+  if (!selectedSeries || !selectedSeries.chapters?.length) return;
+
   currentChapterIdx = chapterIdx;
   const ch = selectedSeries.chapters[chapterIdx];
 
   readerSeriesTitle.textContent = selectedSeries.title;
-  readerChapterTitle.textContent = `Chapter ${ch.chapter_number}`;
+  readerChTitle.textContent     = `Chapter ${ch.chapter_number}`;
   readerOverlay.classList.remove('hidden');
+  detailModal.classList.add('hidden');
 
-  // Update Navigation Buttons state
-  prevChapterBtn.disabled = currentChapterIdx >= selectedSeries.chapters.length - 1;
-  nextChapterBtn.disabled = currentChapterIdx <= 0;
+  prevChBtn.disabled = currentChapterIdx >= selectedSeries.chapters.length - 1;
+  nextChBtn.disabled = currentChapterIdx <= 0;
 
-  prevChapterBtn.onclick = () => { if (currentChapterIdx < selectedSeries.chapters.length - 1) openReader(currentChapterIdx + 1); };
-  nextChapterBtn.onclick = () => { if (currentChapterIdx > 0) openReader(currentChapterIdx - 1); };
+  prevChBtn.onclick = () => { if (currentChapterIdx < selectedSeries.chapters.length - 1) openReader(currentChapterIdx + 1); };
+  nextChBtn.onclick = () => { if (currentChapterIdx > 0) openReader(currentChapterIdx - 1); };
 
-  // Show Loading Spinner
+  // Loading
   readerContent.innerHTML = `
     <div class="reader-loading">
       <div class="spinner"></div>
-      <p style="margin-top: 1rem; color: var(--text-muted);">Memuat gambar Chapter ${ch.chapter_number}...</p>
-    </div>
-  `;
+      <p>Memuat Chapter ${ch.chapter_number}...</p>
+    </div>`;
 
   try {
-    const res = await fetch(`https://api.shngm.io/v1/chapter/detail/${ch.chapter_id}`);
+    const res  = await fetch(`https://api.shngm.io/v1/chapter/detail/${ch.chapter_id}`);
     const data = await res.json();
 
-    if (data.retcode === 0 && data.data && data.data.chapter) {
-      const cdata = data.data;
-      const baseUrl = cdata.base_url || 'https://assets.shngm.id';
-      const cpath = cdata.chapter.path || '';
-      const imageFiles = cdata.chapter.data || [];
+    if (data.retcode === 0 && data.data?.chapter) {
+      const cdata     = data.data;
+      const baseUrl   = cdata.base_url || 'https://assets.shngm.id';
+      const cpath     = cdata.chapter.path || '';
+      const imgFiles  = cdata.chapter.data || [];
 
-      if (imageFiles.length === 0) {
+      if (!imgFiles.length) {
         readerContent.innerHTML = `
           <div class="reader-placeholder">
-            <i class="fa-solid fa-image-slash placeholder-icon"></i>
+            <i class="fa-solid fa-image-slash"></i>
             <h3>Gambar Tidak Tersedia</h3>
-            <p>Gambar chapter ini belum dapat dimuat dari server source.</p>
-          </div>
-        `;
+            <p>Gambar chapter ini belum tersedia dari server.</p>
+          </div>`;
         return;
       }
 
-      // Render vertical images layout
-      const imagesHTML = imageFiles.map((filename, i) => {
-        const fullUrl = `${baseUrl}${cpath}${filename}`;
-        return `<img class="reader-page-img" src="${fullUrl}" alt="Page ${i+1}" referrerpolicy="no-referrer" loading="lazy">`;
-      }).join('');
+      const imgsHTML = imgFiles.map((f, i) =>
+        `<img class="reader-page-img" src="${baseUrl}${cpath}${f}" alt="Page ${i+1}" loading="lazy" referrerpolicy="no-referrer">`
+      ).join('');
 
       readerContent.innerHTML = `
-        <div class="reader-images-wrapper">
-          ${imagesHTML}
+        <div class="reader-images-wrap">
+          ${imgsHTML}
           <div class="reader-footer-nav">
-            <p style="color: var(--text-muted); margin-bottom: 1rem;">Selesai membaca Chapter ${ch.chapter_number}</p>
-            <div style="display: flex; gap: 1rem; justify-content: center;">
-              ${currentChapterIdx < selectedSeries.chapters.length - 1 ? `<button class="btn btn-primary" onclick="openReader(${currentChapterIdx + 1})"><i class="fa-solid fa-chevron-left"></i> Chapter Sebelumnya</button>` : ''}
-              ${currentChapterIdx > 0 ? `<button class="btn btn-primary" onclick="openReader(${currentChapterIdx - 1})">Chapter Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>` : ''}
+            <p style="color:var(--text-muted)">Selesai membaca Chapter ${ch.chapter_number}</p>
+            <div class="reader-nav-row">
+              ${currentChapterIdx < selectedSeries.chapters.length - 1
+                ? `<button class="btn-baca" onclick="openReader(${currentChapterIdx + 1})"><i class="fa-solid fa-chevron-left"></i> Sebelumnya</button>` : ''}
+              ${currentChapterIdx > 0
+                ? `<button class="btn-baca" onclick="openReader(${currentChapterIdx - 1})">Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>` : ''}
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
 
-      // Scroll reader to top
       readerContent.scrollTop = 0;
+
+      // Update history
+      addToHistory(selectedSeries.id, ch.chapter_number);
+
     } else {
-      throw new Error('Gagal mendapatkan detail chapter');
+      throw new Error('Gagal mendapatkan data chapter');
     }
   } catch (err) {
-    console.error('Error loading chapter detail:', err);
+    console.error(err);
     readerContent.innerHTML = `
       <div class="reader-placeholder">
-        <i class="fa-solid fa-triangle-exclamation placeholder-icon" style="color: #ef4444;"></i>
-        <h3>Gagal Memuat Gambar Chapter</h3>
-        <p style="margin-top: 0.5rem; color: var(--text-muted);">${err.message || 'Terjadi kesalahan jaringan.'}</p>
-      </div>
-    `;
+        <i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i>
+        <h3>Gagal Memuat Chapter</h3>
+        <p>${err.message || 'Terjadi kesalahan jaringan.'}</p>
+      </div>`;
   }
 }
 
-// Bookmark Functions
-function toggleBookmark(seriesId) {
-  const index = bookmarks.indexOf(seriesId);
-  if (index > -1) {
-    bookmarks.splice(index, 1);
-  } else {
-    bookmarks.push(seriesId);
-  }
-  localStorage.setItem('shinigami_bookmarks', JSON.stringify(bookmarks));
+// ============================================================
+// BOOKMARK & HISTORY
+// ============================================================
+function toggleBookmark(id) {
+  const idx = bookmarks.indexOf(id);
+  if (idx > -1) bookmarks.splice(idx, 1);
+  else bookmarks.push(id);
+  localStorage.setItem('oniverse_bookmarks', JSON.stringify(bookmarks));
   updateBookmarkBadge();
 }
 
 function updateBookmarkBadge() {
-  bookmarkBadge.textContent = bookmarks.length;
+  if (bookmarkCount) bookmarkCount.textContent = bookmarks.length;
+}
+
+function addToHistory(id, chapter, progress = 30) {
+  readHistory = readHistory.filter(h => h.id !== id);
+  readHistory.unshift({ id, chapter, progress, time: Date.now() });
+  readHistory = readHistory.slice(0, 20);
+  localStorage.setItem('oniverse_history', JSON.stringify(readHistory));
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function formatCount(n) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000)     return (n / 1_000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function randomTimeAgo() {
+  const units = [
+    [1, 'menit'],
+    [2, 'menit'],
+    [5, 'menit'],
+    [10, 'menit'],
+    [15, 'menit'],
+    [20, 'menit'],
+  ];
+  const [val, unit] = units[Math.floor(Math.random() * units.length)];
+  return `${val} ${unit} lalu`;
 }
