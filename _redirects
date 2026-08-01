@@ -1,1 +1,4 @@
-/* /index.html 200
+# SPA Fallback for Cloudflare Pages
+/series.json /series.json 200
+/scraped_data/series.json /scraped_data/series.json 200
+/data/series.json /data/series.json 200

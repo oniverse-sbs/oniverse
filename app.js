@@ -98,16 +98,39 @@
   //  DATA LOAD
   // ==========================================================================
   async function loadData() {
-    try {
-      let res = await fetch('scraped_data/series.json');
-      if (!res.ok) res = await fetch('/scraped_data/series.json');
-      if (!res.ok) throw new Error('Fetch fail: status ' + res.status);
-      const data = await res.json();
-      STATE.allSeries = Array.isArray(data) ? data : (data.series || []);
+    const candidates = [
+      'series.json',
+      'data/series.json',
+      'scraped_data/series.json',
+      '/series.json',
+      '/data/series.json',
+      '/scraped_data/series.json',
+      'https://oniverse.sbs/series.json'
+    ];
+    
+    let loadedData = null;
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, { cache: 'no-cache' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && (Array.isArray(data) ? data.length > 0 : (data.series && data.series.length > 0))) {
+            loadedData = Array.isArray(data) ? data : data.series;
+            console.log(`Loaded data successfully from ${url} (${loadedData.length} items)`);
+            break;
+          }
+        }
+      } catch (err) {
+        console.warn(`Attempt failed for ${url}:`, err);
+      }
+    }
+
+    if (loadedData && loadedData.length > 0) {
+      STATE.allSeries = loadedData;
       STATE.filtered = [...STATE.allSeries];
       onDataReady();
-    } catch (e) {
-      console.error('Data load error:', e);
+    } else {
+      console.error('All data load candidates failed.');
       showToast('Gagal memuat data komik. Coba refresh halaman.', 'warning');
     }
   }
