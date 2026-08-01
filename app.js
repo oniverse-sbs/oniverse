@@ -510,19 +510,43 @@
 
     // Fetch full chapters from API if available
     if (s.id && (!s.chapters || s.chapters.length < (s.total_chapters || 30))) {
-      fetch(`https://api.shngm.io/v1/chapter/${s.id}/list?page=1&page_size=500&sort_by=chapter_number&sort_order=desc`)
-        .then(r => r.json())
-        .then(d => {
-          if (d && d.retcode === 0 && Array.isArray(d.data)) {
-            s.chapters = d.data.map(c => ({
-              number: String(c.chapter_number || ''),
-              chapter: String(c.chapter_number || ''),
-              slug: c.chapter_id || '',
-              date: c.release_date || c.created_at || ''
-            }));
-            if (STATE.currentDetail === s) openDetail(s);
-          }
-        }).catch(e => console.warn('Chapter API fetch error:', e));
+      if (s.source === 'komikcast' || s.kc_slug || String(s.id).startsWith('kc_')) {
+        const kcSeries = s.kc_slug || String(s.id).replace('kc_', '');
+        fetch(`https://be.komikcast.cc/series/${kcSeries}/chapters`)
+          .then(r => r.json())
+          .then(d => {
+            const items = d.data || [];
+            if (Array.isArray(items) && items.length > 0) {
+              s.chapters = items.map(ch => {
+                const cd = ch.data || {};
+                const idx = cd.index || ch.id;
+                return {
+                  number: String(idx),
+                  chapter: String(idx),
+                  slug: `kc_ch_${kcSeries}_${idx}`,
+                  kc_index: idx,
+                  kc_series_slug: kcSeries,
+                  date: (ch.createdAt || '').slice(0, 10)
+                };
+              });
+              if (STATE.currentDetail === s) openDetail(s);
+            }
+          }).catch(e => console.warn('KC Chapter API error:', e));
+      } else {
+        fetch(`https://api.shngm.io/v1/chapter/${s.id}/list?page=1&page_size=500&sort_by=chapter_number&sort_order=desc`)
+          .then(r => r.json())
+          .then(d => {
+            if (d && d.retcode === 0 && Array.isArray(d.data)) {
+              s.chapters = d.data.map(c => ({
+                number: String(c.chapter_number || ''),
+                chapter: String(c.chapter_number || ''),
+                slug: c.chapter_id || '',
+                date: c.release_date || c.created_at || ''
+              }));
+              if (STATE.currentDetail === s) openDetail(s);
+            }
+          }).catch(e => console.warn('Shinigami Chapter API error:', e));
+      }
     }
   }
 
@@ -562,27 +586,37 @@
     
     // Fetch chapter images
     const chSlug = ch.slug || ch.chapter_slug || ch.chapter_id || '';
+    let images = [];
     try {
-      const res = await fetch(`https://api.shngm.io/v1/chapter/detail/${chSlug}`);
-      if (!res.ok) throw new Error('API error');
-      const jsonRes = await res.json();
-      const d = jsonRes.data || {};
-      const baseUrl = d.base_url || d.base_url_low || 'https://assets.shngm.id';
-      const chData = d.chapter || {};
-      const chPath = chData.path || '';
-      const filenames = chData.data || chData.images || [];
+      if (series.source === 'komikcast' || series.kc_slug || ch.kc_series_slug || (series.id && String(series.id).startsWith('kc_'))) {
+        const kcSeries = series.kc_slug || (series.id ? String(series.id).replace('kc_', '') : '');
+        const kcIndex = ch.kc_index || ch.number || ch.chapter;
+        const res = await fetch(`https://be.komikcast.cc/series/${kcSeries}/chapters/${kcIndex}`);
+        if (!res.ok) throw new Error('Komikcast API error');
+        const jsonRes = await res.json();
+        const chData = jsonRes.data?.data || jsonRes.data || {};
+        images = chData.images || [];
+      } else {
+        const res = await fetch(`https://api.shngm.io/v1/chapter/detail/${chSlug}`);
+        if (!res.ok) throw new Error('API error');
+        const jsonRes = await res.json();
+        const d = jsonRes.data || {};
+        const baseUrl = d.base_url || d.base_url_low || 'https://assets.shngm.id';
+        const chData = d.chapter || {};
+        const chPath = chData.path || '';
+        const filenames = chData.data || chData.images || [];
 
-      let images = [];
-      if (Array.isArray(filenames) && filenames.length > 0) {
-        images = filenames.map(fn => {
-          if (typeof fn === 'string') {
-            if (fn.startsWith('http')) return fn;
-            return baseUrl + chPath + fn;
-          }
-          return fn.url || fn.src || '';
-        });
-      } else if (Array.isArray(d.images)) {
-        images = d.images.map(i => typeof i === 'string' ? (i.startsWith('http') ? i : baseUrl + i) : i.url || i.src);
+        if (Array.isArray(filenames) && filenames.length > 0) {
+          images = filenames.map(fn => {
+            if (typeof fn === 'string') {
+              if (fn.startsWith('http')) return fn;
+              return baseUrl + chPath + fn;
+            }
+            return fn.url || fn.src || '';
+          });
+        } else if (Array.isArray(d.images)) {
+          images = d.images.map(i => typeof i === 'string' ? (i.startsWith('http') ? i : baseUrl + i) : i.url || i.src);
+        }
       }
 
       if (!images.length) throw new Error('No images found');
