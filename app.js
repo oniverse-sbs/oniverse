@@ -31,6 +31,12 @@
   const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
   const fmtNum = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n);
 
+  function getSlug(s) {
+    if (s.slug) return s.slug;
+    if (s.id) return s.id;
+    return (s.title || s.name || 'unknown').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
   function saveBookmarks() { localStorage.setItem('oniverse_bookmarks', JSON.stringify(STATE.bookmarks)); }
   function saveHistory() { localStorage.setItem('oniverse_history', JSON.stringify(STATE.history)); }
   function saveStats() { localStorage.setItem('oniverse_stats', JSON.stringify(STATE.readingStats)); }
@@ -38,6 +44,8 @@
   function getCover(s) {
     if (s.cover) return s.cover;
     if (s.thumbnail) return s.thumbnail;
+    if (s.cover_image_url) return s.cover_image_url;
+    if (s.cover_portrait_url) return s.cover_portrait_url;
     if (s.image) return s.image;
     return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" fill="%2314122c"><rect width="200" height="280"/><text x="50%" y="50%" fill="%235b21b6" font-size="14" text-anchor="middle" dominant-baseline="middle">No Cover</text></svg>';
   }
@@ -174,7 +182,7 @@
       const genres = getGenres(s);
       $('#hero-genres').innerHTML = genres.slice(0, 4).map(g => `<span class="hero-genre-tag">${g}</span>`).join('');
 
-      const isBookmarked = STATE.bookmarks.includes(s.slug || s.title);
+      const isBookmarked = STATE.bookmarks.includes(getSlug(s));
       const bbtn = $('#hero-bookmark-btn');
       bbtn.className = 'btn-bookmark-hero' + (isBookmarked ? ' bookmarked' : '');
       bbtn.innerHTML = `<i class="fa-${isBookmarked ? 'solid' : 'regular'} fa-bookmark"></i> ${isBookmarked ? 'Tersimpan' : 'Bookmark'}`;
@@ -248,7 +256,7 @@
     }
 
     grid.innerHTML = history.map(h => {
-      const series = STATE.allSeries.find(s => (s.slug || s.title) === h.slug);
+      const series = STATE.allSeries.find(s => (getSlug(s)) === h.slug);
       if (!series) return '';
       const progress = h.progress || rand(20, 85);
       return `
@@ -267,7 +275,7 @@
     grid.addEventListener('click', e => {
       const card = e.target.closest('.continue-card');
       if (card) {
-        const series = STATE.allSeries.find(s => (s.slug || s.title) === card.dataset.slug);
+        const series = STATE.allSeries.find(s => (getSlug(s)) === card.dataset.slug);
         if (series) openDetail(series);
       }
     });
@@ -361,7 +369,7 @@
   //  BOOKMARK
   // ==========================================================================
   function toggleBookmark(s) {
-    const key = s.slug || s.title;
+    const key = getSlug(s);
     const idx = STATE.bookmarks.indexOf(key);
     if (idx >= 0) {
       STATE.bookmarks.splice(idx, 1);
@@ -390,7 +398,7 @@
     const modal = $('#detail-modal');
     const body = $('#modal-body');
     const genres = getGenres(s);
-    const isBookmarked = STATE.bookmarks.includes(s.slug || s.title);
+    const isBookmarked = STATE.bookmarks.includes(getSlug(s));
     const chapters = s.chapters || [];
     const sortedChapters = [...chapters].sort((a, b) => parseFloat(b.number || b.chapter || 0) - parseFloat(a.number || a.chapter || 0));
 
@@ -487,7 +495,7 @@
     content.scrollTop = 0;
 
     // Track reading
-    const slug = series.slug || series.title;
+    const slug = getSlug(series);
     const historyEntry = { slug, chapter: ch.number || ch.chapter || idx + 1, progress: rand(30, 80), timestamp: Date.now() };
     STATE.history = [historyEntry, ...STATE.history.filter(h => h.slug !== slug)].slice(0, 20);
     saveHistory();
@@ -787,7 +795,7 @@
       return;
     }
 
-    const bookmarked = STATE.allSeries.filter(s => STATE.bookmarks.includes(s.slug || s.title));
+    const bookmarked = STATE.allSeries.filter(s => STATE.bookmarks.includes(getSlug(s)));
     STATE.filtered = bookmarked;
     STATE.displayCount = STATE.perPage;
 
