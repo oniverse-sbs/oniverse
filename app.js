@@ -871,6 +871,23 @@
     $('#sb-bookmark')?.addEventListener('click', e => { e.preventDefault(); showBookmarkList(); closeMobileSidebar(); });
     $('#sb-history')?.addEventListener('click', e => { e.preventDefault(); document.getElementById('continue-section')?.scrollIntoView({ behavior: 'smooth' }); closeMobileSidebar(); });
 
+    // Forum Diskusi Bindings
+    $('#nav-forum')?.addEventListener('click', e => { e.preventDefault(); openForumModal(); });
+    $('#sb-forum')?.addEventListener('click', e => { e.preventDefault(); openForumModal(); closeMobileSidebar(); });
+    $('#floating-chat-btn')?.addEventListener('click', openForumModal);
+    $('#close-forum-btn')?.addEventListener('click', closeForumModal);
+    $('#forum-send-btn')?.addEventListener('click', sendForumMessage);
+    $('#forum-msg-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendForumMessage(); });
+
+    $$('.forum-channel-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        $$('.forum-channel-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        FORUM_STATE.activeChannel = tab.dataset.channel;
+        renderForumMessages();
+      });
+    });
+
     // Buttons
     $('#login-btn')?.addEventListener('click', () => showToast('Fitur Akun / Login segera hadir!', 'info'));
     $('#notif-btn')?.addEventListener('click', () => showToast('Belum ada notifikasi baru.', 'info'));
@@ -931,6 +948,80 @@
     renderUpdateItems();
     document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
     showToast(`${bookmarked.length} komik di bookmark kamu`, 'info');
+  }
+
+  // ==========================================================================
+  //  FORUM DISKUSI & CHAT MODULE
+  // ==========================================================================
+  const FORUM_STATE = {
+    activeChannel: 'general',
+    userName: localStorage.getItem('oniverse_username') || `Pembaca_${rand(1000, 9999)}`,
+    messages: JSON.parse(localStorage.getItem('oniverse_forum_msgs') || 'null') || [
+      { id: 1, channel: 'general', author: 'Rian_Otaku', avatar: 'R', text: 'Solo Leveling Ragnarok rilis jam berapa min?', time: '10:14' },
+      { id: 2, channel: 'general', author: 'Admin_Oni', avatar: 'A', text: 'Halo kawan-kawan! Komikcast + Shinigami sudah digabung di OniVerse ya! 🔥', time: '10:16', isAdmin: true },
+      { id: 3, channel: 'rekomendasi', author: 'BudiManhwa', avatar: 'B', text: 'Rekomendasi manhwa sistem yang bagus dong?', time: '09:45' },
+      { id: 4, channel: 'rekomendasi', author: 'Siska_Anime', avatar: 'S', text: 'Coba baca "The Greatest Estate Developer", kocak parah!', time: '09:50' },
+      { id: 5, channel: 'spoiler', author: 'TeoriGod', avatar: 'T', text: 'Spoiler Ch 887 Demonic Emperor: Zhuo Fan bakalan bantai klan suci!', time: '11:05' }
+    ]
+  };
+
+  function openForumModal() {
+    const modal = $('#forum-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    renderForumMessages();
+    const unameInput = $('#forum-username-input');
+    if (unameInput) unameInput.value = FORUM_STATE.userName;
+  }
+
+  function closeForumModal() {
+    $('#forum-modal')?.classList.add('hidden');
+  }
+
+  function renderForumMessages() {
+    const box = $('#forum-chat-box');
+    if (!box) return;
+    const msgs = FORUM_STATE.messages.filter(m => m.channel === FORUM_STATE.activeChannel);
+    box.innerHTML = msgs.map(m => {
+      const isSelf = m.author === FORUM_STATE.userName;
+      return `
+        <div class="chat-item ${isSelf ? 'self' : ''}">
+          <div class="chat-avatar" style="${m.isAdmin ? 'background:#ec4899' : ''}">${m.avatar || m.author[0]}</div>
+          <div class="chat-content">
+            <div class="chat-meta">
+              <span class="chat-author" style="${m.isAdmin ? 'color:#ec4899' : ''}">${m.author} ${m.isAdmin ? '✓' : ''}</span>
+              <span>${m.time}</span>
+            </div>
+            <div class="chat-bubble">${m.text}</div>
+          </div>
+        </div>`;
+    }).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function sendForumMessage() {
+    const input = $('#forum-msg-input');
+    const uInput = $('#forum-username-input');
+    if (!input || !input.value.trim()) return;
+
+    if (uInput && uInput.value.trim()) {
+      FORUM_STATE.userName = uInput.value.trim();
+      localStorage.setItem('oniverse_username', FORUM_STATE.userName);
+    }
+
+    const newMsg = {
+      id: Date.now(),
+      channel: FORUM_STATE.activeChannel,
+      author: FORUM_STATE.userName,
+      avatar: FORUM_STATE.userName[0].toUpperCase(),
+      text: input.value.trim(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    FORUM_STATE.messages.push(newMsg);
+    localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+    input.value = '';
+    renderForumMessages();
   }
 
   // ==========================================================================

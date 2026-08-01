@@ -129,6 +129,7 @@
         <a href="#" class="nav-item" id="nav-genre-link">Genre</a>
         <a href="#" class="nav-item" id="nav-update">Update</a>
         <a href="#" class="nav-item" id="nav-ranking">Ranking</a>
+        <a href="#" class="nav-item" id="nav-forum"><i class="fa-solid fa-comments" style="color:var(--accent-light)"></i> Forum</a>
       </nav>
 
       <!-- Right Actions -->
@@ -197,6 +198,11 @@
         <a href="#" class="sidebar-item" id="sb-history">
           <i class="fa-solid fa-clock-rotate-left"></i>
           <span>Riwayat Baca</span>
+        </a>
+        <a href="#" class="sidebar-item" id="sb-forum">
+          <i class="fa-solid fa-comments" style="color:#a855f7"></i>
+          <span>Forum Diskusi</span>
+          <span class="sidebar-badge" style="background:#a855f7">LIVE</span>
         </a>
       </nav>
 
@@ -523,6 +529,48 @@
     </a>
   </nav>
 
+  <!-- ============================================================
+       FLOATING FORUM CHAT WIDGET
+  ============================================================ -->
+  <button class="floating-chat-btn" id="floating-chat-btn">
+    <i class="fa-solid fa-comments"></i>
+    <span>Forum Chat</span>
+    <span class="chat-online-badge">148</span>
+  </button>
+
+  <!-- Forum Chat Drawer / Modal -->
+  <div class="forum-modal-overlay hidden" id="forum-modal">
+    <div class="forum-card">
+      <div class="forum-header">
+        <div class="forum-title-wrap">
+          <i class="fa-solid fa-comments text-accent" style="color:var(--accent-light);font-size:1.4rem"></i>
+          <div>
+            <h3 style="margin:0;font-family:'Outfit';font-weight:700">Forum Diskusi OniVerse</h3>
+            <span class="forum-online-txt" style="font-size:0.75rem;color:var(--text-muted)"><i class="fa-solid fa-circle" style="color:#22c55e;font-size:0.5rem"></i> 148 Pembaca Online</span>
+          </div>
+        </div>
+        <button class="modal-close" id="close-forum-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Channel Tabs -->
+      <div class="forum-channels">
+        <button class="forum-channel-tab active" data-channel="general"><i class="fa-solid fa-fire"></i> Obrolan Umum</button>
+        <button class="forum-channel-tab" data-channel="rekomendasi"><i class="fa-solid fa-thumbs-up"></i> Rekomendasi</button>
+        <button class="forum-channel-tab" data-channel="spoiler"><i class="fa-solid fa-mask"></i> Teori & Spoiler</button>
+      </div>
+
+      <!-- Message History Container -->
+      <div class="forum-chat-box" id="forum-chat-box"></div>
+
+      <!-- Send Input Bar -->
+      <div class="forum-input-bar">
+        <input type="text" id="forum-username-input" placeholder="Nama..." style="width: 90px; flex-shrink: 0;" autocomplete="off">
+        <input type="text" id="forum-msg-input" placeholder="Ketik pesan..." autocomplete="off">
+        <button id="forum-send-btn" class="btn-baca" style="padding: 0.5rem 0.85rem;"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== SPONSORED AD BANNER SLOT #4 ===== -->
   <div class="ad-container" style="max-width: 1200px; margin: 1.5rem auto 0; text-align: center; overflow: hidden;" id="ad-space-footer">
     <script src="https://pl30628279.effectivecpmnetwork.com/e1/22/4e/e1224e58d177272cb8d6f83b09dd728c.js"></script>
@@ -567,7 +615,7 @@
     </div>
   </footer>
 
-  <script src="data.js?v=4.0"></script>
-  <script src="app.js?v=4.0"></script>
+  <script src="data.js?v=5.0"></script>
+  <script src="app.js?v=5.0"></script>
 </body>
 </html>
