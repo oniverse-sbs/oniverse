@@ -1049,6 +1049,138 @@
   }
 
   // ==========================================================================
+  //  CULTIVATION MINI-GAME (MONSTER BATTLE & SPIN WHEEL)
+  // ==========================================================================
+  const GAME_STATE = {
+    monsterHp: 100,
+    maxHp: 100,
+    timer: 10,
+    timerInterval: null,
+    isPlaying: false,
+    monsterName: '🐉 Naga Api Kegelapan (LV. 99)',
+    monsterAvatar: '🐉'
+  };
+
+  function openMinigameModal() {
+    $('#minigame-modal')?.classList.remove('hidden');
+    resetMonsterBattle();
+  }
+
+  function closeMinigameModal() {
+    $('#minigame-modal')?.classList.add('hidden');
+    clearInterval(GAME_STATE.timerInterval);
+  }
+
+  function resetMonsterBattle() {
+    clearInterval(GAME_STATE.timerInterval);
+    const monsters = [
+      { name: '🐉 Naga Api Kegelapan (LV. 99)', hp: 120, avatar: '🐉' },
+      { name: '🐺 Serigala Es Kuno (LV. 45)', hp: 80, avatar: '🐺' },
+      { name: '👹 Iblis Petir Merah (LV. 77)', hp: 100, avatar: '👹' },
+      { name: '🐍 Ular Sanca Raksasa (LV. 60)', hp: 90, avatar: '🐍' }
+    ];
+    const m = monsters[rand(0, monsters.length - 1)];
+    GAME_STATE.monsterHp = m.hp;
+    GAME_STATE.maxHp = m.hp;
+    GAME_STATE.timer = 10;
+    GAME_STATE.isPlaying = false;
+    GAME_STATE.monsterName = m.name;
+    GAME_STATE.monsterAvatar = m.avatar;
+
+    const nameEl = $('#monster-name');
+    const avatarEl = $('#monster-avatar');
+    if (nameEl) nameEl.textContent = m.name;
+    if (avatarEl) avatarEl.textContent = m.avatar;
+    updateMonsterUI();
+  }
+
+  function updateMonsterUI() {
+    const pct = Math.max(0, (GAME_STATE.monsterHp / GAME_STATE.maxHp) * 100);
+    const bar = $('#monster-hp-bar');
+    if (bar) bar.style.width = `${pct}%`;
+    const textEl = $('#monster-hp-text');
+    if (textEl) textEl.textContent = `${Math.max(0, GAME_STATE.monsterHp)} / ${GAME_STATE.maxHp}`;
+    const timerEl = $('#monster-timer-text');
+    if (timerEl) timerEl.textContent = `${GAME_STATE.timer}s`;
+  }
+
+  function handleAttackMonster() {
+    if (GAME_STATE.monsterHp <= 0) return;
+
+    if (!GAME_STATE.isPlaying) {
+      GAME_STATE.isPlaying = true;
+      GAME_STATE.timerInterval = setInterval(() => {
+        GAME_STATE.timer--;
+        updateMonsterUI();
+        if (GAME_STATE.timer <= 0) {
+          clearInterval(GAME_STATE.timerInterval);
+          GAME_STATE.isPlaying = false;
+          showToast('⚠️ Waktu habis! Monster Spirit berhasil kabur!', 'info');
+          resetMonsterBattle();
+        }
+      }, 1000);
+    }
+
+    const dmg = rand(8, 16);
+    GAME_STATE.monsterHp -= dmg;
+
+    const floatText = $('#damage-floating-text');
+    if (floatText) {
+      floatText.textContent = `💥 CRITICAL DAMAGE! -${dmg} HP`;
+      floatText.style.opacity = '1';
+      setTimeout(() => { floatText.style.opacity = '0'; }, 300);
+    }
+
+    const monsterAvatar = $('#monster-avatar');
+    if (monsterAvatar) {
+      monsterAvatar.style.transform = 'scale(0.85) rotate(-10deg)';
+      setTimeout(() => { monsterAvatar.style.transform = 'scale(1)'; }, 100);
+    }
+
+    updateMonsterUI();
+
+    if (GAME_STATE.monsterHp <= 0) {
+      clearInterval(GAME_STATE.timerInterval);
+      GAME_STATE.isPlaying = false;
+      STATE.readingStats.chapters = (STATE.readingStats.chapters || 0) + 5;
+      saveReadingStats();
+      updateCultivationUI();
+      showToast(`🏆 KEMENANGAN TELAH DICAPAI! ${GAME_STATE.monsterName} dikalahkan! +5 Chapter EXP Bonus! 🐉`, 'success');
+      setTimeout(resetMonsterBattle, 2000);
+    }
+  }
+
+  function handleSpinWheel() {
+    const wheelCircle = $('#spin-wheel-circle');
+    const resultText = $('#spin-result-text');
+    const iconEl = $('#spin-wheel-icon');
+    if (!wheelCircle) return;
+
+    const prizes = [
+      { text: '✨ Bonus +3 Chapter EXP Kultivasi!', bonus: 3, icon: '✨' },
+      { text: '🔮 Bonus +5 Chapter EXP Kultivasi!', bonus: 5, icon: '🔮' },
+      { text: '🪐 Bonus +10 Chapter EXP Kosmik!', bonus: 10, icon: '🪐' },
+      { text: '🐉 HARTA KARUN NAGA! +15 EXP Kultivasi!', bonus: 15, icon: '🐉' },
+      { text: '🍃 Rezeki Pemula +2 Chapter EXP!', bonus: 2, icon: '🍃' }
+    ];
+
+    const chosen = prizes[rand(0, prizes.length - 1)];
+    const deg = rand(1080, 2160);
+
+    wheelCircle.style.transform = `rotate(${deg}deg)`;
+    if (resultText) resultText.textContent = 'Memutar Roda Gacha Kosmik... 🎡';
+
+    setTimeout(() => {
+      if (iconEl) iconEl.textContent = chosen.icon;
+      if (resultText) resultText.textContent = chosen.text;
+      STATE.readingStats.chapters = (STATE.readingStats.chapters || 0) + chosen.bonus;
+      saveReadingStats();
+      updateCultivationUI();
+      showToast(chosen.text, 'success');
+    }, 3000);
+  }
+
+  // ==========================================================================
   //  EVENT BINDINGS
   // ==========================================================================
   function bindEvents() {
@@ -1272,6 +1404,35 @@
     const closeWelcomeAd = () => { $('#welcome-ad-modal')?.classList.add('hidden'); };
     $('#close-welcome-ad-btn')?.addEventListener('click', closeWelcomeAd);
     $('#continue-reading-btn')?.addEventListener('click', closeWelcomeAd);
+
+    // Mini-Game Bindings
+    $('#floating-game-btn')?.addEventListener('click', openMinigameModal);
+    $('#close-minigame-btn')?.addEventListener('click', closeMinigameModal);
+    $('#btn-attack-monster')?.addEventListener('click', handleAttackMonster);
+    $('#monster-avatar')?.addEventListener('click', handleAttackMonster);
+    $('#btn-spin-wheel')?.addEventListener('click', handleSpinWheel);
+
+    $('#game-tab-battle')?.addEventListener('click', () => {
+      $('#game-tab-battle').classList.add('active');
+      $('#game-tab-battle').style.background = 'var(--accent-light)';
+      $('#game-tab-battle').style.color = '#fff';
+      $('#game-tab-spin').classList.remove('active');
+      $('#game-tab-spin').style.background = 'transparent';
+      $('#game-tab-spin').style.color = 'var(--text-muted)';
+      $('#game-arena-battle').classList.remove('hidden');
+      $('#game-arena-spin').classList.add('hidden');
+    });
+
+    $('#game-tab-spin')?.addEventListener('click', () => {
+      $('#game-tab-spin').classList.add('active');
+      $('#game-tab-spin').style.background = 'var(--accent-light)';
+      $('#game-tab-spin').style.color = '#fff';
+      $('#game-tab-battle').classList.remove('active');
+      $('#game-tab-battle').style.background = 'transparent';
+      $('#game-tab-battle').style.color = 'var(--text-muted)';
+      $('#game-arena-spin').classList.remove('hidden');
+      $('#game-arena-battle').classList.add('hidden');
+    });
 
     // Theme toggle
     $('#theme-toggle')?.addEventListener('click', () => {

@@ -1829,6 +1829,42 @@ ul, ol { list-style: none; }
   font-weight: 800;
 }
 
+.floating-game-btn {
+  position: fixed;
+  bottom: 7.6rem;
+  right: 1.25rem;
+  z-index: 990;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  border: none;
+  padding: 0.65rem 1.15rem;
+  border-radius: var(--radius-full);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.floating-game-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.6);
+}
+
+.game-hot-badge {
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.62rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  animation: pulseAura 1.5s infinite ease-in-out;
+}
+
 .forum-modal-overlay {
   position: fixed;
   inset: 0;

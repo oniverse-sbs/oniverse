@@ -562,6 +562,86 @@
   </nav>
 
   <!-- ============================================================
+       FLOATING CULTIVATION MINI-GAME WIDGET
+  ============================================================ -->
+  <button class="floating-game-btn" id="floating-game-btn">
+    <i class="fa-solid fa-gamepad" style="color:#fff"></i>
+    <span>Game Kultivasi</span>
+    <span class="game-hot-badge">HOT</span>
+  </button>
+
+  <!-- ============================================================
+       CULTIVATION MINI-GAME MODAL (BATTLE & SPIN)
+  ============================================================ -->
+  <div class="forum-modal-overlay hidden" id="minigame-modal" style="z-index: 1050;">
+    <div class="forum-card" style="max-width: 520px; height: auto; max-height: 640px;">
+      <div class="forum-header" style="background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(124,58,237,0.2)); border-bottom-color: rgba(245,158,11,0.3);">
+        <div class="forum-title-wrap">
+          <i class="fa-solid fa-dragon" style="color:#f59e0b; font-size:1.4rem"></i>
+          <div>
+            <h3 style="margin:0; font-family:'Outfit'; font-weight:800; color:var(--text-main);">Arena Kultivasi OniVerse</h3>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Lawan Monster Spirit & Putar Roda Keberuntungan!</span>
+          </div>
+        </div>
+        <button class="modal-close" id="close-minigame-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1.25rem; overflow-y: auto;">
+        
+        <!-- Game Tabs -->
+        <div style="display: flex; gap: 0.5rem; background: var(--bg-main); padding: 0.35rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
+          <button class="btn-baca active" id="game-tab-battle" style="flex:1; padding:0.5rem; font-size:0.8rem; justify-content:center;"><i class="fa-solid fa-sword"></i> Pembantaian Monster</button>
+          <button class="btn-baca" id="game-tab-spin" style="flex:1; padding:0.5rem; font-size:0.8rem; justify-content:center; background:transparent; color:var(--text-muted); border:none;"><i class="fa-solid fa-dharmachakra"></i> Roda Keberuntungan</button>
+        </div>
+
+        <!-- MODE 1: MONSTER BATTLE ARENA -->
+        <div id="game-arena-battle" style="display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--bg-main); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; gap:1rem;">
+          <div style="position:relative; width:100%;">
+            <span style="font-size:0.72rem; color:var(--accent-light); font-weight:700;">VALLEY OF SPIRIT BEASTS</span>
+            <h3 style="margin:0.2rem 0; font-family:'Outfit'; font-weight:800; color:#ef4444;" id="monster-name">🐉 Naga Api Kegelapan (LV. 99)</h3>
+            
+            <!-- Monster HP Bar -->
+            <div style="width:100%; background:rgba(239,68,68,0.15); height:16px; border-radius:var(--radius-full); border:1px solid rgba(239,68,68,0.4); overflow:hidden; margin:0.5rem 0;">
+              <div id="monster-hp-bar" style="width:100%; height:100%; background:linear-gradient(90deg, #ef4444, #f97316); transition:width 0.1s linear;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--text-muted); font-weight:700;">
+              <span>HP Monster: <strong id="monster-hp-text" style="color:#ef4444;">100 / 100</strong></span>
+              <span>Waktu Sisa: <strong id="monster-timer-text" style="color:#f59e0b;">10s</strong></span>
+            </div>
+          </div>
+
+          <!-- Monster Avatar Visual -->
+          <div id="monster-avatar" style="font-size:4.5rem; filter:drop-shadow(0 0 15px rgba(239,68,68,0.6)); cursor:pointer; user-select:none; transition:transform 0.1s ease;">
+            🐉
+          </div>
+          <div id="damage-floating-text" style="height:20px; font-weight:800; font-size:1.1rem; color:#f59e0b; opacity:0; transition:opacity 0.2s ease;">CRITICAL HIT! -15 HP</div>
+
+          <button id="btn-attack-monster" class="btn-baca" style="width:100%; justify-content:center; padding:0.85rem; font-size:1.05rem; font-weight:800; background:linear-gradient(135deg, #ef4444, #f97316); box-shadow:0 6px 20px rgba(239,68,68,0.4);">
+            ⚔️ SERANG SEKARANG! (TAP CEPAT)
+          </button>
+        </div>
+
+        <!-- MODE 2: DAILY SPIN WHEEL -->
+        <div id="game-arena-spin" class="hidden" style="display:flex; flex-direction:column; align-items:center; text-align:center; background:var(--bg-main); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; gap:1rem;">
+          <h3 style="margin:0; font-family:'Outfit'; font-weight:800; color:#f59e0b;">🎰 Roda Gacha Kultivasi Harian</h3>
+          <p style="margin:0; font-size:0.8rem; color:var(--text-muted);">Putar roda untuk mendapatkan EXP Kultivasi Instant gratis!</p>
+          
+          <div style="position:relative; width:180px; height:180px; border-radius:50%; border:6px solid #f59e0b; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle, #7c3aed, #0d0a1a); box-shadow:0 0 25px rgba(245,158,11,0.5); overflow:hidden; transition:transform 3s cubic-bezier(0.15, 0.9, 0.3, 1);" id="spin-wheel-circle">
+            <div style="font-size:3.5rem;" id="spin-wheel-icon">🔮</div>
+          </div>
+
+          <div id="spin-result-text" style="font-weight:700; font-size:0.9rem; color:var(--accent-light); min-height:24px;">Tekan tombol di bawah untuk memutar Roda!</div>
+
+          <button id="btn-spin-wheel" class="btn-baca" style="width:100%; justify-content:center; padding:0.8rem; font-size:0.95rem; font-weight:800; background:linear-gradient(135deg, #f59e0b, #d97706); box-shadow:0 6px 20px rgba(245,158,11,0.4);">
+            🎡 PUTAR RODA KULTIVASI (GRATIS)
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
        FLOATING FORUM CHAT WIDGET
   ============================================================ -->
   <button class="floating-chat-btn" id="floating-chat-btn">
@@ -824,7 +904,7 @@
     </div>
   </footer>
 
-  <script src="data.js?v=18.0"></script>
-  <script src="app.js?v=18.0"></script>
+  <script src="data.js?v=19.0"></script>
+  <script src="app.js?v=19.0"></script>
 </body>
 </html>
