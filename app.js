@@ -253,8 +253,41 @@
     }
   }
 
+  function renderAdminModList() {
+    const listEl = $('#admin-chat-mod-list');
+    if (!listEl) return;
+    if (!FORUM_STATE.messages.length) {
+      listEl.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:0.5rem;">Tidak ada pesan forum.</div>';
+      return;
+    }
+
+    listEl.innerHTML = FORUM_STATE.messages.map(m => `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:0.4rem 0.65rem; border-radius:var(--radius-md); border:1px solid var(--border);">
+        <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:82%;">
+          <strong style="color:${m.isAdmin ? '#ef4444' : 'var(--accent-light)'}">${m.author}:</strong>
+          <span style="color:var(--text-main); margin-left:0.3rem;">${m.text}</span>
+        </div>
+        <button class="admin-del-msg-btn" data-id="${m.id}" style="background:rgba(239,68,68,0.2); color:#ef4444; border:none; padding:0.15rem 0.4rem; border-radius:4px; font-size:0.68rem; font-weight:700; cursor:pointer;">Hapus</button>
+      </div>
+    `).join('');
+
+    $$('.admin-del-msg-btn', listEl).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.dataset.id);
+        FORUM_STATE.messages = FORUM_STATE.messages.filter(msg => msg.id !== id);
+        localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+        renderAdminModList();
+        renderForumMessages();
+        showToast('Pesan berhasil dihapus oleh Admin.', 'info');
+      });
+    });
+  }
+
   function openAdminModal() {
     $('#admin-modal')?.classList.remove('hidden');
+    renderAdminModList();
+    const onlineEl = $('#admin-online-count');
+    if (onlineEl) onlineEl.textContent = rand(145, 168);
   }
 
   function closeAdminModal() {
