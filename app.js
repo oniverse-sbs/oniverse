@@ -166,30 +166,33 @@
   }
 
   // ==========================================================================
-  //  CULTIVATION REALMS (APOTHEOSIS 21 RANAH KULTIVASI) & ADMIN DASHBOARD
+  //  CULTIVATION REALMS (24 RANAH KULTIVASI LENGKAP) & ADMIN DASHBOARD
   // ==========================================================================
   const CULTIVATION_REALMS = [
-    { name: "Half-Step Innate Soul", req: 0, badge: "🍃", color: "#94a3b8" },
-    { name: "Innate", req: 3, badge: "🌱", color: "#10b981" },
-    { name: "Spirit Illumination", req: 6, badge: "✨", color: "#06b6d4" },
-    { name: "Spirit Core", req: 10, badge: "🔮", color: "#3b82f6" },
-    { name: "Void Tribulation", req: 15, badge: "⚡", color: "#6366f1" },
-    { name: "Life and Death", req: 22, badge: "☯️", color: "#8b5cf6" },
-    { name: "Divine Sea", req: 30, badge: "🌊", color: "#0284c7" },
-    { name: "Divine Extremity", req: 40, badge: "🌋", color: "#f97316" },
-    { name: "Divine Transformation", req: 52, badge: "💫", color: "#d97706" },
-    { name: "World Lord", req: 68, badge: "🌍", color: "#16a34a" },
-    { name: "Heavenly Venerable", req: 88, badge: "☁️", color: "#38bdf8" },
-    { name: "True God", req: 110, badge: "🌟", color: "#eab308" },
-    { name: "Saint", req: 140, badge: "🕊️", color: "#f43f5e" },
-    { name: "Paramita", req: 180, badge: "📿", color: "#a855f7" },
-    { name: "Chaos Ancient God", req: 230, badge: "🌌", color: "#c084fc" },
-    { name: "Immortal", req: 300, badge: "⚔️", color: "#fb7185" },
-    { name: "Origin", req: 400, badge: "🌀", color: "#38bdf8" },
-    { name: "Source", req: 520, badge: "💥", color: "#f43f5e" },
-    { name: "Ultimate Lord", req: 680, badge: "👑", color: "#fbbf24" },
-    { name: "Absolute God", req: 850, badge: "⚡👑", color: "#ec4899" },
-    { name: "World's Master", req: 1000, badge: "🪐", color: "#a855f7" }
+    { level: 1, name: "Half-Step Innate Soul", req: 0, badge: "🍃", color: "#94a3b8", aura: "rank-aura-1" },
+    { level: 2, name: "Innate", req: 3, badge: "🌱", color: "#10b981", aura: "rank-aura-2" },
+    { level: 3, name: "Spirit Illumination", req: 6, badge: "✨", color: "#06b6d4", aura: "rank-aura-3" },
+    { level: 4, name: "Spirit Core", req: 10, badge: "🔮", color: "#3b82f6", aura: "rank-aura-4" },
+    { level: 5, name: "Void Tribulation", req: 15, badge: "⚡", color: "#6366f1", aura: "rank-aura-5" },
+    { level: 6, name: "Life and Death", req: 22, badge: "☯️", color: "#8b5cf6", aura: "rank-aura-6" },
+    { level: 7, name: "Divine Sea", req: 30, badge: "🌊", color: "#0284c7", aura: "rank-aura-7" },
+    { level: 8, name: "Divine Extremity", req: 40, badge: "🌋", color: "#f97316", aura: "rank-aura-8" },
+    { level: 9, name: "Divine Transformation", req: 52, badge: "💫", color: "#d97706", aura: "rank-aura-9" },
+    { level: 10, name: "World Lord", req: 68, badge: "🌍", color: "#16a34a", aura: "rank-aura-10" },
+    { level: 11, name: "Heavenly Venerable", req: 88, badge: "☁️", color: "#38bdf8", aura: "rank-aura-11" },
+    { level: 12, name: "True God", req: 110, badge: "🌟", color: "#eab308", aura: "rank-aura-12" },
+    { level: 13, name: "Saint", req: 140, badge: "🕊️", color: "#f43f5e", aura: "rank-aura-13" },
+    { level: 14, name: "Paramita", req: 180, badge: "📿", color: "#a855f7", aura: "rank-aura-14" },
+    { level: 15, name: "Chaos Ancient God", req: 230, badge: "🌌", color: "#c084fc", aura: "rank-aura-15" },
+    { level: 16, name: "Immortal", req: 300, badge: "⚔️", color: "#fb7185", aura: "rank-aura-16" },
+    { level: 17, name: "Origin", req: 400, badge: "🌀", color: "#00d2ff", aura: "rank-aura-17" },
+    { level: 18, name: "Source", req: 520, badge: "💥", color: "#ff4b2b", aura: "rank-aura-18" },
+    { level: 19, name: "Ultimate Lord", req: 680, badge: "👑", color: "#f59e0b", aura: "rank-aura-19" },
+    { level: 20, name: "Absolute God", req: 850, badge: "⚡👑", color: "#ec4899", aura: "rank-aura-20" },
+    { level: 21, name: "World's Master", req: 1000, badge: "🪐", color: "#8b5cf6", aura: "rank-aura-21" },
+    { level: 22, name: "Primordial Overlord", req: 1250, badge: "🐉", color: "#10b981", aura: "rank-aura-22" },
+    { level: 23, name: "Supreme Ancestor", req: 1550, badge: "🌌👑", color: "#d946ef", aura: "rank-aura-23" },
+    { level: 24, name: "Grandmaster of Chaos", req: 2000, badge: "☸️✨", color: "#f43f5e", aura: "rank-aura-24" }
   ];
 
   function getCultivationRealm() {
@@ -1248,13 +1251,10 @@
   }
 
   function getRankAuraClass(rankName, isAdmin) {
-    if (isAdmin) return 'rank-tier-admin';
-    if (!rankName) return 'rank-tier-low';
+    if (isAdmin) return 'rank-aura-admin';
+    if (!rankName) return 'rank-aura-1';
     const idx = CULTIVATION_REALMS.findIndex(r => r.name === rankName);
-    if (idx >= 17) return 'rank-tier-supreme';
-    if (idx >= 11) return 'rank-tier-high';
-    if (idx >= 5) return 'rank-tier-mid';
-    return 'rank-tier-low';
+    return idx >= 0 ? `rank-aura-${idx + 1}` : 'rank-aura-1';
   }
 
   function renderForumMessages() {
