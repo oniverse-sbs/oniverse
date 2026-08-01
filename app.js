@@ -808,6 +808,45 @@
     document.body.style.overflow = '';
   }
 
+  function getChapterCommentsKey(seriesSlug, chNum) {
+    return `oniverse_ch_comments_${seriesSlug}_ch${chNum}`;
+  }
+
+  function renderChapterComments(seriesSlug, chNum) {
+    const listEl = $('#ch-comment-list');
+    const countEl = $('#ch-comment-count');
+    if (!listEl) return;
+
+    const key = getChapterCommentsKey(seriesSlug, chNum);
+    const comments = JSON.parse(localStorage.getItem(key) || '[]');
+
+    if (countEl) countEl.textContent = comments.length;
+
+    if (!comments.length) {
+      listEl.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding:1rem;">Belum ada komentar di chapter ini. Jadilah yang pertama berkomentar! 💬</div>';
+      return;
+    }
+
+    listEl.innerHTML = comments.map((c) => {
+      const rankInfo = c.userRank || { badge: '🍃', name: 'Half-Step Innate Soul', color: '#94a3b8' };
+      const auraClass = getRankAuraClass(rankInfo.name, c.isAdmin);
+      return `
+        <div style="display:flex; gap:0.75rem; background:var(--bg-main); padding:0.75rem; border-radius:var(--radius-md); border:1px solid var(--border);">
+          <div class="chat-avatar ${auraClass}" style="width:36px; height:36px; font-size:0.85rem; flex-shrink:0;">${rankInfo.badge || c.author[0]}</div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:0.25rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+                <strong style="font-size:0.82rem; color:${c.isAdmin ? '#ef4444' : 'var(--text-main)'};">${c.author}</strong>
+                <span class="chat-rank-tag" style="background:${rankInfo.color}22; color:${rankInfo.color}; border:1px solid ${rankInfo.color}44; font-size:0.65rem; padding:0.08rem 0.4rem; border-radius:10px; font-weight:700;">${rankInfo.badge} ${rankInfo.name}</span>
+              </div>
+              <span style="font-size:0.7rem; color:var(--text-muted);">${c.time}</span>
+            </div>
+            <p style="margin:0; font-size:0.85rem; color:var(--text-muted); line-height:1.4;">${c.text}</p>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
   // ==========================================================================
   //  READER
   // ==========================================================================
@@ -882,11 +921,58 @@
           <p style="color:var(--text-muted);font-size:0.85rem">— Akhir Chapter ${ch.number || ch.chapter || idx + 1} —</p>
           <!-- Reader End Sponsored Ad (Non-Intrusive) -->
           <div style="margin: 1rem 0; min-height: 90px; text-align: center;" id="reader-ad-slot"></div>
+
+          <!-- Chapter Comment Section -->
+          <div class="chapter-comment-box" style="margin: 1.5rem auto; max-width: 720px; text-align: left; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem;">
+            <h4 style="margin:0 0 1rem 0; font-family:'Outfit'; font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:0.5rem; color:var(--text-main);">
+              <i class="fa-solid fa-comments" style="color:var(--accent-light)"></i> Diskusi Chapter ${ch.number || ch.chapter || idx + 1} <span id="ch-comment-count" style="font-size:0.75rem; background:rgba(124,58,237,0.2); color:var(--accent-light); padding:0.15rem 0.5rem; border-radius:var(--radius-full);">0</span>
+            </h4>
+            
+            <div style="display:flex; gap:0.65rem; margin-bottom:1.25rem;">
+              <input type="text" id="ch-comment-input" placeholder="Tulis pendapatmu tentang chapter ini..." style="flex:1; background:var(--bg-main); border:1px solid var(--border); color:var(--text-main); padding:0.65rem 0.85rem; border-radius:var(--radius-md); font-size:0.85rem; font-family:inherit;">
+              <button id="ch-comment-send" class="btn-baca" style="padding:0.65rem 1.2rem; font-size:0.85rem;"><i class="fa-solid fa-paper-plane"></i> Kirim</button>
+            </div>
+
+            <div id="ch-comment-list" style="display:flex; flex-direction:column; gap:0.85rem;"></div>
+          </div>
+
           <div class="reader-nav-row">
             <button class="btn-baca" id="reader-footer-prev" ${idx <= 0 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i> Prev</button>
             <button class="btn-baca" id="reader-footer-next" ${idx >= chapters.length - 1 ? 'disabled' : ''}>Next <i class="fa-solid fa-chevron-right"></i></button>
           </div>
         </div>`;
+
+      const seriesSlug = getSlug(series);
+      const chNum = ch.number || ch.chapter || idx + 1;
+      renderChapterComments(seriesSlug, chNum);
+
+      const commentInput = $('#ch-comment-input');
+      const commentSendBtn = $('#ch-comment-send');
+
+      const sendComment = () => {
+        if (!commentInput || !commentInput.value.trim()) return;
+        const text = commentInput.value.trim();
+        const key = getChapterCommentsKey(seriesSlug, chNum);
+        const comments = JSON.parse(localStorage.getItem(key) || '[]');
+        const { rank } = getCultivationRealm();
+        const authorName = FORUM_STATE.userName || 'Kultivator_Anonim';
+
+        comments.unshift({
+          id: Date.now(),
+          author: authorName,
+          userRank: { badge: rank.badge, name: rank.name, color: rank.color },
+          text: text,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+
+        localStorage.setItem(key, JSON.stringify(comments));
+        commentInput.value = '';
+        renderChapterComments(seriesSlug, chNum);
+        showToast('Komentar chapter berhasil dikirim!', 'success');
+      };
+
+      if (commentSendBtn) commentSendBtn.onclick = sendComment;
+      if (commentInput) commentInput.onkeydown = e => { if (e.key === 'Enter') sendComment(); };
 
       const fp = $('#reader-footer-prev');
       const fn = $('#reader-footer-next');
