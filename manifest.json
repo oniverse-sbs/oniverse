@@ -1,0 +1,21 @@
+{
+  "name": "OniVerse - Baca Komik Manhwa Manga Online",
+  "short_name": "OniVerse",
+  "description": "Platform baca komik manhwa, manga, dan manhua bahasa Indonesia tercepat dan gratis dengan 600+ judul komik.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0816",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

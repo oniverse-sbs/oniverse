@@ -21,6 +21,25 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="OniVerse.SBS">
   <meta name="msapplication-TileColor" content="#0d0a1a">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+
+  <!-- ===== GOOGLE STRUCTURED DATA (JSON-LD) ===== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "OniVerse",
+    "alternateName": "OniVerse SBS",
+    "url": "https://oniverse.sbs/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://oniverse.sbs/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 
   <!-- ===== OPEN GRAPH (Facebook, WhatsApp, Telegram) ===== -->
   <meta property="og:type" content="website">
@@ -765,7 +784,7 @@
     </div>
   </footer>
 
-  <script src="data.js?v=10.0"></script>
-  <script src="app.js?v=10.0"></script>
+  <script src="data.js?v=11.0"></script>
+  <script src="app.js?v=11.0"></script>
 </body>
 </html>

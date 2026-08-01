@@ -692,6 +692,9 @@
             <button class="btn-bookmark-hero ${isBookmarked ? 'bookmarked' : ''}" id="detail-bookmark-btn">
               <i class="fa-${isBookmarked ? 'solid' : 'regular'} fa-bookmark"></i> ${isBookmarked ? 'Tersimpan' : 'Bookmark'}
             </button>
+            <button class="btn-bookmark-hero" id="detail-share-btn" style="background:linear-gradient(135deg, #25D366, #128C7E);color:#fff;border:none;">
+              <i class="fa-brands fa-whatsapp"></i> Bagikan
+            </button>
           </div>
         </div>
       </div>
@@ -720,6 +723,19 @@
     $('#detail-bookmark-btn').onclick = () => {
       toggleBookmark(s);
       openDetail(s);
+    };
+
+    $('#detail-share-btn').onclick = () => {
+      const comicTitle = s.title || s.name || 'Komik';
+      const comicSlug = getSlug(s);
+      const shareUrl = `https://oniverse.sbs/?comic=${comicSlug}`;
+      const shareText = `Yuk baca komik "${comicTitle}" gratis di OniVerse! 🔥\n${shareUrl}`;
+      
+      if (navigator.share) {
+        navigator.share({ title: comicTitle, text: shareText, url: shareUrl }).catch(() => {});
+      } else {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+      }
     };
 
     const chSearch = $('#ch-search');
