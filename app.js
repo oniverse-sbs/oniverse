@@ -992,23 +992,29 @@
     });
 
     // Admin Dashboard Bindings
-    $('#sb-admin')?.addEventListener('click', e => { e.preventDefault(); openAdminModal(); closeMobileSidebar(); });
     $('#close-admin-btn')?.addEventListener('click', closeAdminModal);
     $('#admin-broadcast-btn')?.addEventListener('click', adminBroadcastMessage);
     $('#admin-clear-chat-btn')?.addEventListener('click', adminClearChat);
     $('#admin-refresh-data-btn')?.addEventListener('click', () => { location.reload(); });
 
-    // Buttons
-    $('#login-btn')?.addEventListener('click', () => showToast('Fitur Akun / Login segera hadir!', 'info'));
-    $('#notif-btn')?.addEventListener('click', () => showToast('Belum ada notifikasi baru.', 'info'));
-    $('#donasi-btn')?.addEventListener('click', () => showToast('Terima kasih atas dukunganmu pada OniVerse! 💜', 'success'));
-    $('#discord-btn')?.addEventListener('click', e => { e.preventDefault(); showToast('Komunitas Discord OniVerse segera dibuka!', 'info'); });
-
-    // Logo home
+    // Secret Admin Triggers: 5 Clicks on Logo or ?admin=1 URL parameter
+    let logoClicks = 0;
     $('#logo-home')?.addEventListener('click', e => {
       e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      logoClicks++;
+      if (logoClicks >= 5) {
+        logoClicks = 0;
+        openAdminModal();
+        showToast('🔑 Mode Admin Terbuka!', 'success');
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('admin') === '1' || urlParams.get('admin') === 'true') {
+      setTimeout(() => { openAdminModal(); }, 500);
+    }
 
     // Theme toggle
     $('#theme-toggle')?.addEventListener('click', () => {
@@ -1113,6 +1119,13 @@
     const input = $('#forum-msg-input');
     const uInput = $('#forum-username-input');
     if (!input || !input.value.trim()) return;
+
+    if (input.value.trim() === '/admin') {
+      input.value = '';
+      closeForumModal();
+      openAdminModal();
+      return;
+    }
 
     if (uInput && uInput.value.trim()) {
       FORUM_STATE.userName = uInput.value.trim();
