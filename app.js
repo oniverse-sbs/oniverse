@@ -92,6 +92,109 @@
     if (el('stat-read')) el('stat-read').textContent = s.read;
     if (el('stat-chapters')) el('stat-chapters').textContent = s.chapters;
     if (el('stat-streak')) el('stat-streak').innerHTML = `${s.streak}<i class="fa-solid fa-fire"></i>`;
+    updateCultivationUI();
+  }
+
+  // ==========================================================================
+  //  CULTIVATION REALMS (APOTHEOSIS 21 RANAH KULTIVASI) & ADMIN DASHBOARD
+  // ==========================================================================
+  const CULTIVATION_REALMS = [
+    { name: "Half-Step Innate Soul", req: 0, badge: "🍃", color: "#94a3b8" },
+    { name: "Innate", req: 3, badge: "🌱", color: "#10b981" },
+    { name: "Spirit Illumination", req: 6, badge: "✨", color: "#06b6d4" },
+    { name: "Spirit Core", req: 10, badge: "🔮", color: "#3b82f6" },
+    { name: "Void Tribulation", req: 15, badge: "⚡", color: "#6366f1" },
+    { name: "Life and Death", req: 22, badge: "☯️", color: "#8b5cf6" },
+    { name: "Divine Sea", req: 30, badge: "🌊", color: "#0284c7" },
+    { name: "Divine Extremity", req: 40, badge: "🌋", color: "#f97316" },
+    { name: "Divine Transformation", req: 52, badge: "💫", color: "#d97706" },
+    { name: "World Lord", req: 68, badge: "🌍", color: "#16a34a" },
+    { name: "Heavenly Venerable", req: 88, badge: "☁️", color: "#38bdf8" },
+    { name: "True God", req: 110, badge: "🌟", color: "#eab308" },
+    { name: "Saint", req: 140, badge: "🕊️", color: "#f43f5e" },
+    { name: "Paramita", req: 180, badge: "📿", color: "#a855f7" },
+    { name: "Chaos Ancient God", req: 230, badge: "🌌", color: "#c084fc" },
+    { name: "Immortal", req: 300, badge: "⚔️", color: "#fb7185" },
+    { name: "Origin", req: 400, badge: "🌀", color: "#38bdf8" },
+    { name: "Source", req: 520, badge: "💥", color: "#f43f5e" },
+    { name: "Ultimate Lord", req: 680, badge: "👑", color: "#fbbf24" },
+    { name: "Absolute God", req: 850, badge: "⚡👑", color: "#ec4899" },
+    { name: "World's Master", req: 1000, badge: "🪐", color: "#a855f7" }
+  ];
+
+  function getCultivationRealm() {
+    const chaptersRead = STATE.readingStats.chapters || 0;
+    let rank = CULTIVATION_REALMS[0];
+    let nextRank = CULTIVATION_REALMS[1];
+    
+    for (let i = CULTIVATION_REALMS.length - 1; i >= 0; i--) {
+      if (chaptersRead >= CULTIVATION_REALMS[i].req) {
+        rank = CULTIVATION_REALMS[i];
+        nextRank = CULTIVATION_REALMS[i + 1] || null;
+        break;
+      }
+    }
+    return { rank, nextRank, chaptersRead };
+  }
+
+  function updateCultivationUI() {
+    const { rank, nextRank, chaptersRead } = getCultivationRealm();
+    const badgeEl = $('#cultivation-badge');
+    const titleEl = $('#cultivation-title');
+    const subEl = $('#cultivation-sub');
+
+    if (badgeEl) badgeEl.textContent = rank.badge;
+    if (titleEl) {
+      titleEl.textContent = rank.name;
+      titleEl.style.color = rank.color;
+    }
+    if (subEl) {
+      if (nextRank) {
+        const diff = nextRank.req - chaptersRead;
+        subEl.textContent = `Baca ${diff} chapter lagi untuk naik ke ${nextRank.name}!`;
+      } else {
+        subEl.textContent = `Tingkat Tertinggi Dicapai! (Ranah Ke-21)`;
+      }
+    }
+  }
+
+  function openAdminModal() {
+    $('#admin-modal')?.classList.remove('hidden');
+  }
+
+  function closeAdminModal() {
+    $('#admin-modal')?.classList.add('hidden');
+  }
+
+  function adminBroadcastMessage() {
+    const input = $('#admin-broadcast-msg');
+    if (!input || !input.value.trim()) return;
+    const msgText = input.value.trim();
+    
+    const newMsg = {
+      id: Date.now(),
+      channel: 'general',
+      author: 'Admin_OniVerse',
+      avatar: '👑',
+      text: `📢 PENGUMUMAN ADMIN: ${msgText}`,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isAdmin: true
+    };
+    
+    FORUM_STATE.messages.push(newMsg);
+    localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+    input.value = '';
+    showToast('Pengumuman Admin berhasil di-broadcast ke Chat Forum!', 'success');
+    renderForumMessages();
+  }
+
+  function adminClearChat() {
+    FORUM_STATE.messages = [
+      { id: Date.now(), channel: 'general', author: 'Admin_OniVerse', avatar: '👑', text: 'Chat Forum telah dibersihkan oleh Admin.', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), isAdmin: true }
+    ];
+    localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+    renderForumMessages();
+    showToast('Seluruh chat forum berhasil dibersihkan!', 'success');
   }
 
   // ==========================================================================
@@ -887,6 +990,13 @@
         renderForumMessages();
       });
     });
+
+    // Admin Dashboard Bindings
+    $('#sb-admin')?.addEventListener('click', e => { e.preventDefault(); openAdminModal(); closeMobileSidebar(); });
+    $('#close-admin-btn')?.addEventListener('click', closeAdminModal);
+    $('#admin-broadcast-btn')?.addEventListener('click', adminBroadcastMessage);
+    $('#admin-clear-chat-btn')?.addEventListener('click', adminClearChat);
+    $('#admin-refresh-data-btn')?.addEventListener('click', () => { location.reload(); });
 
     // Buttons
     $('#login-btn')?.addEventListener('click', () => showToast('Fitur Akun / Login segera hadir!', 'info'));

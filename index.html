@@ -203,8 +203,25 @@
           <i class="fa-solid fa-comments" style="color:#a855f7"></i>
           <span>Forum Diskusi</span>
           <span class="sidebar-badge" style="background:#a855f7">LIVE</span>
+        <a href="#" class="sidebar-item" id="sb-admin">
+          <i class="fa-solid fa-user-shield" style="color:#ef4444"></i>
+          <span>Admin Dashboard</span>
+          <span class="sidebar-badge" style="background:#ef4444">VIP</span>
         </a>
       </nav>
+
+      <!-- Cultivation Rank Card -->
+      <div class="reading-stats" style="border-color:rgba(168,85,247,0.3);background:linear-gradient(135deg, rgba(168,85,247,0.08), rgba(124,58,237,0.05));margin-bottom:0.75rem" id="cultivation-card">
+        <div class="stats-header" style="color:var(--accent-light)">
+          <i class="fa-solid fa-bolt"></i>
+          <span>Tingkat Kultivasi</span>
+        </div>
+        <div style="text-align:center;padding:0.4rem 0">
+          <div id="cultivation-badge" style="font-size:1.5rem;margin-bottom:0.2rem">🍃</div>
+          <div id="cultivation-title" style="font-family:'Outfit';font-weight:800;font-size:0.95rem;color:#64748b">Pemula Qi</div>
+          <div id="cultivation-sub" style="font-size:0.7rem;color:var(--text-muted);margin-top:0.15rem">Baca komik untuk meningkatkan kultivasi!</div>
+        </div>
+      </div>
 
       <!-- Reading Stats -->
       <div class="reading-stats" id="reading-stats">
@@ -571,6 +588,71 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       ADMIN DASHBOARD MODAL
+  ============================================================ -->
+  <div class="forum-modal-overlay hidden" id="admin-modal">
+    <div class="forum-card" style="max-width: 600px;">
+      <div class="forum-header" style="background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(124,58,237,0.15)); border-bottom-color: rgba(239,68,68,0.3);">
+        <div class="forum-title-wrap">
+          <i class="fa-solid fa-user-shield text-accent" style="color:#ef4444;font-size:1.4rem"></i>
+          <div>
+            <h3 style="margin:0;font-family:'Outfit';font-weight:800;color:#ef4444">Admin OniVerse Dashboard</h3>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Control Panel Owner · 👑 World's Master</span>
+          </div>
+        </div>
+        <button class="modal-close" id="close-admin-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div style="padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.25rem;">
+        <!-- Metrics Grid -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+          <div style="background:var(--bg-main); border:1px solid var(--border); padding:0.85rem; border-radius:var(--radius-md); text-align:center;">
+            <div style="font-size:1.4rem; font-family:'Outfit'; font-weight:800; color:var(--accent-light);">647</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">Total Komik</div>
+          </div>
+          <div style="background:var(--bg-main); border:1px solid var(--border); padding:0.85rem; border-radius:var(--radius-md); text-align:center;">
+            <div style="font-size:1.4rem; font-family:'Outfit'; font-weight:800; color:#22c55e;">148</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">Pembaca Online</div>
+          </div>
+          <div style="background:var(--bg-main); border:1px solid var(--border); padding:0.85rem; border-radius:var(--radius-md); text-align:center;">
+            <div style="font-size:1.4rem; font-family:'Outfit'; font-weight:800; color:#f59e0b;" id="admin-est-revenue">$14.50</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">Estimasi Iklan</div>
+          </div>
+        </div>
+
+        <!-- Quick Admin Actions -->
+        <div style="background:var(--bg-main); border:1px solid var(--border); padding:1rem; border-radius:var(--radius-md); display:flex; flex-direction:column; gap:0.75rem;">
+          <h4 style="margin:0; font-size:0.9rem; font-family:'Outfit'; font-weight:700;"><i class="fa-solid fa-bullhorn" style="color:var(--accent-light)"></i> Kirim Pengumuman Admin ke Chat</h4>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="admin-broadcast-msg" placeholder="Ketik pengumuman admin..." style="flex:1; background:var(--bg-card); border:1px solid var(--border); color:var(--text-main); padding:0.5rem 0.85rem; border-radius:var(--radius-md); font-size:0.82rem;">
+            <button id="admin-broadcast-btn" class="btn-baca" style="background:#ef4444;"><i class="fa-solid fa-paper-plane"></i> Broadcast</button>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-main); border:1px solid var(--border); padding:1rem; border-radius:var(--radius-md); display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 style="margin:0; font-size:0.88rem; font-family:'Outfit'; font-weight:700;">Reset Chat Forum</h4>
+            <p style="margin:0.15rem 0 0; font-size:0.72rem; color:var(--text-muted)">Bersihkan pesan obrolan forum jika perlu.</p>
+          </div>
+          <button id="admin-clear-chat-btn" style="background:rgba(239,68,68,0.2); color:#ef4444; border:1px solid rgba(239,68,68,0.4); padding:0.45rem 0.85rem; border-radius:var(--radius-md); font-size:0.78rem; font-weight:700; cursor:pointer;">Hapus Chat</button>
+        </div>
+
+        <div style="background:var(--bg-main); border:1px solid var(--border); padding:1rem; border-radius:var(--radius-md); display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 style="margin:0; font-size:0.88rem; font-family:'Outfit'; font-weight:700;">Status Server & Scraper</h4>
+            <p style="margin:0.15rem 0 0; font-size:0.72rem; color:#22c55e;">● All Systems Operational (Cloudflare Edge)</p>
+          </div>
+          <button id="admin-refresh-data-btn" class="btn-baca" style="font-size:0.78rem; padding:0.45rem 0.85rem;"><i class="fa-solid fa-arrows-rotate"></i> Sync Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- ===== SPONSORED AD BANNER SLOT #4 ===== -->
   <div class="ad-container" style="max-width: 1200px; margin: 1.5rem auto 0; text-align: center; overflow: hidden;" id="ad-space-footer">
     <script src="https://pl30628279.effectivecpmnetwork.com/e1/22/4e/e1224e58d177272cb8d6f83b09dd728c.js"></script>
@@ -615,7 +697,7 @@
     </div>
   </footer>
 
-  <script src="data.js?v=5.0"></script>
-  <script src="app.js?v=5.0"></script>
+  <script src="data.js?v=6.0"></script>
+  <script src="app.js?v=6.0"></script>
 </body>
 </html>
