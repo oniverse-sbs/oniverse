@@ -2,11 +2,75 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OniVerse.SBS - Baca Komik Online Gratis Terlengkap</title>
-  <meta name="description" content="Baca komik manhwa, manga, dan manhua online gratis di OniVerse.SBS. Koleksi terlengkap dengan kualitas gambar terbaik dan update tercepat.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-  <!-- Fonts & Icons -->
+  <!-- ===== PRIMARY SEO ===== -->
+  <title>OniVerse.SBS - Baca Komik Manhwa, Manga & Manhua Online Gratis Terlengkap</title>
+  <meta name="description" content="Baca komik manhwa, manga, dan manhua online gratis di OniVerse.SBS. Koleksi 300+ judul terlengkap dengan kualitas gambar HD terbaik, update tercepat setiap hari. Solo Leveling, Nano Machine, dan banyak lagi!">
+  <meta name="keywords" content="baca komik online, baca manhwa, baca manga, baca manhua, komik gratis, manhwa indo, manga sub indo, solo leveling, nano machine, komik terbaru, OniVerse, oniverse.sbs, baca komik terlengkap, komik bahasa indonesia, manhwa terbaru 2025, manga online gratis, baca manhwa gratis, komik action, komik fantasy, komik romance">
+  <meta name="author" content="OniVerse.SBS">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow">
+  <link rel="canonical" href="https://oniverse.sbs/">
+
+  <!-- ===== THEME & APP ===== -->
+  <meta name="theme-color" content="#0d0a1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="OniVerse">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="OniVerse.SBS">
+  <meta name="msapplication-TileColor" content="#0d0a1a">
+
+  <!-- ===== OPEN GRAPH (Facebook, WhatsApp, Telegram) ===== -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OniVerse.SBS">
+  <meta property="og:title" content="OniVerse.SBS - Baca Komik Manhwa, Manga & Manhua Online Gratis">
+  <meta property="og:description" content="Baca 300+ komik manhwa, manga, dan manhua online gratis dengan kualitas HD. Update tercepat setiap hari!">
+  <meta property="og:url" content="https://oniverse.sbs/">
+  <meta property="og:image" content="https://oniverse.sbs/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- ===== TWITTER CARD ===== -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OniVerse.SBS - Baca Komik Online Gratis Terlengkap">
+  <meta name="twitter:description" content="Baca 300+ komik manhwa, manga, dan manhua online gratis. Update tercepat!">
+  <meta name="twitter:image" content="https://oniverse.sbs/og-image.png">
+
+  <!-- ===== JSON-LD STRUCTURED DATA ===== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "OniVerse.SBS",
+    "alternateName": ["OniVerse", "Oniverse SBS"],
+    "url": "https://oniverse.sbs/",
+    "description": "Platform baca komik manhwa, manga, dan manhua online gratis terlengkap di Indonesia.",
+    "inLanguage": "id-ID",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://oniverse.sbs/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "OniVerse.SBS",
+    "url": "https://oniverse.sbs/",
+    "logo": "https://oniverse.sbs/og-image.png",
+    "sameAs": []
+  }
+  </script>
+
+  <!-- ===== FAVICON ===== -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%237c3aed'/><text x='16' y='22' font-size='18' fill='white' text-anchor='middle' font-family='sans-serif' font-weight='bold'>O</text></svg>">
+
+  <!-- ===== FONTS & ICONS ===== -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
@@ -16,26 +80,39 @@
 </head>
 <body>
 
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toast-container"></div>
+
   <!-- ============================================================
        NAVBAR
   ============================================================ -->
   <header class="navbar" id="main-header">
     <div class="nav-inner">
+      <!-- Mobile Menu Toggle -->
+      <button class="mobile-menu-btn" id="mobile-menu-btn">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
       <!-- Logo -->
       <a href="#" class="brand-logo" id="logo-home">
         <div class="logo-icon">
           <i class="fa-solid fa-fire-flame-curved"></i>
         </div>
-        <span class="logo-text">ONIVERSE<span class="logo-accent">.SBS</span></span>
+        <span class="logo-text">ONI<span class="logo-accent">VERSE</span></span>
       </a>
 
       <!-- Search -->
-      <div class="nav-search">
+      <div class="nav-search" id="nav-search-wrap">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
         <input type="text" id="search-input" placeholder="Cari komik, genre, atau author..." autocomplete="off">
         <span class="search-shortcut">/</span>
         <button id="clear-search-btn" class="clear-btn hidden"><i class="fa-solid fa-xmark"></i></button>
       </div>
+
+      <!-- Mobile Search Toggle -->
+      <button class="mobile-search-btn" id="mobile-search-btn">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
 
       <!-- Nav Links -->
       <nav class="nav-links">
@@ -56,16 +133,23 @@
           <span class="notif-dot"></span>
         </button>
         <button class="btn-masuk" id="login-btn">
-          <i class="fa-solid fa-user"></i> Masuk
+          <i class="fa-solid fa-user"></i> <span class="btn-masuk-text">Masuk</span>
         </button>
       </div>
-
-      <!-- Mobile Menu Toggle -->
-      <button class="mobile-menu-btn" id="mobile-menu-btn">
-        <i class="fa-solid fa-bars"></i>
-      </button>
     </div>
   </header>
+
+  <!-- Mobile Search Expanded -->
+  <div class="mobile-search-expanded hidden" id="mobile-search-expanded">
+    <div class="mobile-search-inner">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="mobile-search-input" placeholder="Cari komik..." autocomplete="off">
+      <button id="close-mobile-search"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="sidebar-overlay hidden" id="sidebar-overlay"></div>
 
   <!-- ============================================================
        PAGE LAYOUT
@@ -82,7 +166,7 @@
           <span>Beranda</span>
         </a>
         <a href="#" class="sidebar-item" id="sb-semua">
-          <i class="fa-solid fa-grid-2"></i>
+          <i class="fa-solid fa-compass"></i>
           <span>Semua Komik</span>
         </a>
         <a href="#" class="sidebar-item" id="sb-update">
@@ -103,27 +187,47 @@
           <span class="sidebar-badge" id="bookmark-count">0</span>
         </a>
         <a href="#" class="sidebar-item" id="sb-history">
-          <i class="fa-solid fa-history"></i>
+          <i class="fa-solid fa-clock-rotate-left"></i>
           <span>Riwayat Baca</span>
         </a>
       </nav>
+
+      <!-- Reading Stats -->
+      <div class="reading-stats" id="reading-stats">
+        <div class="stats-header">
+          <i class="fa-solid fa-chart-simple"></i>
+          <span>Statistik Bacaan</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-val" id="stat-read">0</span>
+            <span class="stat-lbl">Dibaca</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-val" id="stat-chapters">0</span>
+            <span class="stat-lbl">Chapter</span>
+          </div>
+          <div class="stat-box streak-box">
+            <span class="stat-val" id="stat-streak">0<i class="fa-solid fa-fire"></i></span>
+            <span class="stat-lbl">Streak</span>
+          </div>
+        </div>
+      </div>
 
       <div class="sidebar-divider">
         <span>GENRE</span>
       </div>
 
       <nav class="sidebar-genres" id="sidebar-genres">
-        <!-- Diisi JS -->
-        <a href="#" class="sidebar-genre-item" data-genre="Action"><i class="fa-solid fa-sword"></i> Action</a>
+        <a href="#" class="sidebar-genre-item" data-genre="Action"><i class="fa-solid fa-bolt"></i> Action</a>
         <a href="#" class="sidebar-genre-item" data-genre="Adventure"><i class="fa-solid fa-map"></i> Adventure</a>
         <a href="#" class="sidebar-genre-item" data-genre="Fantasy"><i class="fa-solid fa-hat-wizard"></i> Fantasy</a>
         <a href="#" class="sidebar-genre-item" data-genre="Murim"><i class="fa-solid fa-yin-yang"></i> Murim</a>
         <a href="#" class="sidebar-genre-item" data-genre="Romance"><i class="fa-solid fa-heart"></i> Romance</a>
         <a href="#" class="sidebar-genre-item" data-genre="Comedy"><i class="fa-solid fa-face-laugh-squint"></i> Comedy</a>
-        <a href="#" class="sidebar-genre-item" data-genre="School"><i class="fa-solid fa-school"></i> School</a>
-        <a href="#" class="sidebar-genre-item" data-genre="Magic"><i class="fa-solid fa-wand-magic-sparkles"></i> Magic</a>
+        <a href="#" class="sidebar-genre-item" data-genre="School Life"><i class="fa-solid fa-school"></i> School</a>
         <a href="#" class="sidebar-genre-item" data-genre="Horror"><i class="fa-solid fa-skull"></i> Horror</a>
-        <a href="#" class="sidebar-genre-item" data-genre="Sci-fi"><i class="fa-solid fa-robot"></i> Sci-fi</a>
+        <a href="#" class="sidebar-genre-item" data-genre="System"><i class="fa-solid fa-robot"></i> System</a>
         <button class="sidebar-see-all" id="sidebar-genre-more">Lihat Semua <i class="fa-solid fa-chevron-right"></i></button>
       </nav>
 
@@ -131,7 +235,7 @@
       <div class="sidebar-community">
         <div class="community-icon"><i class="fa-solid fa-users"></i></div>
         <h4>Gabung Komunitas!</h4>
-        <p>Dapatkan update tercepat, rekomendasi komik terbaik, dan diskusi seru bersama komunitas OniVerse!</p>
+        <p>Diskusi seru bersama komunitas OniVerse!</p>
         <a href="#" class="btn-discord" id="discord-btn">
           <i class="fa-brands fa-discord"></i> Gabung Sekarang
         </a>
@@ -146,15 +250,10 @@
       <!-- ===== HERO SLIDER ===== -->
       <section class="hero-section" id="hero-section">
         <div class="hero-slider" id="hero-slider">
-
-          <!-- Trending Badge -->
           <div class="hero-trend-badge">
             <i class="fa-solid fa-fire"></i> TRENDING #1 HARI INI
           </div>
-
-          <!-- Slides (diisi JS) -->
           <div class="hero-slides" id="hero-slides">
-            <!-- Skeleton -->
             <div class="hero-slide active">
               <div class="hero-bg" id="hero-bg-0"></div>
               <div class="hero-overlay"></div>
@@ -167,7 +266,7 @@
                   </div>
                   <h1 class="hero-title" id="hero-title">Memuat Komik...</h1>
                   <div class="hero-genres" id="hero-genres"></div>
-                  <p class="hero-synopsis" id="hero-synopsis">Memuat data komik pilihan terbaik untuk kamu...</p>
+                  <p class="hero-synopsis" id="hero-synopsis">Memuat data komik pilihan terbaik...</p>
                   <div class="hero-actions">
                     <button class="btn-baca" id="hero-read-btn">
                       <i class="fa-solid fa-book-open"></i> Baca Sekarang
@@ -180,13 +279,25 @@
               </div>
             </div>
           </div>
-
-          <!-- Slider Controls -->
           <button class="slider-prev" id="slider-prev"><i class="fa-solid fa-chevron-left"></i></button>
           <button class="slider-next" id="slider-next"><i class="fa-solid fa-chevron-right"></i></button>
-
-          <!-- Dots -->
           <div class="slider-dots" id="slider-dots"></div>
+        </div>
+      </section>
+
+      <!-- ===== GENRE QUICK FILTER ===== -->
+      <section class="genre-chips-section" id="genre-chips-section">
+        <div class="genre-chips-scroll" id="genre-chips">
+          <button class="genre-chip active" data-genre="all"><i class="fa-solid fa-fire"></i> Semua</button>
+          <button class="genre-chip" data-genre="Action"><i class="fa-solid fa-bolt"></i> Action</button>
+          <button class="genre-chip" data-genre="Fantasy"><i class="fa-solid fa-hat-wizard"></i> Fantasy</button>
+          <button class="genre-chip" data-genre="Adventure"><i class="fa-solid fa-map"></i> Adventure</button>
+          <button class="genre-chip" data-genre="Romance"><i class="fa-solid fa-heart"></i> Romance</button>
+          <button class="genre-chip" data-genre="Comedy"><i class="fa-solid fa-face-laugh-squint"></i> Comedy</button>
+          <button class="genre-chip" data-genre="System"><i class="fa-solid fa-robot"></i> System</button>
+          <button class="genre-chip" data-genre="Reincarnation"><i class="fa-solid fa-rotate"></i> Reinkarnasi</button>
+          <button class="genre-chip" data-genre="Murim"><i class="fa-solid fa-yin-yang"></i> Murim</button>
+          <button class="genre-chip" data-genre="Horror"><i class="fa-solid fa-skull"></i> Horror</button>
         </div>
       </section>
 
@@ -197,7 +308,6 @@
           <a href="#" class="see-all-link">Lihat Semua <i class="fa-solid fa-arrow-right"></i></a>
         </div>
         <div class="continue-grid" id="continue-grid">
-          <!-- Diisi JS dari localStorage history -->
           <div class="empty-continue" id="empty-continue">
             <i class="fa-solid fa-book-open"></i>
             <p>Belum ada riwayat baca. Mulai baca komik sekarang!</p>
@@ -212,20 +322,19 @@
           <a href="#" class="see-all-link">Lihat Semua <i class="fa-solid fa-arrow-right"></i></a>
         </div>
         <div class="trending-scroll-wrap">
-          <button class="scroll-prev-btn" id="trending-prev"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="scroll-arrow scroll-prev-btn" id="trending-prev"><i class="fa-solid fa-chevron-left"></i></button>
           <div class="trending-row" id="trending-row">
-            <!-- Skeleton -->
             <div class="trending-skeleton"></div>
             <div class="trending-skeleton"></div>
             <div class="trending-skeleton"></div>
             <div class="trending-skeleton"></div>
             <div class="trending-skeleton"></div>
           </div>
-          <button class="scroll-next-btn" id="trending-next"><i class="fa-solid fa-chevron-right"></i></button>
+          <button class="scroll-arrow scroll-next-btn" id="trending-next"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
       </section>
 
-      <!-- ===== CATALOG / BROWSE (All comics grid) ===== -->
+      <!-- ===== CATALOG ===== -->
       <section class="content-section" id="catalog-section">
         <div class="section-header">
           <div class="section-title-wrap">
@@ -259,18 +368,13 @@
           </div>
         </div>
 
-        <!-- Update List -->
         <div class="update-list" id="update-list">
-          <div class="update-skeleton"></div>
-          <div class="update-skeleton"></div>
           <div class="update-skeleton"></div>
           <div class="update-skeleton"></div>
           <div class="update-skeleton"></div>
         </div>
 
-        <!-- Full Comic Grid (show when browsing) -->
-        <div class="comic-grid hidden" id="comic-grid">
-        </div>
+        <div class="comic-grid hidden" id="comic-grid"></div>
 
         <div class="empty-state hidden" id="empty-state">
           <i class="fa-solid fa-ghost"></i>
@@ -278,37 +382,32 @@
           <p>Coba ubah filter atau kata kunci pencarian.</p>
           <button class="btn-baca" id="reset-filter-btn">Reset Filter</button>
         </div>
+
+        <!-- Load More -->
+        <div class="load-more-wrap hidden" id="load-more-wrap">
+          <button class="btn-load-more" id="load-more-btn">
+            <i class="fa-solid fa-plus"></i> Muat Lebih Banyak
+          </button>
+        </div>
       </section>
 
-      <!-- ===== FITUR FOOTER ===== -->
+      <!-- ===== FEATURES BAR ===== -->
       <section class="features-bar">
         <div class="feature-item">
           <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
-          <div>
-            <h4>Update Cepat</h4>
-            <p>Rilis chapter terbaru secepat mungkin</p>
-          </div>
+          <div><h4>Update Cepat</h4><p>Rilis chapter terbaru secepat mungkin</p></div>
         </div>
         <div class="feature-item">
           <div class="feature-icon"><i class="fa-solid fa-ban"></i></div>
-          <div>
-            <h4>Gratis & Tanpa Iklan</h4>
-            <p>Baca nyaman tanpa gangguan iklan</p>
-          </div>
+          <div><h4>Gratis & Tanpa Iklan</h4><p>Baca nyaman tanpa gangguan</p></div>
         </div>
         <div class="feature-item">
           <div class="feature-icon"><i class="fa-solid fa-image"></i></div>
-          <div>
-            <h4>Kualitas Terbaik</h4>
-            <p>Gambar HD, pengalaman membaca terbaik</p>
-          </div>
+          <div><h4>Kualitas Terbaik</h4><p>Gambar HD jernih</p></div>
         </div>
         <div class="feature-item">
           <div class="feature-icon"><i class="fa-solid fa-comments"></i></div>
-          <div>
-            <h4>Komunitas Aktif</h4>
-            <p>Diskusi seru dengan ribuan penggemar komik</p>
-          </div>
+          <div><h4>Komunitas Aktif</h4><p>Diskusi bareng ribuan fans</p></div>
         </div>
       </section>
 
@@ -317,16 +416,13 @@
     <!-- ============================================================
          SIDEBAR KANAN
     ============================================================ -->
-    <aside class="sidebar-right">
-
-      <!-- Top Ranking -->
+    <aside class="sidebar-right" id="sidebar-right">
       <div class="ranking-widget">
         <div class="widget-header">
           <h3><i class="fa-solid fa-trophy" style="color:#f59e0b"></i> Top Ranking Minggu Ini</h3>
           <a href="#" class="see-all-link" id="see-ranking">Lihat Semua <i class="fa-solid fa-arrow-right"></i></a>
         </div>
         <ol class="ranking-list" id="ranking-list">
-          <!-- Skeleton -->
           <li class="ranking-skeleton"></li>
           <li class="ranking-skeleton"></li>
           <li class="ranking-skeleton"></li>
@@ -338,17 +434,13 @@
         </button>
       </div>
 
-      <!-- Support Banner -->
       <div class="support-widget">
-        <div class="support-header">
-          <span class="support-logo">ONIVERSE<span>.SBS</span></span>
-        </div>
-        <p>OniVerse akan terus berkembang dengan dukungan dari kalian!</p>
+        <h4>Dukung OniVerse!</h4>
+        <p>Bantu kami terus berkembang dengan dukungan kalian! 💜</p>
         <a href="#" class="btn-donasi" id="donasi-btn">
           <i class="fa-solid fa-heart"></i> Donasi Sekarang
         </a>
       </div>
-
     </aside>
   </div>
 
@@ -358,9 +450,7 @@
   <div class="modal-overlay hidden" id="detail-modal">
     <div class="modal-card">
       <button class="modal-close" id="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
-      <div class="modal-body" id="modal-body">
-        <!-- Injected by JS -->
-      </div>
+      <div class="modal-body" id="modal-body"></div>
     </div>
   </div>
 
@@ -370,16 +460,20 @@
   <div class="reader-overlay hidden" id="reader-overlay">
     <div class="reader-header">
       <button class="reader-back" id="close-reader-btn">
-        <i class="fa-solid fa-arrow-left"></i> Kembali
+        <i class="fa-solid fa-arrow-left"></i> <span class="reader-back-text">Kembali</span>
       </button>
       <div class="reader-meta">
         <span id="reader-series-title">Series Title</span>
         <span class="reader-ch" id="reader-chapter-title">Chapter 1</span>
       </div>
       <div class="reader-nav-btns">
-        <button class="btn-reader-nav" id="prev-chapter-btn"><i class="fa-solid fa-chevron-left"></i> Prev</button>
-        <button class="btn-reader-nav" id="next-chapter-btn">Next <i class="fa-solid fa-chevron-right"></i></button>
+        <button class="btn-reader-nav" id="prev-chapter-btn"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="btn-reader-nav" id="next-chapter-btn"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
+    </div>
+    <!-- Reader Progress Bar -->
+    <div class="reader-progress-bar" id="reader-progress-bar">
+      <div class="reader-progress-fill" id="reader-progress-fill"></div>
     </div>
     <div class="reader-content" id="reader-content">
       <div class="reader-placeholder">
@@ -390,12 +484,39 @@
   </div>
 
   <!-- ============================================================
+       MOBILE BOTTOM NAV
+  ============================================================ -->
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <a href="#" class="bottom-nav-item active" data-nav="beranda">
+      <i class="fa-solid fa-house"></i>
+      <span>Beranda</span>
+    </a>
+    <a href="#" class="bottom-nav-item" data-nav="komik">
+      <i class="fa-solid fa-compass"></i>
+      <span>Komik</span>
+    </a>
+    <a href="#" class="bottom-nav-item" data-nav="update">
+      <i class="fa-solid fa-bolt"></i>
+      <span>Update</span>
+    </a>
+    <a href="#" class="bottom-nav-item" data-nav="bookmark">
+      <i class="fa-solid fa-bookmark"></i>
+      <span>Bookmark</span>
+      <span class="bottom-badge" id="bottom-bkm-badge">0</span>
+    </a>
+    <a href="#" class="bottom-nav-item" data-nav="ranking">
+      <i class="fa-solid fa-trophy"></i>
+      <span>Ranking</span>
+    </a>
+  </nav>
+
+  <!-- ============================================================
        FOOTER
   ============================================================ -->
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-brand">
-        <span class="logo-text">ONIVERSE<span class="logo-accent">.SBS</span></span>
+        <span class="logo-text">ONI<span class="logo-accent">VERSE</span></span>
         <p>Platform membaca komik manhwa, manga, dan manhua online terbaik di Indonesia.</p>
         <div class="footer-social">
           <a href="#" class="social-link"><i class="fa-brands fa-discord"></i></a>
@@ -409,33 +530,21 @@
         <a href="#">Semua Komik</a>
         <a href="#">Genre</a>
         <a href="#">Update Terbaru</a>
-        <a href="#">Ranking</a>
       </div>
       <div class="footer-links">
         <h5>Info</h5>
         <a href="#">Tentang Kami</a>
         <a href="#">Kontak</a>
-        <a href="#">Kebijakan Privasi</a>
-        <a href="#">Syarat & Ketentuan</a>
         <a href="#">DMCA</a>
+        <a href="#">Kebijakan Privasi</a>
       </div>
-      <div class="footer-stats">
-        <div class="stat-item">
-          <span class="stat-num" id="footer-total">0+</span>
-          <span class="stat-label">Komik</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num">50K+</span>
-          <span class="stat-label">Pembaca</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num">99%</span>
-          <span class="stat-label">Uptime</span>
-        </div>
+      <div class="footer-stats-wrap">
+        <div class="stat-item"><span class="stat-num" id="footer-total">0+</span><span class="stat-label">Komik</span></div>
+        <div class="stat-item"><span class="stat-num">50K+</span><span class="stat-label">Pembaca</span></div>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2025 OniVerse.SBS · Dibuat dengan <i class="fa-solid fa-heart" style="color:#ec4899"></i> untuk para pembaca komik Indonesia</p>
+      <p>© 2025 OniVerse.SBS · Dibuat dengan <i class="fa-solid fa-heart" style="color:#ec4899"></i> untuk pembaca komik Indonesia</p>
       <p id="footer-updated"></p>
     </div>
   </footer>

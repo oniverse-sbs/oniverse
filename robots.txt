@@ -1,0 +1,9 @@
+# OniVerse.SBS Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://oniverse.sbs/sitemap.xml
+
+# Crawl-delay (be nice to the server)
+Crawl-delay: 2

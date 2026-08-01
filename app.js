@@ -1,871 +1,815 @@
 /* ==========================================================================
-   OniVerse.SBS — Main Application Script
+   OniVerse.SBS — Application Logic
    ========================================================================== */
 
-// ============================================================
-// STATE
-// ============================================================
-let allSeries = [];
-let rawDataset = null;
-let bookmarks = JSON.parse(localStorage.getItem('oniverse_bookmarks') || '[]');
-let readHistory = JSON.parse(localStorage.getItem('oniverse_history') || '[]');
-let selectedSeries = null;
-let currentChapterIdx = -1;
-let currentFilter = { search: '', type: 'all', genre: 'all', sort: 'latest', view: 'home' };
-let heroSlides = [];
-let heroIdx = 0;
-let heroTimer = null;
+(function() {
+  'use strict';
 
-// ============================================================
-// DOM REFS
-// ============================================================
-const searchInput      = document.getElementById('search-input');
-const clearSearchBtn   = document.getElementById('clear-search-btn');
-const filterType       = document.getElementById('filter-type');
-const filterGenre      = document.getElementById('filter-genre');
-const sortBy           = document.getElementById('sort-by');
-const comicGrid        = document.getElementById('comic-grid');
-const updateList       = document.getElementById('update-list');
-const emptyState       = document.getElementById('empty-state');
-const resetFilterBtn   = document.getElementById('reset-filter-btn');
-const catalogCount     = document.getElementById('catalog-count');
-const catalogTitle     = document.getElementById('catalog-title');
+  // ==========================================================================
+  //  STATE
+  // ==========================================================================
+  const STATE = {
+    allSeries: [],
+    filtered: [],
+    displayCount: 12,
+    perPage: 12,
+    currentSlide: 0,
+    sliderTimer: null,
+    currentDetail: null,
+    currentReader: { series: null, chapterIdx: -1, chapters: [] },
+    bookmarks: JSON.parse(localStorage.getItem('oniverse_bookmarks') || '[]'),
+    history: JSON.parse(localStorage.getItem('oniverse_history') || '[]'),
+    readingStats: JSON.parse(localStorage.getItem('oniverse_stats') || '{"read":0,"chapters":0,"streak":0,"lastDate":""}'),
+  };
 
-const heroTitle        = document.getElementById('hero-title');
-const heroRating       = document.getElementById('hero-rating');
-const heroChapter      = document.getElementById('hero-chapter');
-const heroViews        = document.getElementById('hero-views');
-const heroGenres       = document.getElementById('hero-genres');
-const heroSynopsis     = document.getElementById('hero-synopsis');
-const heroReadBtn      = document.getElementById('hero-read-btn');
-const heroBookmarkBtn  = document.getElementById('hero-bookmark-btn');
-const heroSliderDots   = document.getElementById('slider-dots');
-const heroSlidesEl     = document.getElementById('hero-slides');
-const sliderPrev       = document.getElementById('slider-prev');
-const sliderNext       = document.getElementById('slider-next');
+  // ==========================================================================
+  //  UTILITY
+  // ==========================================================================
+  const $ = (sel, ctx) => (ctx || document).querySelector(sel);
+  const $$ = (sel, ctx) => [...(ctx || document).querySelectorAll(sel)];
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+  const fmtNum = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n);
 
-const trendingRow      = document.getElementById('trending-row');
-const trendingPrev     = document.getElementById('trending-prev');
-const trendingNext     = document.getElementById('trending-next');
-const continueGrid     = document.getElementById('continue-grid');
-const emptyContinue    = document.getElementById('empty-continue');
-const rankingList      = document.getElementById('ranking-list');
-const bookmarkCount    = document.getElementById('bookmark-count');
-const footerTotal      = document.getElementById('footer-total');
-const footerUpdated    = document.getElementById('footer-updated');
+  function saveBookmarks() { localStorage.setItem('oniverse_bookmarks', JSON.stringify(STATE.bookmarks)); }
+  function saveHistory() { localStorage.setItem('oniverse_history', JSON.stringify(STATE.history)); }
+  function saveStats() { localStorage.setItem('oniverse_stats', JSON.stringify(STATE.readingStats)); }
 
-const detailModal      = document.getElementById('detail-modal');
-const modalBody        = document.getElementById('modal-body');
-const closeModalBtn    = document.getElementById('close-modal-btn');
+  function getCover(s) {
+    if (s.cover) return s.cover;
+    if (s.thumbnail) return s.thumbnail;
+    if (s.image) return s.image;
+    return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" fill="%2314122c"><rect width="200" height="280"/><text x="50%" y="50%" fill="%235b21b6" font-size="14" text-anchor="middle" dominant-baseline="middle">No Cover</text></svg>';
+  }
 
-const readerOverlay    = document.getElementById('reader-overlay');
-const closeReaderBtn   = document.getElementById('close-reader-btn');
-const readerSeriesTitle= document.getElementById('reader-series-title');
-const readerChTitle    = document.getElementById('reader-chapter-title');
-const prevChBtn        = document.getElementById('prev-chapter-btn');
-const nextChBtn        = document.getElementById('next-chapter-btn');
-const readerContent    = document.getElementById('reader-content');
+  // ==========================================================================
+  //  TOAST NOTIFICATIONS
+  // ==========================================================================
+  function showToast(message, type = 'info') {
+    const container = $('#toast-container');
+    const icons = { success: 'fa-circle-check', info: 'fa-circle-info', warning: 'fa-triangle-exclamation' };
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i> ${message}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3100);
+  }
 
-const mobileMenuBtn    = document.getElementById('mobile-menu-btn');
-const sidebarLeft      = document.getElementById('sidebar-left');
-const themeToggle      = document.getElementById('theme-toggle');
-const btnRankingFull   = document.getElementById('btn-ranking-full');
-
-// ============================================================
-// INIT
-// ============================================================
-document.addEventListener('DOMContentLoaded', () => {
-  setupEventListeners();
-  updateBookmarkBadge();
-  loadData();
-});
-
-async function loadData() {
-  try {
-    const res = await fetch('scraped_data/series.json');
-    if (!res.ok) throw new Error('Data tidak ditemukan');
-    rawDataset = await res.json();
-    allSeries = rawDataset.series || [];
-
-    // Footer stats
-    if (footerTotal) footerTotal.textContent = allSeries.length.toLocaleString() + '+';
-    if (footerUpdated && rawDataset.metadata) {
-      footerUpdated.textContent = 'Data: ' + (rawDataset.metadata.scraped_at || '');
+  // ==========================================================================
+  //  READING STATS
+  // ==========================================================================
+  function updateStreak() {
+    const today = new Date().toDateString();
+    const s = STATE.readingStats;
+    if (s.lastDate !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      s.streak = (s.lastDate === yesterday) ? s.streak + 1 : 1;
+      s.lastDate = today;
+      saveStats();
     }
+  }
 
-    // Populate genre dropdown
-    populateGenreDropdown();
+  function trackRead(seriesTitle) {
+    const s = STATE.readingStats;
+    s.read++;
+    s.chapters++;
+    updateStreak();
+    saveStats();
+    renderStats();
+  }
 
-    // Render all sections
-    renderHeroSlider();
+  function renderStats() {
+    const s = STATE.readingStats;
+    const el = (id) => document.getElementById(id);
+    if (el('stat-read')) el('stat-read').textContent = s.read;
+    if (el('stat-chapters')) el('stat-chapters').textContent = s.chapters;
+    if (el('stat-streak')) el('stat-streak').innerHTML = `${s.streak}<i class="fa-solid fa-fire"></i>`;
+  }
+
+  // ==========================================================================
+  //  DATA LOAD
+  // ==========================================================================
+  async function loadData() {
+    try {
+      const res = await fetch('scraped_data/series.json');
+      if (!res.ok) throw new Error('Fetch fail');
+      STATE.allSeries = await res.json();
+      STATE.filtered = [...STATE.allSeries];
+      onDataReady();
+    } catch (e) {
+      console.error('Data load error:', e);
+      showToast('Gagal memuat data komik', 'warning');
+    }
+  }
+
+  function onDataReady() {
+    populateGenreFilter();
+    renderHero();
     renderTrending();
-    renderContinueReading();
+    renderContinue();
     renderUpdateList();
     renderRanking();
-
-  } catch (err) {
-    console.error('Gagal memuat data:', err);
-    showDataError();
+    updateBookmarkCount();
+    renderStats();
+    $('#footer-total').textContent = STATE.allSeries.length + '+';
+    $('#footer-updated').textContent = 'Data terakhir diperbarui: ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    showToast(`${STATE.allSeries.length} komik berhasil dimuat!`, 'success');
   }
-}
 
-function showDataError() {
-  if (updateList) updateList.innerHTML = `
-    <div class="empty-state">
-      <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444"></i>
-      <h3>Gagal Memuat Data</h3>
-      <p>File scraped_data/series.json tidak ditemukan.</p>
-    </div>`;
-}
+  // ==========================================================================
+  //  GENRE FILTER POPULATE
+  // ==========================================================================
+  function populateGenreFilter() {
+    const genreSet = new Set();
+    STATE.allSeries.forEach(s => {
+      if (s.genres) s.genres.forEach(g => genreSet.add(g));
+      if (s.genre) s.genre.split(',').forEach(g => genreSet.add(g.trim()));
+    });
+    const sel = $('#filter-genre');
+    if (!sel) return;
+    [...genreSet].sort().forEach(g => {
+      if (g) {
+        const opt = document.createElement('option');
+        opt.value = g; opt.textContent = g;
+        sel.appendChild(opt);
+      }
+    });
+  }
 
-// ============================================================
-// HERO SLIDER
-// ============================================================
-function renderHeroSlider() {
-  if (!allSeries.length) return;
+  function getGenres(s) {
+    if (Array.isArray(s.genres)) return s.genres;
+    if (typeof s.genre === 'string') return s.genre.split(',').map(g => g.trim()).filter(Boolean);
+    return [];
+  }
 
-  // Ambil 5 komik terpopuler untuk slide
-  heroSlides = [...allSeries]
-    .sort((a, b) => (b.bookmark_count || 0) - (a.bookmark_count || 0))
-    .slice(0, 5);
+  // ==========================================================================
+  //  HERO SLIDER
+  // ==========================================================================
+  function renderHero() {
+    const featured = STATE.allSeries
+      .filter(s => parseFloat(s.rating) >= 8)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 5);
 
-  // Build slides HTML
-  heroSlidesEl.innerHTML = heroSlides.map((s, i) => {
-    const cover = s.cover_landscape_url || s.cover_image_url || s.cover_portrait_url || '';
-    return `
-      <div class="hero-slide ${i === 0 ? 'active' : ''}" data-idx="${i}">
-        <div class="hero-bg" style="background-image:url('${cover}')"></div>
-        <div class="hero-overlay"></div>
-      </div>`;
-  }).join('');
+    if (!featured.length) return;
 
-  // Build dots
-  heroSliderDots.innerHTML = heroSlides.map((_, i) =>
-    `<span class="dot ${i === 0 ? 'active' : ''}" data-dot="${i}"></span>`
-  ).join('');
+    const dotsC = $('#slider-dots');
+    dotsC.innerHTML = featured.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" data-idx="${i}"></span>`).join('');
 
-  // Render hero content for first slide
-  renderHeroContent(0);
+    function setSlide(idx) {
+      STATE.currentSlide = idx;
+      const s = featured[idx];
+      const bg = $('#hero-bg-0');
+      bg.style.backgroundImage = `url(${getCover(s)})`;
+      bg.style.transform = 'scale(1)';
+      void bg.offsetWidth;
+      bg.style.transform = 'scale(1.06)';
 
-  // Dot click
-  heroSliderDots.querySelectorAll('.dot').forEach(dot => {
-    dot.addEventListener('click', () => goToSlide(parseInt(dot.dataset.dot)));
-  });
+      $('#hero-title').textContent = s.title || s.name || 'Unknown';
+      $('#hero-rating').textContent = s.rating || 'N/A';
+      $('#hero-chapter').textContent = (s.total_chapters || s.chapters?.length || '?') + ' Chapter';
+      $('#hero-views').textContent = fmtNum(s.views || rand(100000, 5000000)) + ' Views';
+      $('#hero-synopsis').textContent = s.synopsis || s.description || 'Belum ada deskripsi.';
 
-  // Auto-slide
-  startHeroTimer();
-}
+      const genres = getGenres(s);
+      $('#hero-genres').innerHTML = genres.slice(0, 4).map(g => `<span class="hero-genre-tag">${g}</span>`).join('');
 
-function goToSlide(idx) {
-  const slides = heroSlidesEl.querySelectorAll('.hero-slide');
-  const dots   = heroSliderDots.querySelectorAll('.dot');
+      const isBookmarked = STATE.bookmarks.includes(s.slug || s.title);
+      const bbtn = $('#hero-bookmark-btn');
+      bbtn.className = 'btn-bookmark-hero' + (isBookmarked ? ' bookmarked' : '');
+      bbtn.innerHTML = `<i class="fa-${isBookmarked ? 'solid' : 'regular'} fa-bookmark"></i> ${isBookmarked ? 'Tersimpan' : 'Bookmark'}`;
 
-  slides[heroIdx]?.classList.remove('active');
-  dots[heroIdx]?.classList.remove('active');
+      $$('.dot', dotsC).forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
 
-  heroIdx = (idx + heroSlides.length) % heroSlides.length;
+    setSlide(0);
 
-  slides[heroIdx]?.classList.add('active');
-  dots[heroIdx]?.classList.add('active');
+    $('#slider-prev').onclick = () => { setSlide((STATE.currentSlide - 1 + featured.length) % featured.length); resetSliderTimer(); };
+    $('#slider-next').onclick = () => { setSlide((STATE.currentSlide + 1) % featured.length); resetSliderTimer(); };
+    dotsC.addEventListener('click', e => { const d = e.target.dataset.idx; if (d !== undefined) { setSlide(+d); resetSliderTimer(); } });
 
-  renderHeroContent(heroIdx);
-  resetHeroTimer();
-}
+    $('#hero-read-btn').onclick = () => openDetail(featured[STATE.currentSlide]);
+    $('#hero-bookmark-btn').onclick = () => {
+      toggleBookmark(featured[STATE.currentSlide]);
+      setSlide(STATE.currentSlide);
+    };
 
-function renderHeroContent(idx) {
-  const s = heroSlides[idx];
-  if (!s) return;
+    function resetSliderTimer() {
+      clearInterval(STATE.sliderTimer);
+      STATE.sliderTimer = setInterval(() => setSlide((STATE.currentSlide + 1) % featured.length), 6000);
+    }
+    resetSliderTimer();
+  }
 
-  heroTitle.textContent   = s.title || 'Judul Tidak Tersedia';
-  heroRating.textContent  = s.user_rate ? s.user_rate.toFixed(1) : 'N/A';
-  heroChapter.textContent = s.latest_chapter_number ? s.latest_chapter_number + ' Chapter' : 'Ongoing';
-  heroViews.textContent   = formatCount(s.view_count || 0) + ' Views';
-  heroSynopsis.textContent = s.description || 'Tidak ada deskripsi tersedia.';
+  // ==========================================================================
+  //  TRENDING ROW
+  // ==========================================================================
+  function renderTrending() {
+    const trending = STATE.allSeries
+      .sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
+      .slice(0, 15);
 
-  // Genre tags
-  heroGenres.innerHTML = (s.genres || []).slice(0, 4).map(g =>
-    `<span class="hero-genre-tag">${g}</span>`
-  ).join('');
-
-  // Bookmark state
-  updateHeroBookmarkBtn(s.id);
-
-  heroReadBtn.onclick = () => openDetailModal(s);
-  heroBookmarkBtn.onclick = () => {
-    toggleBookmark(s.id);
-    updateHeroBookmarkBtn(s.id);
-  };
-}
-
-function updateHeroBookmarkBtn(id) {
-  const isBkm = bookmarks.includes(id);
-  heroBookmarkBtn.innerHTML = isBkm
-    ? `<i class="fa-solid fa-bookmark"></i> Bookmarked`
-    : `<i class="fa-regular fa-bookmark"></i> Bookmark`;
-  heroBookmarkBtn.classList.toggle('bookmarked', isBkm);
-}
-
-function startHeroTimer() {
-  heroTimer = setInterval(() => goToSlide(heroIdx + 1), 5000);
-}
-
-function resetHeroTimer() {
-  clearInterval(heroTimer);
-  startHeroTimer();
-}
-
-// ============================================================
-// TRENDING
-// ============================================================
-function renderTrending() {
-  if (!allSeries.length) return;
-
-  const trending = [...allSeries]
-    .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
-    .slice(0, 15);
-
-  trendingRow.innerHTML = trending.map((s, i) => {
-    const cover  = s.cover_portrait_url || s.cover_image_url || '';
-    const rating = s.user_rate ? s.user_rate.toFixed(1) : '8.5';
-    return `
-      <div class="trending-card" data-id="${s.id}" title="${s.title}">
+    const container = $('#trending-row');
+    container.innerHTML = trending.map((s, i) => `
+      <div class="trending-card" data-slug="${s.slug || ''}" data-idx="${i}">
         <span class="trending-rank">${i + 1}</span>
         <div class="trending-poster">
-          <img src="${cover}" alt="${s.title}" loading="lazy"
-               onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300'">
+          <img src="${getCover(s)}" alt="${s.title || s.name}" loading="lazy" onerror="this.style.background='#14122c'">
         </div>
         <div class="trending-info">
-          <div class="trending-title">${s.title}</div>
-          <div class="trending-rating"><i class="fa-solid fa-star"></i> ${rating}</div>
+          <div class="trending-title">${s.title || s.name || 'Unknown'}</div>
+          <div class="trending-rating"><i class="fa-solid fa-star"></i> ${s.rating || 'N/A'}</div>
         </div>
-      </div>`;
-  }).join('');
+      </div>
+    `).join('');
 
-  // Click
-  trendingRow.querySelectorAll('.trending-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const found = allSeries.find(s => s.id === card.dataset.id);
-      if (found) openDetailModal(found);
+    container.addEventListener('click', e => {
+      const card = e.target.closest('.trending-card');
+      if (card) openDetail(trending[+card.dataset.idx]);
     });
-  });
-}
 
-// ============================================================
-// CONTINUE READING
-// ============================================================
-function renderContinueReading() {
-  if (!readHistory.length) {
-    emptyContinue.classList.remove('hidden');
-    return;
+    // Scroll arrows
+    const wrap = container;
+    const prevBtn = $('#trending-prev');
+    const nextBtn = $('#trending-next');
+    if (prevBtn) prevBtn.onclick = () => wrap.scrollBy({ left: -240, behavior: 'smooth' });
+    if (nextBtn) nextBtn.onclick = () => wrap.scrollBy({ left: 240, behavior: 'smooth' });
   }
 
-  emptyContinue.classList.add('hidden');
-  const items = readHistory.slice(0, 5).map(h => {
-    const s = allSeries.find(x => x.id === h.id);
-    if (!s) return '';
-    const cover = s.cover_portrait_url || s.cover_image_url || '';
-    return `
-      <div class="continue-card" data-id="${s.id}">
-        <div class="continue-poster">
-          <img src="${cover}" alt="${s.title}" loading="lazy"
-               onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300'">
-        </div>
-        <div class="continue-progress-wrap">
-          <div class="continue-title">${s.title}</div>
-          <div class="continue-chapter">Ch. ${h.chapter || 1}</div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill" style="width:${h.progress || 30}%"></div>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
-
-  continueGrid.innerHTML = items + continueGrid.innerHTML;
-
-  continueGrid.querySelectorAll('.continue-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const found = allSeries.find(s => s.id === card.dataset.id);
-      if (found) openDetailModal(found);
-    });
-  });
-}
-
-// ============================================================
-// UPDATE LIST (Baru Diupdate)
-// ============================================================
-function renderUpdateList(series) {
-  const list = series || [...allSeries]
-    .sort((a, b) => (b.latest_chapter_number || 0) - (a.latest_chapter_number || 0))
-    .slice(0, 12);
-
-  updateList.innerHTML = list.map(s => {
-    const cover   = s.cover_portrait_url || s.cover_image_url || '';
-    const chNum   = s.latest_chapter_number ? `Chapter ${s.latest_chapter_number}` : 'Ongoing';
-    const timeAgo = randomTimeAgo();
-    const isNew   = Math.random() > 0.4;
-    return `
-      <div class="update-item" data-id="${s.id}">
-        <img class="update-thumb" src="${cover}" alt="${s.title}" loading="lazy"
-             onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=200'">
-        <div class="update-info">
-          <div class="update-title">${s.title}</div>
-          <div class="update-chapter">${chNum}</div>
-          <div class="update-time">${timeAgo}</div>
-        </div>
-        ${isNew ? '<span class="update-new-badge">NEW</span>' : ''}
-      </div>`;
-  }).join('');
-
-  updateList.querySelectorAll('.update-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const found = allSeries.find(s => s.id === item.dataset.id);
-      if (found) openDetailModal(found);
-    });
-  });
-}
-
-// ============================================================
-// RANKING (Sidebar)
-// ============================================================
-function renderRanking() {
-  if (!allSeries.length) return;
-
-  const top10 = [...allSeries]
-    .sort((a, b) => (b.user_rate || 0) - (a.user_rate || 0))
-    .slice(0, 10);
-
-  rankingList.innerHTML = top10.map((s, i) => {
-    const cover  = s.cover_portrait_url || s.cover_image_url || '';
-    const rating = s.user_rate ? s.user_rate.toFixed(1) : '8.5';
-    const chNum  = s.latest_chapter_number ? s.latest_chapter_number + ' Chapter' : 'Ongoing';
-    const cls    = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
-    return `
-      <li class="ranking-item" data-id="${s.id}">
-        <span class="rank-num ${cls}">${i + 1}</span>
-        <img class="rank-thumb" src="${cover}" alt="${s.title}" loading="lazy"
-             onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=200'">
-        <div class="rank-info">
-          <div class="rank-title">${s.title}</div>
-          <div class="rank-chapter">${chNum}</div>
-          <div class="rank-score"><i class="fa-solid fa-star"></i> ${rating}</div>
-        </div>
-      </li>`;
-  }).join('');
-
-  rankingList.querySelectorAll('.ranking-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const found = allSeries.find(s => s.id === item.dataset.id);
-      if (found) openDetailModal(found);
-    });
-  });
-}
-
-// ============================================================
-// COMIC GRID (Browse / Search)
-// ============================================================
-function renderComicGrid(series) {
-  // Switch to grid view
-  updateList.classList.add('hidden');
-  comicGrid.classList.remove('hidden');
-
-  catalogCount.textContent = `${series.length} dari ${allSeries.length} Series`;
-
-  if (!series.length) {
-    comicGrid.innerHTML = '';
-    emptyState.classList.remove('hidden');
-    return;
-  }
-
-  emptyState.classList.add('hidden');
-  comicGrid.innerHTML = series.map(s => {
-    const cover  = s.cover_portrait_url || s.cover_image_url || '';
-    const rating = s.user_rate ? s.user_rate.toFixed(1) : '8.5';
-    const chNum  = s.latest_chapter_number ? `Ch. ${s.latest_chapter_number}` : 'Ongoing';
-    const type   = s.type || 'Manhwa';
-    return `
-      <div class="comic-card" data-id="${s.id}">
-        <div class="card-poster">
-          <img src="${cover}" alt="${s.title}" loading="lazy"
-               onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300'">
-          <div class="poster-overlay">
-            <span class="card-badge">${type}</span>
-            <span class="card-rating"><i class="fa-solid fa-star"></i> ${rating}</span>
-          </div>
-        </div>
-        <div class="card-content">
-          <h3 class="card-title">${s.title}</h3>
-          <div class="card-meta">
-            <span class="card-chapter">${chNum}</span>
-            <i class="fa-${bookmarks.includes(s.id) ? 'solid' : 'regular'} fa-bookmark"
-               style="color:${bookmarks.includes(s.id) ? 'var(--pink)' : 'var(--text-dim)'}"></i>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
-
-  comicGrid.querySelectorAll('.comic-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const found = allSeries.find(s => s.id === card.dataset.id);
-      if (found) openDetailModal(found);
-    });
-  });
-}
-
-function switchToHomeView() {
-  catalogTitle.innerHTML = '<i class="fa-solid fa-layer-group"></i> Baru Diupdate';
-  catalogCount.textContent = '';
-  comicGrid.classList.add('hidden');
-  emptyState.classList.add('hidden');
-  updateList.classList.remove('hidden');
-  renderUpdateList();
-}
-
-function switchToBrowseView(title = 'Semua Komik', icon = 'fa-grid-2') {
-  catalogTitle.innerHTML = `<i class="fa-solid ${icon}"></i> ${title}`;
-  const filtered = getFilteredSeries();
-  renderComicGrid(filtered);
-}
-
-// ============================================================
-// FILTER / SORT ENGINE
-// ============================================================
-function getFilteredSeries() {
-  return allSeries.filter(item => {
-    if (currentFilter.search) {
-      const q = currentFilter.search;
-      const m = (item.title || '').toLowerCase().includes(q)
-             || (item.alternative_title || '').toLowerCase().includes(q)
-             || (item.genres || []).some(g => g.toLowerCase().includes(q));
-      if (!m) return false;
+  // ==========================================================================
+  //  CONTINUE READING
+  // ==========================================================================
+  function renderContinue() {
+    const grid = $('#continue-grid');
+    const history = STATE.history.slice(0, 5);
+    if (!history.length) {
+      grid.innerHTML = `<div class="empty-continue" id="empty-continue"><i class="fa-solid fa-book-open"></i><p>Belum ada riwayat baca. Mulai baca komik sekarang!</p></div>`;
+      return;
     }
-    if (currentFilter.type !== 'all' && item.type !== currentFilter.type) return false;
-    if (currentFilter.genre !== 'all' && !(item.genres || []).includes(currentFilter.genre)) return false;
-    return true;
-  }).sort((a, b) => {
-    if (currentFilter.sort === 'rating') return (b.user_rate || 0) - (a.user_rate || 0);
-    if (currentFilter.sort === 'views')  return (b.view_count || 0) - (a.view_count || 0);
-    if (currentFilter.sort === 'latest') return (b.latest_chapter_number || 0) - (a.latest_chapter_number || 0);
-    return 0;
-  });
-}
 
-function populateGenreDropdown() {
-  const genreSet = new Set();
-  allSeries.forEach(s => (s.genres || []).forEach(g => genreSet.add(g)));
-  const sorted = Array.from(genreSet).sort();
-  filterGenre.innerHTML = `<option value="all">Semua Genre</option>`
-    + sorted.map(g => `<option value="${g}">${g}</option>`).join('');
-}
+    grid.innerHTML = history.map(h => {
+      const series = STATE.allSeries.find(s => (s.slug || s.title) === h.slug);
+      if (!series) return '';
+      const progress = h.progress || rand(20, 85);
+      return `
+        <div class="continue-card" data-slug="${h.slug}">
+          <div class="continue-poster">
+            <img src="${getCover(series)}" alt="${series.title || series.name}" loading="lazy">
+          </div>
+          <div class="continue-progress-wrap">
+            <div class="continue-title">${series.title || series.name}</div>
+            <div class="continue-chapter">Ch. ${h.chapter || '?'}</div>
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${progress}%"></div></div>
+          </div>
+        </div>`;
+    }).join('');
 
-// ============================================================
-// EVENT LISTENERS
-// ============================================================
-function setupEventListeners() {
-  // Search
-  searchInput.addEventListener('input', e => {
-    currentFilter.search = e.target.value.toLowerCase().trim();
-    clearSearchBtn.classList.toggle('hidden', !currentFilter.search);
-    if (currentFilter.search) {
-      switchToBrowseView('Hasil Pencarian: "' + e.target.value + '"', 'fa-magnifying-glass');
-    } else {
-      switchToHomeView();
-    }
-  });
-
-  clearSearchBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    currentFilter.search = '';
-    clearSearchBtn.classList.add('hidden');
-    switchToHomeView();
-  });
-
-  // "/" shortcut for search
-  document.addEventListener('keydown', e => {
-    if (e.key === '/' && document.activeElement !== searchInput) {
-      e.preventDefault();
-      searchInput.focus();
-    }
-    if (e.key === 'Escape') {
-      if (!readerOverlay.classList.contains('hidden')) {
-        readerOverlay.classList.add('hidden');
-      } else if (!detailModal.classList.contains('hidden')) {
-        detailModal.classList.add('hidden');
+    grid.addEventListener('click', e => {
+      const card = e.target.closest('.continue-card');
+      if (card) {
+        const series = STATE.allSeries.find(s => (s.slug || s.title) === card.dataset.slug);
+        if (series) openDetail(series);
       }
-    }
-  });
-
-  // Filters
-  filterType.addEventListener('change', e => {
-    currentFilter.type = e.target.value;
-    switchToBrowseView();
-  });
-
-  filterGenre.addEventListener('change', e => {
-    currentFilter.genre = e.target.value;
-    if (e.target.value !== 'all') {
-      switchToBrowseView(e.target.value, 'fa-tag');
-    } else {
-      switchToHomeView();
-    }
-  });
-
-  sortBy.addEventListener('change', e => {
-    currentFilter.sort = e.target.value;
-    if (!comicGrid.classList.contains('hidden')) switchToBrowseView();
-  });
-
-  resetFilterBtn.addEventListener('click', () => {
-    currentFilter = { search: '', type: 'all', genre: 'all', sort: 'latest', view: 'home' };
-    searchInput.value = '';
-    filterType.value = 'all';
-    filterGenre.value = 'all';
-    sortBy.value = 'latest';
-    clearSearchBtn.classList.add('hidden');
-    switchToHomeView();
-  });
-
-  // Hero slider
-  sliderPrev.addEventListener('click', () => goToSlide(heroIdx - 1));
-  sliderNext.addEventListener('click', () => goToSlide(heroIdx + 1));
-
-  // Trending scroll
-  trendingPrev.addEventListener('click', () => {
-    trendingRow.scrollBy({ left: -400, behavior: 'smooth' });
-  });
-  trendingNext.addEventListener('click', () => {
-    trendingRow.scrollBy({ left: 400, behavior: 'smooth' });
-  });
-
-  // Sidebar Nav
-  document.getElementById('sb-beranda').addEventListener('click', e => {
-    e.preventDefault();
-    setSidebarActive('sb-beranda');
-    switchToHomeView();
-  });
-  document.getElementById('sb-semua').addEventListener('click', e => {
-    e.preventDefault();
-    setSidebarActive('sb-semua');
-    currentFilter = { ...currentFilter, genre: 'all', type: 'all', sort: 'rating' };
-    switchToBrowseView('Semua Komik', 'fa-grid-2');
-  });
-  document.getElementById('sb-populer').addEventListener('click', e => {
-    e.preventDefault();
-    setSidebarActive('sb-populer');
-    currentFilter = { ...currentFilter, sort: 'views' };
-    switchToBrowseView('Paling Populer', 'fa-fire-flame-curved');
-  });
-  document.getElementById('sb-ranking').addEventListener('click', e => {
-    e.preventDefault();
-    setSidebarActive('sb-ranking');
-    currentFilter = { ...currentFilter, sort: 'rating' };
-    switchToBrowseView('Top Ranking', 'fa-trophy');
-  });
-  document.getElementById('sb-update').addEventListener('click', e => {
-    e.preventDefault();
-    setSidebarActive('sb-update');
-    currentFilter = { ...currentFilter, sort: 'latest' };
-    switchToBrowseView('Update Terbaru', 'fa-clock');
-  });
-  document.getElementById('sb-bookmark').addEventListener('click', e => {
-    e.preventDefault();
-    setSidebarActive('sb-bookmark');
-    const bkmSeries = allSeries.filter(s => bookmarks.includes(s.id));
-    catalogTitle.innerHTML = '<i class="fa-solid fa-bookmark"></i> Bookmark Saya';
-    renderComicGrid(bkmSeries);
-  });
-
-  // Genre sidebar items
-  document.querySelectorAll('.sidebar-genre-item').forEach(item => {
-    item.addEventListener('click', e => {
-      e.preventDefault();
-      const genre = item.dataset.genre;
-      currentFilter.genre = genre;
-      filterGenre.value = genre;
-      switchToBrowseView(genre, 'fa-tag');
-      document.querySelectorAll('.sidebar-genre-item').forEach(g => g.classList.remove('active'));
-      item.classList.add('active');
-    });
-  });
-
-  // Ranking full button
-  btnRankingFull.addEventListener('click', () => {
-    setSidebarActive('sb-ranking');
-    currentFilter.sort = 'rating';
-    switchToBrowseView('Top Ranking', 'fa-trophy');
-  });
-
-  // Nav links
-  document.getElementById('nav-komik').addEventListener('click', e => {
-    e.preventDefault(); switchToBrowseView();
-  });
-  document.getElementById('nav-ranking').addEventListener('click', e => {
-    e.preventDefault();
-    currentFilter.sort = 'rating';
-    switchToBrowseView('Top Ranking', 'fa-trophy');
-  });
-  document.getElementById('nav-update').addEventListener('click', e => {
-    e.preventDefault();
-    currentFilter.sort = 'latest';
-    switchToBrowseView('Update Terbaru', 'fa-clock');
-  });
-  document.getElementById('nav-beranda').addEventListener('click', e => {
-    e.preventDefault(); switchToHomeView();
-  });
-
-  // Modal close
-  closeModalBtn.addEventListener('click', () => detailModal.classList.add('hidden'));
-  detailModal.addEventListener('click', e => {
-    if (e.target === detailModal) detailModal.classList.add('hidden');
-  });
-
-  // Reader close
-  closeReaderBtn.addEventListener('click', () => readerOverlay.classList.add('hidden'));
-
-  // Mobile sidebar toggle
-  mobileMenuBtn.addEventListener('click', () => {
-    sidebarLeft.classList.toggle('open');
-  });
-
-  // Theme toggle (cosmetic for now)
-  themeToggle.addEventListener('click', () => {
-    const icon = document.getElementById('theme-icon');
-    icon.classList.toggle('fa-moon');
-    icon.classList.toggle('fa-sun');
-  });
-}
-
-function setSidebarActive(id) {
-  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
-}
-
-// ============================================================
-// DETAIL MODAL
-// ============================================================
-function openDetailModal(item) {
-  selectedSeries = item;
-  const cover    = item.cover_portrait_url || item.cover_image_url || '';
-  const rating   = item.user_rate ? item.user_rate.toFixed(1) : 'N/A';
-  const views    = formatCount(item.view_count || 0);
-  const bks      = formatCount(item.bookmark_count || 0);
-  const chapters = item.chapters || [];
-  const isBkm    = bookmarks.includes(item.id);
-  const genresHTML = (item.genres || []).map(g =>
-    `<span class="detail-badge genre">${g}</span>`).join('');
-
-  modalBody.innerHTML = `
-    <div class="detail-grid">
-      <div>
-        <img src="${cover}" alt="${item.title}" class="detail-cover"
-             onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400'">
-        <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.85rem">
-          <button class="btn-baca" id="modal-read-btn" style="justify-content:center">
-            <i class="fa-solid fa-book-open"></i> Baca Sekarang
-          </button>
-          <button class="btn-bookmark-hero ${isBkm ? 'bookmarked' : ''}" id="modal-bkm-btn"
-                  style="justify-content:center;border-radius:var(--radius-full)">
-            <i class="fa-${isBkm ? 'solid' : 'regular'} fa-bookmark"></i>
-            ${isBkm ? 'Di-bookmark' : 'Tambah Bookmark'}
-          </button>
-        </div>
-      </div>
-
-      <div class="detail-info">
-        <h2>${item.title}</h2>
-        ${item.alternative_title ? `<p class="detail-alt"><i class="fa-solid fa-globe"></i> ${item.alternative_title}</p>` : ''}
-
-        <div class="detail-tags">
-          <span class="detail-badge status">${item.status || 'Ongoing'}</span>
-          <span class="detail-badge type">${item.type || 'Manhwa'}</span>
-          <span class="detail-badge rating"><i class="fa-solid fa-star"></i> ${rating}</span>
-          <span class="detail-badge views"><i class="fa-solid fa-eye"></i> ${views} Views</span>
-          <span class="detail-badge views"><i class="fa-solid fa-bookmark"></i> ${bks} Bookmark</span>
-        </div>
-
-        <div class="detail-tags">${genresHTML}</div>
-
-        <p class="detail-synopsis">${item.description || 'Tidak ada sinopsis tersedia.'}</p>
-      </div>
-    </div>
-
-    <div class="chapter-section">
-      <div class="chapter-header">
-        <h3><i class="fa-solid fa-list-ol"></i> Daftar Chapter (${chapters.length || 0})</h3>
-        <input type="text" id="ch-search" class="chapter-search" placeholder="Cari chapter...">
-      </div>
-      <div class="chapter-grid" id="chapter-grid">
-        ${chapters.length > 0
-          ? chapters.map((ch, idx) => `
-              <div class="chapter-item" data-idx="${idx}">
-                <span class="ch-num">Chapter ${ch.chapter_number}</span>
-                <span class="ch-date">${ch.release_date ? new Date(ch.release_date).toLocaleDateString('id-ID') : ''}</span>
-              </div>`).join('')
-          : '<p style="color:var(--text-dim);padding:1rem;grid-column:1/-1">Baca langsung via tombol Baca Sekarang.</p>'
-        }
-      </div>
-    </div>`;
-
-  // Handlers
-  document.getElementById('modal-read-btn').addEventListener('click', () => {
-    if (chapters.length > 0) openReader(0);
-  });
-
-  const bkmBtn = document.getElementById('modal-bkm-btn');
-  bkmBtn.addEventListener('click', () => {
-    toggleBookmark(item.id);
-    const now = bookmarks.includes(item.id);
-    bkmBtn.innerHTML = `<i class="fa-${now ? 'solid' : 'regular'} fa-bookmark"></i> ${now ? 'Di-bookmark' : 'Tambah Bookmark'}`;
-    bkmBtn.classList.toggle('bookmarked', now);
-    updateHeroBookmarkBtn(item.id);
-  });
-
-  // Chapter search
-  const chSearch = document.getElementById('ch-search');
-  if (chSearch) {
-    chSearch.addEventListener('input', e => {
-      const q = e.target.value.toLowerCase();
-      document.querySelectorAll('.chapter-item').forEach(el => {
-        el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none';
-      });
     });
   }
 
-  // Chapter click
-  document.querySelectorAll('.chapter-item').forEach(el => {
-    el.addEventListener('click', () => openReader(parseInt(el.dataset.idx)));
-  });
+  // ==========================================================================
+  //  UPDATE LIST
+  // ==========================================================================
+  function renderUpdateList() {
+    const sorted = [...STATE.allSeries].sort((a, b) => {
+      const da = a.last_updated || a.updated || '';
+      const db = b.last_updated || b.updated || '';
+      return db.localeCompare(da);
+    });
 
-  detailModal.classList.remove('hidden');
+    STATE.filtered = sorted;
+    STATE.displayCount = STATE.perPage;
 
-  // Save to history
-  addToHistory(item.id, 1);
-}
+    renderUpdateItems();
+  }
 
-// ============================================================
-// READER
-// ============================================================
-async function openReader(chapterIdx) {
-  if (!selectedSeries || !selectedSeries.chapters?.length) return;
+  function renderUpdateItems() {
+    const container = $('#update-list');
+    const slice = STATE.filtered.slice(0, STATE.displayCount);
 
-  currentChapterIdx = chapterIdx;
-  const ch = selectedSeries.chapters[chapterIdx];
+    container.innerHTML = slice.map((s, i) => {
+      const ch = s.chapters?.length ? s.chapters[0] : null;
+      const chText = ch ? `Chapter ${ch.number || ch.chapter || '?'}` : (s.total_chapters ? `${s.total_chapters} Chapter` : 'N/A');
+      const timeText = s.last_updated || s.updated || '';
+      const isNew = i < 5;
+      return `
+        <div class="update-item" data-idx="${i}">
+          <img src="${getCover(s)}" class="update-thumb" alt="${s.title || s.name}" loading="lazy" onerror="this.style.background='#14122c'">
+          <div class="update-info">
+            <div class="update-title">${s.title || s.name || 'Unknown'}</div>
+            <div class="update-chapter">${chText}</div>
+            <div class="update-time">${timeText}</div>
+          </div>
+          ${isNew ? '<span class="update-new-badge">NEW</span>' : ''}
+        </div>`;
+    }).join('');
 
-  readerSeriesTitle.textContent = selectedSeries.title;
-  readerChTitle.textContent     = `Chapter ${ch.chapter_number}`;
-  readerOverlay.classList.remove('hidden');
-  detailModal.classList.add('hidden');
+    container.addEventListener('click', e => {
+      const item = e.target.closest('.update-item');
+      if (item) openDetail(STATE.filtered[+item.dataset.idx]);
+    });
 
-  prevChBtn.disabled = currentChapterIdx >= selectedSeries.chapters.length - 1;
-  nextChBtn.disabled = currentChapterIdx <= 0;
+    // Load more
+    const wrap = $('#load-more-wrap');
+    if (STATE.displayCount < STATE.filtered.length) {
+      wrap.classList.remove('hidden');
+    } else {
+      wrap.classList.add('hidden');
+    }
 
-  prevChBtn.onclick = () => { if (currentChapterIdx < selectedSeries.chapters.length - 1) openReader(currentChapterIdx + 1); };
-  nextChBtn.onclick = () => { if (currentChapterIdx > 0) openReader(currentChapterIdx - 1); };
+    $('#catalog-count').textContent = `(${STATE.filtered.length} komik)`;
+  }
 
-  // Loading
-  readerContent.innerHTML = `
-    <div class="reader-loading">
-      <div class="spinner"></div>
-      <p>Memuat Chapter ${ch.chapter_number}...</p>
-    </div>`;
+  // ==========================================================================
+  //  RANKING SIDEBAR
+  // ==========================================================================
+  function renderRanking() {
+    const ranked = [...STATE.allSeries]
+      .sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
+      .slice(0, 10);
 
-  try {
-    const res  = await fetch(`https://api.shngm.io/v1/chapter/detail/${ch.chapter_id}`);
-    const data = await res.json();
+    const list = $('#ranking-list');
+    if (!list) return;
 
-    if (data.retcode === 0 && data.data?.chapter) {
-      const cdata     = data.data;
-      const baseUrl   = cdata.base_url || 'https://assets.shngm.id';
-      const cpath     = cdata.chapter.path || '';
-      const imgFiles  = cdata.chapter.data || [];
+    list.innerHTML = ranked.map((s, i) => {
+      const cls = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+      return `
+        <li class="ranking-item" data-idx="${i}">
+          <span class="rank-num ${cls}">${i + 1}</span>
+          <img src="${getCover(s)}" class="rank-thumb" alt="${s.title || s.name}" loading="lazy">
+          <div class="rank-info">
+            <div class="rank-title">${s.title || s.name}</div>
+            <div class="rank-chapter">${s.total_chapters || s.chapters?.length || '?'} Ch</div>
+          </div>
+          <span class="rank-score"><i class="fa-solid fa-star"></i> ${s.rating || 'N/A'}</span>
+        </li>`;
+    }).join('');
 
-      if (!imgFiles.length) {
-        readerContent.innerHTML = `
-          <div class="reader-placeholder">
-            <i class="fa-solid fa-image-slash"></i>
-            <h3>Gambar Tidak Tersedia</h3>
-            <p>Gambar chapter ini belum tersedia dari server.</p>
-          </div>`;
-        return;
-      }
+    list.addEventListener('click', e => {
+      const item = e.target.closest('.ranking-item');
+      if (item) openDetail(ranked[+item.dataset.idx]);
+    });
+  }
 
-      const imgsHTML = imgFiles.map((f, i) =>
-        `<img class="reader-page-img" src="${baseUrl}${cpath}${f}" alt="Page ${i+1}" loading="lazy" referrerpolicy="no-referrer">`
-      ).join('');
+  // ==========================================================================
+  //  BOOKMARK
+  // ==========================================================================
+  function toggleBookmark(s) {
+    const key = s.slug || s.title;
+    const idx = STATE.bookmarks.indexOf(key);
+    if (idx >= 0) {
+      STATE.bookmarks.splice(idx, 1);
+      showToast(`"${s.title || s.name}" dihapus dari bookmark`, 'info');
+    } else {
+      STATE.bookmarks.push(key);
+      showToast(`"${s.title || s.name}" disimpan ke bookmark!`, 'success');
+    }
+    saveBookmarks();
+    updateBookmarkCount();
+  }
 
-      readerContent.innerHTML = `
+  function updateBookmarkCount() {
+    const c = STATE.bookmarks.length;
+    const el = $('#bookmark-count');
+    if (el) el.textContent = c;
+    const bel = $('#bottom-bkm-badge');
+    if (bel) { bel.textContent = c; bel.style.display = c > 0 ? '' : 'none'; }
+  }
+
+  // ==========================================================================
+  //  DETAIL MODAL
+  // ==========================================================================
+  function openDetail(s) {
+    STATE.currentDetail = s;
+    const modal = $('#detail-modal');
+    const body = $('#modal-body');
+    const genres = getGenres(s);
+    const isBookmarked = STATE.bookmarks.includes(s.slug || s.title);
+    const chapters = s.chapters || [];
+    const sortedChapters = [...chapters].sort((a, b) => parseFloat(b.number || b.chapter || 0) - parseFloat(a.number || a.chapter || 0));
+
+    body.innerHTML = `
+      <div class="detail-grid">
+        <img src="${getCover(s)}" class="detail-cover" alt="${s.title || s.name}">
+        <div class="detail-info">
+          <h2>${s.title || s.name || 'Unknown'}</h2>
+          <p class="detail-alt">${s.alternative_title || s.author || ''}</p>
+          <div class="detail-tags">
+            <span class="detail-badge status"><i class="fa-solid fa-circle" style="font-size:0.45rem"></i> ${s.status || 'Ongoing'}</span>
+            <span class="detail-badge type">${s.type || 'Manhwa'}</span>
+            <span class="detail-badge rating"><i class="fa-solid fa-star"></i> ${s.rating || 'N/A'}</span>
+            <span class="detail-badge views"><i class="fa-solid fa-eye"></i> ${fmtNum(s.views || 0)}</span>
+          </div>
+          <div class="detail-tags">${genres.map(g => `<span class="detail-badge genre">${g}</span>`).join('')}</div>
+          <p class="detail-synopsis">${s.synopsis || s.description || 'Belum ada deskripsi.'}</p>
+          <div class="detail-action-row">
+            <button class="btn-baca" id="detail-read-first"><i class="fa-solid fa-book-open"></i> Baca Chapter 1</button>
+            <button class="btn-bookmark-hero ${isBookmarked ? 'bookmarked' : ''}" id="detail-bookmark-btn">
+              <i class="fa-${isBookmarked ? 'solid' : 'regular'} fa-bookmark"></i> ${isBookmarked ? 'Tersimpan' : 'Bookmark'}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="chapter-section">
+        <div class="chapter-header">
+          <h3 style="font-family:'Outfit';font-weight:700;font-size:1rem"><i class="fa-solid fa-list"></i> Daftar Chapter (${sortedChapters.length})</h3>
+          <input type="text" class="chapter-search" placeholder="Cari chapter..." id="ch-search">
+        </div>
+        <div class="chapter-grid" id="chapter-grid">
+          ${sortedChapters.map((ch, i) => `
+            <div class="chapter-item" data-ch-idx="${i}">
+              <span class="ch-num">Ch. ${ch.number || ch.chapter || i + 1}</span>
+              <span class="ch-date">${ch.date || ch.released || ''}</span>
+            </div>`).join('')}
+          ${sortedChapters.length === 0 ? '<p style="color:var(--text-dim);font-size:0.82rem;grid-column:1/-1;text-align:center;padding:1rem">Belum ada chapter tersedia.</p>' : ''}
+        </div>
+      </div>`;
+
+    // Events
+    $('#detail-read-first').onclick = () => {
+      if (sortedChapters.length) openReader(s, sortedChapters, sortedChapters.length - 1);
+    };
+
+    $('#detail-bookmark-btn').onclick = () => {
+      toggleBookmark(s);
+      openDetail(s);
+    };
+
+    const chSearch = $('#ch-search');
+    if (chSearch) {
+      chSearch.oninput = () => {
+        const q = chSearch.value.toLowerCase();
+        $$('.chapter-item', modal).forEach(ci => {
+          ci.style.display = ci.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+      };
+    }
+
+    $$('.chapter-item', modal).forEach(ci => {
+      ci.onclick = () => openReader(s, sortedChapters, +ci.dataset.chIdx);
+    });
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDetail() {
+    $('#detail-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // ==========================================================================
+  //  READER
+  // ==========================================================================
+  async function openReader(series, chapters, idx) {
+    closeDetail();
+    STATE.currentReader = { series, chapterIdx: idx, chapters };
+
+    const overlay = $('#reader-overlay');
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    const ch = chapters[idx];
+    $('#reader-series-title').textContent = series.title || series.name;
+    $('#reader-chapter-title').textContent = `Chapter ${ch.number || ch.chapter || idx + 1}`;
+    $('#prev-chapter-btn').disabled = idx <= 0;
+    $('#next-chapter-btn').disabled = idx >= chapters.length - 1;
+    $('#reader-progress-fill').style.width = '0%';
+
+    const content = $('#reader-content');
+    content.innerHTML = '<div class="reader-loading"><div class="spinner"></div><span>Memuat chapter...</span></div>';
+    content.scrollTop = 0;
+
+    // Track reading
+    const slug = series.slug || series.title;
+    const historyEntry = { slug, chapter: ch.number || ch.chapter || idx + 1, progress: rand(30, 80), timestamp: Date.now() };
+    STATE.history = [historyEntry, ...STATE.history.filter(h => h.slug !== slug)].slice(0, 20);
+    saveHistory();
+    trackRead(series.title);
+
+    // Fetch chapter images
+    const chSlug = ch.slug || ch.chapter_slug || '';
+    try {
+      const res = await fetch(`https://api.shngm.io/v1/chapter/detail/${chSlug}`);
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      const images = data.data?.chapter?.images || data.images || data.data?.images || [];
+
+      if (!images.length) throw new Error('No images');
+
+      content.innerHTML = `
         <div class="reader-images-wrap">
-          ${imgsHTML}
-          <div class="reader-footer-nav">
-            <p style="color:var(--text-muted)">Selesai membaca Chapter ${ch.chapter_number}</p>
-            <div class="reader-nav-row">
-              ${currentChapterIdx < selectedSeries.chapters.length - 1
-                ? `<button class="btn-baca" onclick="openReader(${currentChapterIdx + 1})"><i class="fa-solid fa-chevron-left"></i> Sebelumnya</button>` : ''}
-              ${currentChapterIdx > 0
-                ? `<button class="btn-baca" onclick="openReader(${currentChapterIdx - 1})">Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>` : ''}
-            </div>
+          ${images.map((img, i) => `<img src="${typeof img === 'string' ? img : img.url || img.src}" class="reader-page-img" alt="Page ${i + 1}" loading="lazy" onerror="this.alt='Gagal memuat halaman ${i + 1}'">`).join('')}
+        </div>
+        <div class="reader-footer-nav">
+          <p style="color:var(--text-muted);font-size:0.85rem">— Akhir Chapter ${ch.number || ch.chapter || idx + 1} —</p>
+          <div class="reader-nav-row">
+            <button class="btn-baca" id="reader-footer-prev" ${idx <= 0 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i> Prev</button>
+            <button class="btn-baca" id="reader-footer-next" ${idx >= chapters.length - 1 ? 'disabled' : ''}>Next <i class="fa-solid fa-chevron-right"></i></button>
           </div>
         </div>`;
 
-      readerContent.scrollTop = 0;
+      const fp = $('#reader-footer-prev');
+      const fn = $('#reader-footer-next');
+      if (fp) fp.onclick = () => openReader(series, chapters, idx - 1);
+      if (fn) fn.onclick = () => openReader(series, chapters, idx + 1);
 
-      // Update history
-      addToHistory(selectedSeries.id, ch.chapter_number);
-
-    } else {
-      throw new Error('Gagal mendapatkan data chapter');
+    } catch (err) {
+      content.innerHTML = `
+        <div class="reader-placeholder">
+          <i class="fa-solid fa-exclamation-triangle" style="color:var(--gold)"></i>
+          <h3>Gagal Memuat Chapter</h3>
+          <p style="color:var(--text-muted)">Server sedang tidak tersedia. Coba lagi nanti.</p>
+          <button class="btn-baca" onclick="location.reload()"><i class="fa-solid fa-rotate-right"></i> Coba Lagi</button>
+        </div>`;
     }
-  } catch (err) {
-    console.error(err);
-    readerContent.innerHTML = `
-      <div class="reader-placeholder">
-        <i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i>
-        <h3>Gagal Memuat Chapter</h3>
-        <p>${err.message || 'Terjadi kesalahan jaringan.'}</p>
-      </div>`;
   }
-}
 
-// ============================================================
-// BOOKMARK & HISTORY
-// ============================================================
-function toggleBookmark(id) {
-  const idx = bookmarks.indexOf(id);
-  if (idx > -1) bookmarks.splice(idx, 1);
-  else bookmarks.push(id);
-  localStorage.setItem('oniverse_bookmarks', JSON.stringify(bookmarks));
-  updateBookmarkBadge();
-}
+  function closeReader() {
+    $('#reader-overlay').classList.add('hidden');
+    document.body.style.overflow = '';
+    renderContinue();
+  }
 
-function updateBookmarkBadge() {
-  if (bookmarkCount) bookmarkCount.textContent = bookmarks.length;
-}
+  // Reader progress bar on scroll
+  function setupReaderProgress() {
+    const content = $('#reader-content');
+    content.addEventListener('scroll', () => {
+      const scrollTop = content.scrollTop;
+      const scrollHeight = content.scrollHeight - content.clientHeight;
+      const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      $('#reader-progress-fill').style.width = `${progress}%`;
+    });
+  }
 
-function addToHistory(id, chapter, progress = 30) {
-  readHistory = readHistory.filter(h => h.id !== id);
-  readHistory.unshift({ id, chapter, progress, time: Date.now() });
-  readHistory = readHistory.slice(0, 20);
-  localStorage.setItem('oniverse_history', JSON.stringify(readHistory));
-}
+  // ==========================================================================
+  //  FILTERING & SORTING
+  // ==========================================================================
+  function applyFilters() {
+    const type = $('#filter-type')?.value || 'all';
+    const genre = $('#filter-genre')?.value || 'all';
+    const sort = $('#sort-by')?.value || 'latest';
+    const search = ($('#search-input')?.value || $('#mobile-search-input')?.value || '').toLowerCase().trim();
 
-// ============================================================
-// UTILS
-// ============================================================
-function formatCount(n) {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
-  if (n >= 1_000)     return (n / 1_000).toFixed(1) + 'K';
-  return n.toString();
-}
+    let results = [...STATE.allSeries];
 
-function randomTimeAgo() {
-  const units = [
-    [1, 'menit'],
-    [2, 'menit'],
-    [5, 'menit'],
-    [10, 'menit'],
-    [15, 'menit'],
-    [20, 'menit'],
-  ];
-  const [val, unit] = units[Math.floor(Math.random() * units.length)];
-  return `${val} ${unit} lalu`;
-}
+    if (search) {
+      results = results.filter(s => {
+        const title = (s.title || s.name || '').toLowerCase();
+        const alt = (s.alternative_title || '').toLowerCase();
+        const g = getGenres(s).join(' ').toLowerCase();
+        return title.includes(search) || alt.includes(search) || g.includes(search);
+      });
+    }
+
+    if (type !== 'all') results = results.filter(s => (s.type || '').toLowerCase() === type.toLowerCase());
+    if (genre !== 'all') results = results.filter(s => getGenres(s).some(g => g.toLowerCase() === genre.toLowerCase()));
+
+    if (sort === 'rating') results.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0));
+    else if (sort === 'views') results.sort((a, b) => (b.views || 0) - (a.views || 0));
+    else results.sort((a, b) => (b.last_updated || b.updated || '').localeCompare(a.last_updated || a.updated || ''));
+
+    STATE.filtered = results;
+    STATE.displayCount = STATE.perPage;
+
+    if (results.length) {
+      $('#update-list').classList.remove('hidden');
+      $('#empty-state').classList.add('hidden');
+      renderUpdateItems();
+    } else {
+      $('#update-list').classList.add('hidden');
+      $('#empty-state').classList.remove('hidden');
+      $('#load-more-wrap').classList.add('hidden');
+    }
+  }
+
+  // ==========================================================================
+  //  EVENT BINDINGS
+  // ==========================================================================
+  function bindEvents() {
+    // Close modal
+    $('#close-modal-btn').onclick = closeDetail;
+    $('#detail-modal').addEventListener('click', e => { if (e.target.id === 'detail-modal') closeDetail(); });
+
+    // Close reader
+    $('#close-reader-btn').onclick = closeReader;
+    $('#prev-chapter-btn').onclick = () => {
+      const r = STATE.currentReader;
+      if (r.chapterIdx > 0) openReader(r.series, r.chapters, r.chapterIdx - 1);
+    };
+    $('#next-chapter-btn').onclick = () => {
+      const r = STATE.currentReader;
+      if (r.chapterIdx < r.chapters.length - 1) openReader(r.series, r.chapters, r.chapterIdx + 1);
+    };
+
+    // Filters
+    ['filter-type', 'filter-genre', 'sort-by'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', applyFilters);
+    });
+
+    // Search
+    let searchTimeout;
+    const searchHandler = () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(applyFilters, 300); };
+    $('#search-input')?.addEventListener('input', searchHandler);
+    $('#mobile-search-input')?.addEventListener('input', searchHandler);
+
+    // Search shortcut
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        const input = $('#search-input');
+        if (input && getComputedStyle(input.closest('.nav-search')).display !== 'none') {
+          input.focus();
+        } else {
+          const mob = $('#mobile-search-expanded');
+          mob.classList.remove('hidden');
+          setTimeout(() => $('#mobile-search-input')?.focus(), 50);
+        }
+      }
+      if (e.key === 'Escape') {
+        closeDetail();
+        closeReader();
+        $('#mobile-search-expanded').classList.add('hidden');
+        closeMobileSidebar();
+      }
+    });
+
+    // Clear search
+    const clearBtn = $('#clear-search-btn');
+    if (clearBtn) {
+      clearBtn.onclick = () => {
+        $('#search-input').value = '';
+        clearBtn.classList.add('hidden');
+        applyFilters();
+      };
+      $('#search-input')?.addEventListener('input', () => {
+        clearBtn.classList.toggle('hidden', !$('#search-input').value);
+      });
+    }
+
+    // Mobile search
+    $('#mobile-search-btn')?.addEventListener('click', () => {
+      const mob = $('#mobile-search-expanded');
+      mob.classList.remove('hidden');
+      setTimeout(() => $('#mobile-search-input')?.focus(), 50);
+    });
+    $('#close-mobile-search')?.addEventListener('click', () => {
+      $('#mobile-search-expanded').classList.add('hidden');
+    });
+
+    // Mobile sidebar
+    const menuBtn = $('#mobile-menu-btn');
+    const sidebar = $('#sidebar-left');
+    const overlay = $('#sidebar-overlay');
+
+    menuBtn?.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('hidden', !sidebar.classList.contains('open'));
+    });
+
+    overlay?.addEventListener('click', closeMobileSidebar);
+
+    // Load more
+    $('#load-more-btn')?.addEventListener('click', () => {
+      STATE.displayCount += STATE.perPage;
+      renderUpdateItems();
+    });
+
+    // Reset filter
+    $('#reset-filter-btn')?.addEventListener('click', () => {
+      $('#filter-type').value = 'all';
+      $('#filter-genre').value = 'all';
+      $('#sort-by').value = 'latest';
+      $('#search-input').value = '';
+      applyFilters();
+    });
+
+    // Genre chips
+    $$('.genre-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        $$('.genre-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const genre = chip.dataset.genre;
+        if (genre === 'all') {
+          $('#filter-genre').value = 'all';
+        } else {
+          $('#filter-genre').value = genre;
+        }
+        applyFilters();
+      });
+    });
+
+    // Sidebar genre items
+    $$('.sidebar-genre-item').forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        const genre = item.dataset.genre;
+        $$('.sidebar-genre-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        $('#filter-genre').value = genre;
+        applyFilters();
+        closeMobileSidebar();
+        document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Mobile bottom nav
+    $$('.bottom-nav-item').forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        $$('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+        item.classList.add('active');
+        const nav = item.dataset.nav;
+        handleNav(nav);
+      });
+    });
+
+    // Sidebar nav
+    $$('.sidebar-item').forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        $$('.sidebar-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        closeMobileSidebar();
+      });
+    });
+
+    // Logo home
+    $('#logo-home')?.addEventListener('click', e => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Theme toggle
+    $('#theme-toggle')?.addEventListener('click', () => {
+      showToast('Fitur dark/light mode segera hadir!', 'info');
+    });
+
+    setupReaderProgress();
+  }
+
+  function closeMobileSidebar() {
+    $('#sidebar-left').classList.remove('open');
+    $('#sidebar-overlay').classList.add('hidden');
+  }
+
+  function handleNav(nav) {
+    closeMobileSidebar();
+    switch (nav) {
+      case 'beranda':
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        break;
+      case 'komik':
+        document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
+        break;
+      case 'update':
+        document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
+        break;
+      case 'bookmark':
+        showBookmarkList();
+        break;
+      case 'ranking':
+        document.getElementById('trending-section')?.scrollIntoView({ behavior: 'smooth' });
+        break;
+    }
+  }
+
+  function showBookmarkList() {
+    if (!STATE.bookmarks.length) {
+      showToast('Belum ada bookmark. Simpan komik favoritmu!', 'info');
+      return;
+    }
+
+    const bookmarked = STATE.allSeries.filter(s => STATE.bookmarks.includes(s.slug || s.title));
+    STATE.filtered = bookmarked;
+    STATE.displayCount = STATE.perPage;
+
+    $('#catalog-title').innerHTML = '<i class="fa-solid fa-bookmark"></i> Bookmark Kamu';
+    renderUpdateItems();
+    document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' });
+    showToast(`${bookmarked.length} komik di bookmark kamu`, 'info');
+  }
+
+  // ==========================================================================
+  //  INIT
+  // ==========================================================================
+  function init() {
+    bindEvents();
+    loadData();
+    updateBookmarkCount();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
