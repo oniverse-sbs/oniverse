@@ -96,6 +96,76 @@
   }
 
   // ==========================================================================
+  //  USER AUTHENTICATION MODULE (LOGIN / REGISTER / GUEST STUCK SYSTEM)
+  // ==========================================================================
+  const AUTH_STATE = {
+    user: JSON.parse(localStorage.getItem('oniverse_user') || 'null')
+  };
+
+  function isUserLoggedIn() {
+    return !!AUTH_STATE.user;
+  }
+
+  function openAuthModal() {
+    const modal = $('#auth-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+
+    const form = $('#auth-form');
+    const loggedView = $('#auth-logged-in-view');
+    const nameEl = $('#auth-user-name');
+    const rankEl = $('#auth-user-rank');
+    const avatarEl = $('#auth-user-avatar');
+
+    if (isUserLoggedIn()) {
+      form?.classList.add('hidden');
+      loggedView?.classList.remove('hidden');
+      if (nameEl) nameEl.textContent = AUTH_STATE.user.username;
+      const { rank } = getCultivationRealm();
+      if (rankEl) rankEl.textContent = `Ranah Kultivasi: ${rank.badge} ${rank.name}`;
+      if (avatarEl) avatarEl.textContent = rank.badge;
+    } else {
+      form?.classList.remove('hidden');
+      loggedView?.classList.add('hidden');
+    }
+  }
+
+  function closeAuthModal() {
+    $('#auth-modal')?.classList.add('hidden');
+  }
+
+  function handleAuthSubmit(e) {
+    e.preventDefault();
+    const uInput = $('#auth-input-user');
+    const pInput = $('#auth-input-pass');
+    if (!uInput || !pInput) return;
+
+    const username = uInput.value.trim();
+    const password = pInput.value.trim();
+    if (!username || !password) return;
+
+    AUTH_STATE.user = {
+      username,
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem('oniverse_user', JSON.stringify(AUTH_STATE.user));
+    localStorage.setItem('oniverse_username', username);
+    FORUM_STATE.userName = username;
+
+    closeAuthModal();
+    updateCultivationUI();
+    showToast(`Selamat datang Kultivator ${username}! Ranah kultivasi terbuka! 🐉`, 'success');
+  }
+
+  function handleLogout() {
+    AUTH_STATE.user = null;
+    localStorage.removeItem('oniverse_user');
+    closeAuthModal();
+    updateCultivationUI();
+    showToast('Kamu telah keluar akun. Kultivasi terkunci di Level 1.', 'info');
+  }
+
+  // ==========================================================================
   //  CULTIVATION REALMS (APOTHEOSIS 21 RANAH KULTIVASI) & ADMIN DASHBOARD
   // ==========================================================================
   const CULTIVATION_REALMS = [
@@ -124,6 +194,16 @@
 
   function getCultivationRealm() {
     const chaptersRead = STATE.readingStats.chapters || 0;
+    
+    // GUEST: STUCK at Level 1 (Half-Step Innate Soul)!
+    if (!isUserLoggedIn()) {
+      return {
+        rank: { name: "Half-Step Innate Soul", req: 0, badge: "🍃", color: "#94a3b8", isStuck: true },
+        nextRank: CULTIVATION_REALMS[1],
+        chaptersRead
+      };
+    }
+
     let rank = CULTIVATION_REALMS[0];
     let nextRank = CULTIVATION_REALMS[1];
     
@@ -145,15 +225,30 @@
 
     if (badgeEl) badgeEl.textContent = rank.badge;
     if (titleEl) {
-      titleEl.textContent = rank.name;
+      titleEl.textContent = isUserLoggedIn() ? rank.name : `${rank.name} (TERKUNCI)`;
       titleEl.style.color = rank.color;
     }
     if (subEl) {
-      if (nextRank) {
+      if (!isUserLoggedIn()) {
+        subEl.innerHTML = `<span style="color:#ef4444;font-weight:700">⚠️ TERKUNCI di Level 1!</span><br><a href="#" id="cult-login-link" style="color:var(--accent-light);text-decoration:underline;font-weight:700">Login gratis</a> untuk naik kultivasi!`;
+        setTimeout(() => {
+          $('#cult-login-link')?.addEventListener('click', e => { e.preventDefault(); openAuthModal(); });
+        }, 100);
+      } else if (nextRank) {
         const diff = nextRank.req - chaptersRead;
         subEl.textContent = `Baca ${diff} chapter lagi untuk naik ke ${nextRank.name}!`;
       } else {
         subEl.textContent = `Tingkat Tertinggi Dicapai! (Ranah Ke-21)`;
+      }
+    }
+
+    // Update navbar login button text
+    const loginBtn = $('#login-btn');
+    if (loginBtn) {
+      if (isUserLoggedIn()) {
+        loginBtn.innerHTML = `<i class="fa-solid fa-user-check" style="color:#22c55e"></i> <span class="btn-masuk-text">${AUTH_STATE.user.username}</span>`;
+      } else {
+        loginBtn.innerHTML = `<i class="fa-solid fa-user"></i> <span class="btn-masuk-text">Masuk</span>`;
       }
     }
   }
@@ -977,6 +1072,15 @@
     // Forum Diskusi Bindings
     $('#nav-forum')?.addEventListener('click', e => { e.preventDefault(); openForumModal(); });
     $('#sb-forum')?.addEventListener('click', e => { e.preventDefault(); openForumModal(); closeMobileSidebar(); });
+
+    // Auth Modal Bindings
+    $('#login-btn')?.addEventListener('click', openAuthModal);
+    $('#close-auth-btn')?.addEventListener('click', closeAuthModal);
+    $('#auth-form')?.addEventListener('submit', handleAuthSubmit);
+    $('#auth-logout-btn')?.addEventListener('click', handleLogout);
+
+    // Buttons
+    $('#notif-btn')?.addEventListener('click', () => showToast('Belum ada notifikasi baru.', 'info'));
     $('#floating-chat-btn')?.addEventListener('click', openForumModal);
     $('#close-forum-btn')?.addEventListener('click', closeForumModal);
     $('#forum-send-btn')?.addEventListener('click', sendForumMessage);

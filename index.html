@@ -643,8 +643,46 @@
         </div>
       </div>
     </div>
-  </div>
+  <!-- ============================================================
+       AUTH / LOGIN MODAL
+  ============================================================ -->
+  <div class="forum-modal-overlay hidden" id="auth-modal">
+    <div class="forum-card" style="max-width: 400px; height: auto; max-height: 520px;">
+      <div class="forum-header">
+        <div class="forum-title-wrap">
+          <i class="fa-solid fa-user-ninja text-accent" style="color:var(--accent-light);font-size:1.4rem"></i>
+          <div>
+            <h3 style="margin:0;font-family:'Outfit';font-weight:800">Akun Kultivator OniVerse</h3>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Login untuk membuka 21 Ranah Kultivasi!</span>
+          </div>
+        </div>
+        <button class="modal-close" id="close-auth-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
 
+      <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+        <div id="auth-logged-in-view" class="hidden" style="text-align: center; padding: 0.5rem 0;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.25rem;" id="auth-user-avatar">🐉</div>
+          <h3 id="auth-user-name" style="margin: 0; font-family:'Outfit'; font-weight:800;">Username</h3>
+          <p id="auth-user-rank" style="margin: 0.25rem 0 1rem; font-size: 0.85rem; font-weight: 700; color: var(--accent-light);">Ranah Kultivasi: Pemula</p>
+          <button id="auth-logout-btn" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); padding: 0.55rem 1.25rem; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; width: 100%;">Keluar Akun (Logout)</button>
+        </div>
+
+        <form id="auth-form" style="display: flex; flex-direction: column; gap: 0.85rem;">
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Username Kultivator</label>
+            <input type="text" id="auth-input-user" placeholder="Masukkan username..." required style="width: 100%; background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); padding: 0.6rem 0.85rem; border-radius: var(--radius-md); font-size: 0.85rem;" autocomplete="off">
+          </div>
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 0.35rem;">Kata Sandi (Password)</label>
+            <input type="password" id="auth-input-pass" placeholder="Masukkan password..." required style="width: 100%; background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); padding: 0.6rem 0.85rem; border-radius: var(--radius-md); font-size: 0.85rem;">
+          </div>
+
+          <button type="submit" class="btn-baca" style="margin-top: 0.5rem; justify-content: center; padding: 0.65rem;"><i class="fa-solid fa-right-to-bracket"></i> Masuk / Daftar Akun</button>
+        </form>
+
+        <div style="background: rgba(168,85,247,0.1); border: 1px dashed rgba(168,85,247,0.3); padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
+          💡 <b>Info Kultivasi:</b> Jika belum punya akun, memasukkan Username & Password di atas akan langsung membuatkan akun kultivator baru secara otomatis!
+        </div>
       </div>
     </div>
   </div>
@@ -693,7 +731,7 @@
     </div>
   </footer>
 
-  <script src="data.js?v=7.0"></script>
-  <script src="app.js?v=7.0"></script>
+  <script src="data.js?v=8.0"></script>
+  <script src="app.js?v=8.0"></script>
 </body>
 </html>
