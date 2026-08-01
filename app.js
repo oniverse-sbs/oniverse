@@ -958,7 +958,7 @@
     userName: localStorage.getItem('oniverse_username') || `Pembaca_${rand(1000, 9999)}`,
     messages: JSON.parse(localStorage.getItem('oniverse_forum_msgs') || 'null') || [
       { id: 1, channel: 'general', author: 'Rian_Otaku', avatar: 'R', text: 'Solo Leveling Ragnarok rilis jam berapa min?', time: '10:14' },
-      { id: 2, channel: 'general', author: 'Admin_Oni', avatar: 'A', text: 'Halo kawan-kawan! Komikcast + Shinigami sudah digabung di OniVerse ya! 🔥', time: '10:16', isAdmin: true },
+      { id: 2, channel: 'general', author: 'Admin_Oni', avatar: 'A', text: 'Halo kawan-kawan! Selamat datang di Forum OniVerse! Lebih dari 600+ komik HD siap dibaca gratis! 🔥', time: '10:16', isAdmin: true },
       { id: 3, channel: 'rekomendasi', author: 'BudiManhwa', avatar: 'B', text: 'Rekomendasi manhwa sistem yang bagus dong?', time: '09:45' },
       { id: 4, channel: 'rekomendasi', author: 'Siska_Anime', avatar: 'S', text: 'Coba baca "The Greatest Estate Developer", kocak parah!', time: '09:50' },
       { id: 5, channel: 'spoiler', author: 'TeoriGod', avatar: 'T', text: 'Spoiler Ch 887 Demonic Emperor: Zhuo Fan bakalan bantai klan suci!', time: '11:05' }
