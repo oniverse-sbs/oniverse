@@ -561,20 +561,37 @@
     STATE.history = [historyEntry, ...STATE.history.filter(h => h.slug !== slug)].slice(0, 20);
     saveHistory();
     trackRead(series.title);
-
+    
     // Fetch chapter images
-    const chSlug = ch.slug || ch.chapter_slug || '';
+    const chSlug = ch.slug || ch.chapter_slug || ch.chapter_id || '';
     try {
       const res = await fetch(`https://api.shngm.io/v1/chapter/detail/${chSlug}`);
       if (!res.ok) throw new Error('API error');
-      const data = await res.json();
-      const images = data.data?.chapter?.images || data.images || data.data?.images || [];
+      const jsonRes = await res.json();
+      const d = jsonRes.data || {};
+      const baseUrl = d.base_url || d.base_url_low || 'https://assets.shngm.id';
+      const chData = d.chapter || {};
+      const chPath = chData.path || '';
+      const filenames = chData.data || chData.images || [];
 
-      if (!images.length) throw new Error('No images');
+      let images = [];
+      if (Array.isArray(filenames) && filenames.length > 0) {
+        images = filenames.map(fn => {
+          if (typeof fn === 'string') {
+            if (fn.startsWith('http')) return fn;
+            return baseUrl + chPath + fn;
+          }
+          return fn.url || fn.src || '';
+        });
+      } else if (Array.isArray(d.images)) {
+        images = d.images.map(i => typeof i === 'string' ? (i.startsWith('http') ? i : baseUrl + i) : i.url || i.src);
+      }
+
+      if (!images.length) throw new Error('No images found');
 
       content.innerHTML = `
         <div class="reader-images-wrap">
-          ${images.map((img, i) => `<img src="${typeof img === 'string' ? img : img.url || img.src}" class="reader-page-img" alt="Page ${i + 1}" loading="lazy" onerror="this.alt='Gagal memuat halaman ${i + 1}'">`).join('')}
+          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="Halaman ${i + 1}" loading="lazy" onerror="this.alt='Gagal memuat halaman ${i + 1}'">`).join('')}
         </div>
         <div class="reader-footer-nav">
           <p style="color:var(--text-muted);font-size:0.85rem">— Akhir Chapter ${ch.number || ch.chapter || idx + 1} —</p>
