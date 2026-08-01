@@ -464,6 +464,10 @@
           </div>
         </div>
       </div>
+      <!-- Modal Sponsored Ad Slot #3 -->
+      <div style="margin: 0.85rem 0; text-align: center; min-height: 80px;" id="modal-ad-slot">
+        <script src="https://pl30628279.effectivecpmnetwork.com/e1/22/4e/e1224e58d177272cb8d6f83b09dd728c.js"></script>
+      </div>
       <div class="chapter-section">
         <div class="chapter-header">
           <h3 style="font-family:'Outfit';font-weight:700;font-size:1rem"><i class="fa-solid fa-list"></i> Daftar Chapter (${sortedChapters.length})</h3>
