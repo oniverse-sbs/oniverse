@@ -99,28 +99,37 @@
   // ==========================================================================
   async function loadData() {
     try {
-      const res = await fetch('scraped_data/series.json');
-      if (!res.ok) throw new Error('Fetch fail');
-      STATE.allSeries = await res.json();
+      let res = await fetch('scraped_data/series.json');
+      if (!res.ok) res = await fetch('/scraped_data/series.json');
+      if (!res.ok) throw new Error('Fetch fail: status ' + res.status);
+      const data = await res.json();
+      STATE.allSeries = Array.isArray(data) ? data : (data.series || []);
       STATE.filtered = [...STATE.allSeries];
       onDataReady();
     } catch (e) {
       console.error('Data load error:', e);
-      showToast('Gagal memuat data komik', 'warning');
+      showToast('Gagal memuat data komik. Coba refresh halaman.', 'warning');
     }
   }
 
+  function safeExec(fn, name) {
+    try { fn(); } catch(err) { console.error(`Error rendering ${name}:`, err); }
+  }
+
   function onDataReady() {
-    populateGenreFilter();
-    renderHero();
-    renderTrending();
-    renderContinue();
-    renderUpdateList();
-    renderRanking();
-    updateBookmarkCount();
-    renderStats();
-    $('#footer-total').textContent = STATE.allSeries.length + '+';
-    $('#footer-updated').textContent = 'Data terakhir diperbarui: ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    safeExec(populateGenreFilter, 'GenreFilter');
+    safeExec(renderHero, 'Hero');
+    safeExec(renderTrending, 'Trending');
+    safeExec(renderContinue, 'Continue');
+    safeExec(renderUpdateList, 'UpdateList');
+    safeExec(renderRanking, 'Ranking');
+    safeExec(updateBookmarkCount, 'BookmarkCount');
+    safeExec(renderStats, 'Stats');
+
+    const totalEl = $('#footer-total');
+    if (totalEl) totalEl.textContent = STATE.allSeries.length + '+';
+    const updatedEl = $('#footer-updated');
+    if (updatedEl) updatedEl.textContent = 'Data terakhir diperbarui: ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     showToast(`${STATE.allSeries.length} komik berhasil dimuat!`, 'success');
   }
 
@@ -465,6 +474,23 @@
 
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+
+    // Fetch full chapters from API if available
+    if (s.id && (!s.chapters || s.chapters.length < (s.total_chapters || 30))) {
+      fetch(`https://api.shngm.io/v1/chapter/${s.id}/list?page=1&page_size=500&sort_by=chapter_number&sort_order=desc`)
+        .then(r => r.json())
+        .then(d => {
+          if (d && d.retcode === 0 && Array.isArray(d.data)) {
+            s.chapters = d.data.map(c => ({
+              number: String(c.chapter_number || ''),
+              chapter: String(c.chapter_number || ''),
+              slug: c.chapter_id || '',
+              date: c.release_date || c.created_at || ''
+            }));
+            if (STATE.currentDetail === s) openDetail(s);
+          }
+        }).catch(e => console.warn('Chapter API fetch error:', e));
+    }
   }
 
   function closeDetail() {
