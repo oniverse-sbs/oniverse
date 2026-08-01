@@ -1261,6 +1261,18 @@
       setTimeout(() => { openAdminModal(); }, 500);
     }
 
+    // Welcome Sponsored Pop-up Ad (Triggered once per session)
+    if (!sessionStorage.getItem('oniverse_welcome_ad_shown')) {
+      setTimeout(() => {
+        $('#welcome-ad-modal')?.classList.remove('hidden');
+        sessionStorage.setItem('oniverse_welcome_ad_shown', 'true');
+      }, 1500);
+    }
+
+    const closeWelcomeAd = () => { $('#welcome-ad-modal')?.classList.add('hidden'); };
+    $('#close-welcome-ad-btn')?.addEventListener('click', closeWelcomeAd);
+    $('#continue-reading-btn')?.addEventListener('click', closeWelcomeAd);
+
     // Theme toggle
     $('#theme-toggle')?.addEventListener('click', () => {
       showToast('Fitur dark/light mode segera hadir!', 'info');

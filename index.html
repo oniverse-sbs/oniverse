@@ -740,6 +740,46 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       WELCOME SPONSORED POPUP AD MODAL (ONCE PER SESSION)
+  ============================================================ -->
+  <div class="forum-modal-overlay hidden" id="welcome-ad-modal" style="z-index: 9999;">
+    <div class="forum-card" style="max-width: 480px; height: auto; max-height: 540px; text-align: center; border: 1px solid var(--accent-light);">
+      <div class="forum-header" style="background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(245,158,11,0.2));">
+        <div class="forum-title-wrap">
+          <i class="fa-solid fa-gift" style="color:#f59e0b; font-size:1.3rem"></i>
+          <div>
+            <h3 style="margin:0; font-family:'Outfit'; font-weight:800; color:var(--text-main);">Selamat Datang di OniVerse!</h3>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Sponsor Resmi Pembaca Komik Gratis</span>
+          </div>
+        </div>
+        <button class="modal-close" id="close-welcome-ad-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+        <p style="margin:0; font-size:0.85rem; color:var(--text-muted);">Dukung OniVerse agar semua komik tetap 100% GRATIS selamanya! 🔥</p>
+        
+        <!-- Adsterra Sponsored Banner Unit -->
+        <div style="width: 100%; min-height: 160px; background: var(--bg-main); border: 1px solid var(--border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; overflow: hidden;" id="welcome-ad-unit">
+          <script type="text/javascript">
+            atOptions = {
+              'key' : '9d2d0cb539265f24ec4faeb62e731454',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          </script>
+          <script type="text/javascript" src="//www.highperformanceformat.com/9d2d0cb539265f24ec4faeb62e731454/invoke.js"></script>
+        </div>
+
+        <button class="btn-baca" id="continue-reading-btn" style="width: 100%; justify-content: center; padding: 0.75rem; font-size: 0.9rem;">
+          <i class="fa-solid fa-circle-play"></i> Lanjutkan Membaca Komik Gratis
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== SPONSORED AD BANNER SLOT #4 ===== -->
   <div class="ad-container" style="max-width: 1200px; margin: 1.5rem auto 0; text-align: center; overflow: hidden;" id="ad-space-footer">
     <script src="https://pl30628279.effectivecpmnetwork.com/e1/22/4e/e1224e58d177272cb8d6f83b09dd728c.js"></script>
@@ -784,7 +824,7 @@
     </div>
   </footer>
 
-  <script src="data.js?v=16.0"></script>
-  <script src="app.js?v=16.0"></script>
+  <script src="data.js?v=17.0"></script>
+  <script src="app.js?v=17.0"></script>
 </body>
 </html>
