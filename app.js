@@ -561,9 +561,24 @@
   // ==========================================================================
   //  UPDATE LIST
   // ==========================================================================
+  function formatTimeAgo(dStr) {
+    if (!dStr) return 'Baru';
+    const t = Date.parse(dStr);
+    if (isNaN(t)) return dStr.slice(0, 10);
+    const diffMs = Date.now() - t;
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Baru saja';
+    if (diffMins < 60) return `${diffMins} mnt lalu`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} jam lalu`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays} hari lalu`;
+    return new Date(t).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  }
+
   function parseDateScore(s) {
     if (!s) return 0;
-    const dStr = s.last_updated || s.updated || s.latest_chapter_time || '';
+    const dStr = s.last_updated || s.updated || s.latest_chapter_time || s.updated_at || '';
     if (!dStr) return 0;
     const t = Date.parse(dStr);
     return isNaN(t) ? 0 : t;
@@ -599,7 +614,8 @@
       } else if (s.total_chapters) {
         chText = `${s.total_chapters} Chapter`;
       }
-      const timeText = s.last_updated || s.updated || 'Baru';
+      const rawTime = s.last_updated || s.updated || s.updated_at || '';
+      const timeText = formatTimeAgo(rawTime);
       const isNew = i < 8;
       const typeBadge = s.type ? `<span class="update-type-tag ${s.type.toLowerCase()}">${s.type}</span>` : '';
       return `
