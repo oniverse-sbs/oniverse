@@ -11,8 +11,8 @@
   const STATE = {
     allSeries: [],
     filtered: [],
-    displayCount: 12,
-    perPage: 12,
+    displayCount: 24,
+    perPage: 24,
     currentSlide: 0,
     sliderTimer: null,
     currentDetail: null,
@@ -432,11 +432,7 @@
   // ==========================================================================
   function renderHero() {
     const featured = [...STATE.allSeries]
-      .sort((a, b) => {
-        const da = a.last_updated || a.updated || '';
-        const db = b.last_updated || b.updated || '';
-        return db.localeCompare(da);
-      })
+      .sort((a, b) => parseDateScore(b) - parseDateScore(a))
       .slice(0, 5);
 
     if (!featured.length) return;
