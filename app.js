@@ -335,7 +335,7 @@
     let initialLoaded = false;
     if (window.SERIES_DATA && Array.isArray(window.SERIES_DATA) && window.SERIES_DATA.length > 0) {
       console.log('Loaded initial data from window.SERIES_DATA:', window.SERIES_DATA.length);
-      STATE.allSeries = window.SERIES_DATA;
+      STATE.allSeries = [...window.SERIES_DATA].sort((a, b) => parseDateScore(b) - parseDateScore(a));
       STATE.filtered = [...STATE.allSeries];
       onDataReady();
       initialLoaded = true;
@@ -369,7 +369,7 @@
     }
 
     if (freshData && freshData.length > 0) {
-      STATE.allSeries = freshData;
+      STATE.allSeries = [...freshData].sort((a, b) => parseDateScore(b) - parseDateScore(a));
       STATE.filtered = [...STATE.allSeries];
       onDataReady();
     } else if (!initialLoaded) {
