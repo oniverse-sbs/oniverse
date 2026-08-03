@@ -150,8 +150,12 @@ def main():
     print(f"Merge Complete! {updated_count} series updated, {added_count} new series added.")
     print(f"Total catalog size: {len(existing_catalog)} series.")
     
-    # Save to series.json
+    # Save to scraped_data/series.json and root series.json
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(existing_catalog, f, ensure_ascii=False, separators=(',', ':'))
+        
+    ROOT_SERIES_FILE = os.path.join(PROJECT_DIR, "series.json")
+    with open(ROOT_SERIES_FILE, "w", encoding="utf-8") as f:
         json.dump(existing_catalog, f, ensure_ascii=False, separators=(',', ':'))
         
     # Save to data.js

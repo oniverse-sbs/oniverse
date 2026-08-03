@@ -110,15 +110,19 @@ def main():
     
     print(f"Sorted total catalog: {len(existing_catalog)} series. Top item: {existing_catalog[0].get('title')} ({existing_catalog[0].get('last_updated')})")
     
-    # Save to series.json
+    # Save to scraped_data/series.json and root series.json
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(existing_catalog, f, ensure_ascii=False, separators=(',', ':'))
+        
+    ROOT_SERIES_FILE = os.path.join(PROJECT_DIR, "series.json")
+    with open(ROOT_SERIES_FILE, "w", encoding="utf-8") as f:
         json.dump(existing_catalog, f, ensure_ascii=False, separators=(',', ':'))
         
     # Save to data.js
     with open(DATA_JS_FILE, "w", encoding="utf-8") as f:
         f.write("window.SERIES_DATA = " + json.dumps(existing_catalog, ensure_ascii=False, separators=(',', ':')) + ";")
         
-    print("SUCCESSFULLY updated series.json & data.js!")
+    print("SUCCESSFULLY updated root series.json, scraped_data/series.json & data.js!")
 
 if __name__ == "__main__":
     main()
