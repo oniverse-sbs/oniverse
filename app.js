@@ -344,6 +344,8 @@
     // Force fetch fresh live data to bypass CDN/browser cache
     const cacheBuster = `t=${Date.now()}`;
     const candidates = [
+      `https://raw.githubusercontent.com/oniverse-sbs/oniverse/main/scraped_data/series.json?${cacheBuster}`,
+      `https://raw.githubusercontent.com/oniverse-sbs/oniverse/main/series.json?${cacheBuster}`,
       `series.json?${cacheBuster}`,
       `scraped_data/series.json?${cacheBuster}`,
       `data/series.json?${cacheBuster}`,
