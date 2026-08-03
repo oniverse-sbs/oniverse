@@ -25,52 +25,22 @@
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
 
-  <!-- ===== GOOGLE STRUCTURED DATA (JSON-LD) ===== -->
+  <!-- ===== GOOGLE STRUCTURED DATA (JSON-LD) — satu WebSite, satu Organization ===== -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "OniVerse",
-    "alternateName": "OniVerse SBS",
+    "alternateName": ["OniVerse SBS", "Oniverse"],
     "url": "https://oniverse.sbs/",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://oniverse.sbs/?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
-  }
-  </script>
-
-  <!-- ===== OPEN GRAPH (Facebook, WhatsApp, Telegram) ===== -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="OniVerse.SBS">
-  <meta property="og:title" content="OniVerse.SBS - Baca Komik Manhwa, Manga & Manhua Online Gratis">
-  <meta property="og:description" content="Baca 300+ komik manhwa, manga, dan manhua online gratis dengan kualitas HD. Update tercepat setiap hari!">
-  <meta property="og:url" content="https://oniverse.sbs/">
-  <meta property="og:image" content="https://oniverse.sbs/og-image.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:locale" content="id_ID">
-
-  <!-- ===== TWITTER CARD ===== -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="OniVerse.SBS - Baca Komik Online Gratis Terlengkap">
-  <meta name="twitter:description" content="Baca 300+ komik manhwa, manga, dan manhua online gratis. Update tercepat!">
-  <meta name="twitter:image" content="https://oniverse.sbs/og-image.png">
-
-  <!-- ===== JSON-LD STRUCTURED DATA ===== -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "OniVerse.SBS",
-    "alternateName": ["OniVerse", "Oniverse SBS"],
-    "url": "https://oniverse.sbs/",
-    "description": "Platform baca komik manhwa, manga, dan manhua online gratis terlengkap di Indonesia.",
+    "description": "Situs baca komik Indonesia terlengkap. Manhwa sub indo, manga, dan manhua bahasa Indonesia online gratis.",
     "inLanguage": "id-ID",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://oniverse.sbs/?q={search_term_string}",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://oniverse.sbs/?q={search_term_string}"
+      },
       "query-input": "required name=search_term_string"
     }
   }
@@ -79,20 +49,37 @@
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "OniVerse.SBS",
+    "name": "OniVerse",
     "url": "https://oniverse.sbs/",
-    "logo": "https://oniverse.sbs/og-image.png",
-    "sameAs": []
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://oniverse.sbs/og-image.png",
+      "width": 1200,
+      "height": 630
+    }
   }
   </script>
 
-  <!-- ===== FAVICON ===== -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%237c3aed'/><text x='16' y='22' font-size='18' fill='white' text-anchor='middle' font-family='sans-serif' font-weight='bold'>O</text></svg>">
+  <!-- ===== OPEN GRAPH (Facebook, WhatsApp, Telegram) ===== -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OniVerse.SBS">
+  <meta property="og:title" content="OniVerse.SBS - Baca Komik Indonesia, Manhwa Sub Indo &amp; Manga Online Gratis">
+  <meta property="og:description" content="Situs baca komik Indonesia terlengkap. Tempat baca manhwa sub indo, manga, dan manhua bahasa indonesia online gratis, update chapter tercepat setiap hari!">
+  <meta property="og:url" content="https://oniverse.sbs/">
+  <meta property="og:image" content="https://oniverse.sbs/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- ===== TWITTER CARD ===== -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OniVerse.SBS - Baca Komik Indonesia, Manhwa Sub Indo &amp; Manga Gratis">
+  <meta name="twitter:description" content="Situs baca komik Indonesia terlengkap. Manhwa sub indo, manga, manhua bahasa indonesia, update chapter tercepat!">
+  <meta name="twitter:image" content="https://oniverse.sbs/og-image.png">
 
   <!-- ===== SEARCH ENGINE VERIFICATION ===== -->
   <meta name="msvalidate.01" content="oniverse-bing-verify">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
-  <link rel="alternate" type="application/rss+xml" title="OniVerse.SBS - Komik Terbaru" href="/sitemap.xml">
 
   <!-- ===== FONTS & ICONS ===== -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
