@@ -561,8 +561,19 @@
   // ==========================================================================
   //  UPDATE LIST
   // ==========================================================================
+  function parseDateScore(s) {
+    if (!s) return 0;
+    const dStr = s.last_updated || s.updated || s.latest_chapter_time || '';
+    if (!dStr) return 0;
+    const t = Date.parse(dStr);
+    return isNaN(t) ? 0 : t;
+  }
+
   function renderUpdateList() {
     const sorted = [...STATE.allSeries].sort((a, b) => {
+      const ta = parseDateScore(a);
+      const tb = parseDateScore(b);
+      if (tb !== ta) return tb - ta;
       const da = a.last_updated || a.updated || '';
       const db = b.last_updated || b.updated || '';
       return db.localeCompare(da);
@@ -580,16 +591,29 @@
 
     container.innerHTML = slice.map((s, i) => {
       const ch = s.chapters?.length ? s.chapters[0] : null;
-      const chText = ch ? `Chapter ${ch.number || ch.chapter || '?'}` : (s.total_chapters ? `${s.total_chapters} Chapter` : 'N/A');
-      const timeText = s.last_updated || s.updated || '';
-      const isNew = i < 5;
+      let chText = 'N/A';
+      if (ch) {
+        chText = `Chapter ${ch.number || ch.chapter || '?'}`;
+      } else if (s.latest_chapter) {
+        chText = `Chapter ${s.latest_chapter}`;
+      } else if (s.total_chapters) {
+        chText = `${s.total_chapters} Chapter`;
+      }
+      const timeText = s.last_updated || s.updated || 'Baru';
+      const isNew = i < 8;
+      const typeBadge = s.type ? `<span class="update-type-tag ${s.type.toLowerCase()}">${s.type}</span>` : '';
       return `
         <div class="update-item" data-idx="${i}">
-          <img src="${getCover(s)}" class="update-thumb" alt="${s.title || s.name}" loading="lazy" onerror="this.style.background='#14122c'">
+          <div class="update-thumb-wrap">
+            <img src="${getCover(s)}" class="update-thumb" alt="${s.title || s.name}" loading="lazy" onerror="this.style.background='#14122c'">
+            ${typeBadge}
+          </div>
           <div class="update-info">
             <div class="update-title">${s.title || s.name || 'Unknown'}</div>
-            <div class="update-chapter">${chText}</div>
-            <div class="update-time">${timeText}</div>
+            <div class="update-meta">
+              <span class="update-chapter"><i class="fa-solid fa-book-open" style="color:var(--accent-light);font-size:0.75rem;margin-right:3px"></i>${chText}</span>
+              <span class="update-time"><i class="fa-regular fa-clock" style="font-size:0.7rem;margin-right:2px"></i>${timeText}</span>
+            </div>
           </div>
           ${isNew ? '<span class="update-new-badge">NEW</span>' : ''}
         </div>`;

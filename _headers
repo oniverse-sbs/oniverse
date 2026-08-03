@@ -3,6 +3,20 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
+/*.xml
+  Access-Control-Allow-Origin: *
+  Content-Type: application/xml; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/sitemap.xml
+  Access-Control-Allow-Origin: *
+  Content-Type: application/xml; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/robots.txt
+  Access-Control-Allow-Origin: *
+  Content-Type: text/plain; charset=utf-8
+
 /*.json
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=3600

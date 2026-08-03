@@ -1,4 +1,6 @@
-# SPA Fallback for Cloudflare Pages
+# Direct static file access
+/sitemap.xml /sitemap.xml 200
+/robots.txt /robots.txt 200
 /series.json /series.json 200
 /scraped_data/series.json /scraped_data/series.json 200
 /data/series.json /data/series.json 200

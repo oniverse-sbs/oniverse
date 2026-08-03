@@ -77,8 +77,22 @@ def generate_sitemap():
     sitemap_path = os.path.join(PROJECT_DIR, "sitemap.xml")
     with open(sitemap_path, "w", encoding="utf-8") as f:
         f.write("\n".join(xml_parts))
+
+    # Also generate sitemap_index.xml
+    index_xml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        '  <sitemap>',
+        f'    <loc>{BASE_URL}/sitemap.xml</loc>',
+        f'    <lastmod>{today}</lastmod>',
+        '  </sitemap>',
+        '</sitemapindex>'
+    ]
+    index_path = os.path.join(PROJECT_DIR, "sitemap_index.xml")
+    with open(index_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(index_xml))
     
-    print(f"  >> Sitemap saved ({len(urls)} URLs)")
+    print(f"  >> Sitemap saved ({len(urls)} URLs) + sitemap_index.xml generated")
     return urls
 
 def generate_indexnow_key():
@@ -126,7 +140,7 @@ def submit_indexnow(urls, key):
                 method="POST"
             )
             resp = urllib.request.urlopen(req, context=ctx, timeout=10)
-            print(f"  >> {engine}: {resp.status} OK ✓")
+            print(f"  >> {engine}: {resp.status} OK [Success]")
         except urllib.error.HTTPError as e:
             print(f"  >> {engine}: HTTP {e.code} ({e.reason})")
         except Exception as e:
