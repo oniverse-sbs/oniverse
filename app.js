@@ -6,6 +6,78 @@
   'use strict';
 
   // ==========================================================================
+  //  SECURITY & ANTI-INSPECTION PROTECTIONS
+  // ==========================================================================
+
+  // 1. Disable right-click context menu
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+  });
+
+  // 2. Block DevTools keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    // F12
+    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+    // Ctrl+Shift+I (Inspect), Ctrl+Shift+J (Console), Ctrl+Shift+C (Element picker)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+    // Ctrl+U (View Source)
+    if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+    // Ctrl+S (Save Page)
+    if (e.ctrlKey && (e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
+    // Ctrl+Shift+K (Firefox Console)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'K' || e.key === 'k')) { e.preventDefault(); return false; }
+  });
+
+  // 3. Anti-debugging: detect DevTools open via debugger timing
+  let _devtoolsOpen = false;
+  const _antiDebug = function() {
+    const start = performance.now();
+    debugger;
+    const end = performance.now();
+    if (end - start > 100) {
+      if (!_devtoolsOpen) {
+        _devtoolsOpen = true;
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d0a1a;color:#7c3aed;font-family:Outfit,sans-serif;font-size:2rem;text-align:center;padding:2rem"><div><h1>⛔ Akses Ditolak</h1><p style="font-size:1rem;color:#94a3b8;margin-top:1rem">DevTools terdeteksi. Halaman ini dilindungi.</p><p style="font-size:0.85rem;color:#64748b;margin-top:0.5rem">Tutup DevTools dan refresh halaman untuk melanjutkan.</p></div></div>';
+      }
+    } else {
+      _devtoolsOpen = false;
+    }
+  };
+  setInterval(_antiDebug, 3000);
+
+  // 4. Disable text selection on protected elements (images, covers)
+  document.addEventListener('selectstart', function(e) {
+    const tag = e.target.tagName;
+    if (tag === 'IMG' || tag === 'CANVAS') {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  // 5. Disable image dragging
+  document.addEventListener('dragstart', function(e) {
+    if (e.target.tagName === 'IMG') {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  // 6. Console warning message
+  console.log('%c⛔ STOP!', 'color:#ef4444;font-size:48px;font-weight:bold;text-shadow:2px 2px #000');
+  console.log('%cJangan paste kode apapun di sini. Ini bisa membahayakan akun dan data kamu.', 'color:#f59e0b;font-size:16px');
+
+  // 7. Overwrite console methods in production to suppress logs
+  if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    const _noop = function() {};
+    console.log = _noop;
+    console.warn = _noop;
+    console.info = _noop;
+    console.debug = _noop;
+    // Keep console.error for critical debugging
+  }
+
+  // ==========================================================================
   //  STATE
   // ==========================================================================
   const STATE = {

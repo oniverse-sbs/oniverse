@@ -5,6 +5,54 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap');
 
 /* ============================================================
+   SECURITY: Image & Content Protection
+============================================================ */
+/* Prevent image saving via right-click/drag */
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+
+/* Re-enable pointer events on clickable image containers */
+.card, .hero-slide, .series-card, .trending-item, .ranking-item,
+a img, button img, [onclick] img {
+  pointer-events: auto;
+}
+
+/* Prevent text/content selection on body */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in input fields, textareas, and content areas */
+input, textarea, [contenteditable="true"],
+.synopsis-text, .chapter-list, .forum-message-body, .faq-a {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Reader image protection: invisible overlay prevents screenshot tools */
+.reader-page {
+  position: relative;
+}
+.reader-page::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+
+/* ============================================================
    CSS VARIABLES
 ============================================================ */
 :root {
