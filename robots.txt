@@ -2,8 +2,6 @@
 User-agent: *
 Allow: /
 
-# Sitemap
+# Sitemaps
 Sitemap: https://oniverse.sbs/sitemap.xml
-
-# Crawl-delay (be nice to the server)
-Crawl-delay: 2
+Sitemap: https://oniverse.sbs/sitemap_index.xml

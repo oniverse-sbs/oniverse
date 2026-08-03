@@ -41,6 +41,117 @@
   function saveHistory() { localStorage.setItem('oniverse_history', JSON.stringify(STATE.history)); }
   function saveStats() { localStorage.setItem('oniverse_stats', JSON.stringify(STATE.readingStats)); }
 
+  // ==========================================================================
+  //  SEO & URL ROUTING (for Google Indexing)
+  // ==========================================================================
+  const SEO_DEFAULTS = {
+    title: 'OniVerse.SBS - Baca Komik Indonesia, Manhwa Sub Indo & Manga Online Gratis',
+    description: 'Situs baca komik Indonesia terlengkap. Tempat baca manhwa sub indo, manga, dan manhua bahasa indonesia online gratis dengan kualitas gambar HD terbaik, update chapter tercepat setiap hari!',
+    canonical: 'https://oniverse.sbs/',
+    ogImage: 'https://oniverse.sbs/og-image.png'
+  };
+
+  function updateSEOMeta(opts) {
+    const title = opts.title || SEO_DEFAULTS.title;
+    const desc = opts.description || SEO_DEFAULTS.description;
+    const canonical = opts.canonical || SEO_DEFAULTS.canonical;
+    const ogImage = opts.ogImage || SEO_DEFAULTS.ogImage;
+
+    document.title = title;
+
+    const setMeta = (attr, val, content) => {
+      let el = document.querySelector(`meta[${attr}="${val}"]`);
+      if (el) el.setAttribute('content', content);
+    };
+
+    setMeta('name', 'description', desc);
+    setMeta('property', 'og:title', title);
+    setMeta('property', 'og:description', desc);
+    setMeta('property', 'og:url', canonical);
+    setMeta('property', 'og:image', ogImage);
+    setMeta('name', 'twitter:title', title);
+    setMeta('name', 'twitter:description', desc);
+    setMeta('name', 'twitter:image', ogImage);
+
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) canonicalEl.setAttribute('href', canonical);
+  }
+
+  function getComicURL(s) {
+    return '/komik/' + getSlug(s) + '/';
+  }
+
+  function navigateToComic(s, replace) {
+    const url = getComicURL(s);
+    if (replace) {
+      history.replaceState({ type: 'comic', slug: getSlug(s) }, '', url);
+    } else {
+      history.pushState({ type: 'comic', slug: getSlug(s) }, '', url);
+    }
+    const comicTitle = s.title || s.name || 'Unknown';
+    const genres = getGenres(s);
+    updateSEOMeta({
+      title: `${comicTitle} - Baca Komik Sub Indo Gratis | OniVerse`,
+      description: (s.synopsis || s.description || `Baca ${comicTitle} bahasa Indonesia gratis di OniVerse.SBS`).slice(0, 160),
+      canonical: 'https://oniverse.sbs' + url,
+      ogImage: getCover(s)
+    });
+  }
+
+  function navigateToHome(replace) {
+    if (replace) {
+      history.replaceState({ type: 'home' }, '', '/');
+    } else {
+      history.pushState({ type: 'home' }, '', '/');
+    }
+    updateSEOMeta(SEO_DEFAULTS);
+  }
+
+  function parseRoute() {
+    const path = window.location.pathname;
+    const match = path.match(/^\/komik\/([^/]+)/);
+    if (match) return { type: 'comic', slug: match[1] };
+    return { type: 'home' };
+  }
+
+  function handleRoute(route) {
+    if (route.type === 'comic' && route.slug) {
+      const series = STATE.allSeries.find(s => {
+        const slug = getSlug(s);
+        return slug === route.slug || slug === decodeURIComponent(route.slug);
+      });
+      if (series) {
+        openDetail(series, true);
+      } else {
+        console.warn('Comic not found for slug:', route.slug);
+      }
+    } else {
+      closeDetail(true);
+    }
+  }
+
+  let _pendingRoute = null;
+
+  function initRouter() {
+    window.addEventListener('popstate', (e) => {
+      const state = e.state;
+      if (state && state.type === 'comic' && state.slug) {
+        handleRoute(state);
+      } else {
+        closeDetail(true);
+      }
+    });
+
+    const route = parseRoute();
+    if (route.type === 'comic') {
+      if (STATE.allSeries.length > 0) {
+        handleRoute(route);
+      } else {
+        _pendingRoute = route;
+      }
+    }
+  }
+
   function getCover(s) {
     if (s.cover) return s.cover;
     if (s.thumbnail) return s.thumbnail;
@@ -399,6 +510,13 @@
     const updatedEl = $('#footer-updated');
     if (updatedEl) updatedEl.textContent = 'Data terakhir diperbarui: ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     showToast(`${STATE.allSeries.length} komik berhasil dimuat!`, 'success');
+
+    // Handle pending route from URL (e.g. /komik/slug/) after data loads
+    if (_pendingRoute) {
+      const route = _pendingRoute;
+      _pendingRoute = null;
+      handleRoute(route);
+    }
   }
 
   // ==========================================================================
@@ -709,8 +827,9 @@
   // ==========================================================================
   //  DETAIL MODAL
   // ==========================================================================
-  function openDetail(s) {
+  function openDetail(s, fromRouter) {
     STATE.currentDetail = s;
+    if (!fromRouter) navigateToComic(s, false);
     const modal = $('#detail-modal');
     const body = $('#modal-body');
     const genres = getGenres(s);
@@ -772,8 +891,7 @@
 
     $('#detail-share-btn').onclick = () => {
       const comicTitle = s.title || s.name || 'Komik';
-      const comicSlug = getSlug(s);
-      const shareUrl = `https://oniverse.sbs/?comic=${comicSlug}`;
+      const shareUrl = `https://oniverse.sbs${getComicURL(s)}`;
       const shareText = `Yuk baca komik "${comicTitle}" gratis di OniVerse! 🔥\n${shareUrl}`;
       
       if (navigator.share) {
@@ -821,7 +939,7 @@
                   date: (ch.createdAt || '').slice(0, 10)
                 };
               });
-              if (STATE.currentDetail === s) openDetail(s);
+              if (STATE.currentDetail === s) openDetail(s, true);
             }
           }).catch(e => console.warn('KC Chapter API error:', e));
       } else {
@@ -835,16 +953,18 @@
                 slug: c.chapter_id || '',
                 date: c.release_date || c.created_at || ''
               }));
-              if (STATE.currentDetail === s) openDetail(s);
+              if (STATE.currentDetail === s) openDetail(s, true);
             }
           }).catch(e => console.warn('Shinigami Chapter API error:', e));
       }
     }
   }
 
-  function closeDetail() {
+  function closeDetail(fromRouter) {
     $('#detail-modal').classList.add('hidden');
     document.body.style.overflow = '';
+    STATE.currentDetail = null;
+    if (!fromRouter) navigateToHome(false);
   }
 
   function getChapterCommentsKey(seriesSlug, chNum) {
@@ -1432,12 +1552,15 @@
       setTimeout(() => { openAdminModal(); }, 500);
     }
 
-    // Welcome Sponsored Pop-up Ad (Triggered once per session)
-    if (!sessionStorage.getItem('oniverse_welcome_ad_shown')) {
+    // Welcome Sponsored Pop-up Ad (Triggered once every 24 hours, not every session)
+    const welcomeAdLastShown = localStorage.getItem('oniverse_welcome_ad_time');
+    const welcomeAdCooldown = 24 * 60 * 60 * 1000; // 24 hours
+    const shouldShowWelcomeAd = !welcomeAdLastShown || (Date.now() - parseInt(welcomeAdLastShown, 10)) > welcomeAdCooldown;
+    if (shouldShowWelcomeAd) {
       setTimeout(() => {
         $('#welcome-ad-modal')?.classList.remove('hidden');
-        sessionStorage.setItem('oniverse_welcome_ad_shown', 'true');
-      }, 1500);
+        localStorage.setItem('oniverse_welcome_ad_time', String(Date.now()));
+      }, 10000); // 10 second delay — let user browse first
     }
 
     const closeWelcomeAd = () => { $('#welcome-ad-modal')?.classList.add('hidden'); };
@@ -1624,6 +1747,7 @@
     bindEvents();
     loadData();
     updateBookmarkCount();
+    initRouter();
   }
 
   if (document.readyState === 'loading') {
