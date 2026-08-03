@@ -1,0 +1,24 @@
+# Default: normalize text files to LF on commit
+* text=auto eol=lf
+
+# XML files: force LF to prevent CRLF breaking GSC sitemap parsing
+*.xml text eol=lf
+
+# Python scripts
+*.py text eol=lf
+
+# HTML, CSS, JS
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+
+# JSON data
+*.json text eol=lf
+
+# Binary files — no line ending conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary

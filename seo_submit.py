@@ -87,10 +87,10 @@ def generate_sitemap():
         })
     
     print(f"[2/3] Generating sitemap with {len(urls)} URLs...")
-    
+
     xml_parts = ['<?xml version="1.0" encoding="UTF-8"?>']
     xml_parts.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
-    
+
     for u in urls:
         xml_parts.append("  <url>")
         xml_parts.append(f"    <loc>{u['loc']}</loc>")
@@ -98,26 +98,30 @@ def generate_sitemap():
         xml_parts.append(f"    <changefreq>{u['changefreq']}</changefreq>")
         xml_parts.append(f"    <priority>{u['priority']}</priority>")
         xml_parts.append("  </url>")
-    
-    xml_parts.append("</urlset>")
-    
-    sitemap_path = os.path.join(PROJECT_DIR, "sitemap.xml")
-    with open(sitemap_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(xml_parts))
 
-    # Also generate sitemap_index.xml
-    index_xml = [
+    xml_parts.append("</urlset>")
+
+    sitemap_content = "\n".join(xml_parts) + "\n"
+
+    # Write with binary mode to force LF (not CRLF) on Windows
+    sitemap_path = os.path.join(PROJECT_DIR, "sitemap.xml")
+    with open(sitemap_path, "wb") as f:
+        f.write(sitemap_content.encode("utf-8"))
+
+    # Also generate sitemap_index.xml with LF endings
+    index_xml = "\n".join([
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
         '  <sitemap>',
         f'    <loc>{BASE_URL}/sitemap.xml</loc>',
         f'    <lastmod>{today}</lastmod>',
         '  </sitemap>',
-        '</sitemapindex>'
-    ]
+        '</sitemapindex>',
+        ''
+    ])
     index_path = os.path.join(PROJECT_DIR, "sitemap_index.xml")
-    with open(index_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(index_xml))
+    with open(index_path, "wb") as f:
+        f.write(index_xml.encode("utf-8"))
     
     print(f"  >> Sitemap saved ({len(urls)} URLs) + sitemap_index.xml generated")
     return urls
