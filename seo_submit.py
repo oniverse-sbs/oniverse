@@ -40,29 +40,45 @@ def generate_sitemap():
         "priority": "1.0"
     })
     
-    # Each comic gets a URL entry with properly encoded query param
+    # Each comic gets a URL entry with clean, XML-safe slug
     for s in series:
-        slug = s.get("slug", "") or s.get("id", "") or s.get("title", "").lower().replace(" ", "-")
-        if not slug or slug in ("kc-", "", "undefined"):
-            continue
+        slug = s.get("slug", "") or s.get("id", "") or ""
         title = s.get("title", "")
         updated = s.get("last_updated", "") or s.get("updated_at", "") or today
-        
+
+        # Skip empty/invalid slugs
+        if not slug or slug in ("kc-", "", "undefined"):
+            continue
+
         # Normalize date
         if "T" in updated:
             updated = updated[:10]
         elif not updated:
             updated = today
-        
-        # Use clean slug URL (no query params in sitemap for better GSC compatibility)
-        clean_slug = slug.replace(" ", "-").lower()
-        # Remove UUID-only slugs (not meaningful for SEO)
+
+        # Build clean SEO-safe slug from title if slug is UUID
+        import re
+        clean_slug = slug.lower().strip()
         if len(clean_slug) == 36 and clean_slug.count("-") == 4:
-            # It's a UUID, use title-based slug instead
-            clean_slug = title.lower().strip().replace(" ", "-").replace("'", "").replace(",", "")[:60] if title else None
-            if not clean_slug:
+            # It's a UUID — use title-based slug
+            if not title:
                 continue
-            
+            clean_slug = title.lower().strip()
+
+        # Sanitize slug: remove/replace all characters invalid in URLs or XML
+        clean_slug = clean_slug.replace("&", "and")  # & → and
+        clean_slug = clean_slug.replace("'", "").replace('"', "")
+        clean_slug = clean_slug.replace(":", "").replace(";", "")
+        clean_slug = clean_slug.replace("?", "").replace("!", "")
+        clean_slug = clean_slug.replace("(", "").replace(")", "")
+        clean_slug = clean_slug.replace(",", "").replace(".", "")
+        clean_slug = re.sub(r"[^\w\s-]", "", clean_slug)  # remove any other specials
+        clean_slug = re.sub(r"[\s_]+", "-", clean_slug)   # spaces/underscores → hyphens
+        clean_slug = re.sub(r"-+", "-", clean_slug).strip("-")  # collapse multiple hyphens
+        clean_slug = clean_slug[:80]  # max 80 chars
+        if not clean_slug:
+            continue
+
         urls.append({
             "loc": f"{BASE_URL}/komik/{clean_slug}/",
             "lastmod": updated[:10] if len(updated) >= 10 else today,
