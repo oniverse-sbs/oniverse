@@ -332,46 +332,47 @@
   //  DATA LOAD
   // ==========================================================================
   async function loadData() {
+    let initialLoaded = false;
     if (window.SERIES_DATA && Array.isArray(window.SERIES_DATA) && window.SERIES_DATA.length > 0) {
-      console.log('Loaded data instantly from window.SERIES_DATA:', window.SERIES_DATA.length);
+      console.log('Loaded initial data from window.SERIES_DATA:', window.SERIES_DATA.length);
       STATE.allSeries = window.SERIES_DATA;
       STATE.filtered = [...STATE.allSeries];
       onDataReady();
-      return;
+      initialLoaded = true;
     }
 
+    // Force fetch fresh live data to bypass CDN/browser cache
+    const cacheBuster = `t=${Date.now()}`;
     const candidates = [
-      'series.json',
-      'data/series.json',
-      'scraped_data/series.json',
-      '/series.json',
-      '/data/series.json',
-      '/scraped_data/series.json',
-      'https://oniverse.sbs/series.json'
+      `series.json?${cacheBuster}`,
+      `scraped_data/series.json?${cacheBuster}`,
+      `data/series.json?${cacheBuster}`,
+      `/series.json?${cacheBuster}`,
+      `https://oniverse.sbs/series.json?${cacheBuster}`
     ];
     
-    let loadedData = null;
+    let freshData = null;
     for (const url of candidates) {
       try {
-        const res = await fetch(url, { cache: 'no-cache' });
+        const res = await fetch(url, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (data && (Array.isArray(data) ? data.length > 0 : (data.series && data.series.length > 0))) {
-            loadedData = Array.isArray(data) ? data : data.series;
-            console.log(`Loaded data successfully from ${url} (${loadedData.length} items)`);
+            freshData = Array.isArray(data) ? data : data.series;
+            console.log(`Fresh live data fetched successfully from ${url} (${freshData.length} items)`);
             break;
           }
         }
       } catch (err) {
-        console.warn(`Attempt failed for ${url}:`, err);
+        console.warn(`Fetch attempt failed for ${url}:`, err);
       }
     }
 
-    if (loadedData && loadedData.length > 0) {
-      STATE.allSeries = loadedData;
+    if (freshData && freshData.length > 0) {
+      STATE.allSeries = freshData;
       STATE.filtered = [...STATE.allSeries];
       onDataReady();
-    } else {
+    } else if (!initialLoaded) {
       console.error('All data load candidates failed.');
       showToast('Gagal memuat data komik. Coba refresh halaman.', 'warning');
     }
