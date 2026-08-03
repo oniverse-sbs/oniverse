@@ -111,7 +111,7 @@ else:
     print("SUCCESS: ZERO ERRORS FOUND! All files, data schemas, XML structures, and live endpoints are 100% HEALTHY & VALID.")
 
 if warnings:
-    print(f"\n⚠️ WARNINGS ({len(warnings)}):")
+    print(f"\n[WARNINGS] ({len(warnings)}):")
     for w in warnings:
         print(f"   - {w}")
 
