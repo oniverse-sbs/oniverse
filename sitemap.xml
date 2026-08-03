@@ -7,6 +7,18 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://oniverse.sbs/?comic=kc-the-possessed-grappler</loc>
+    <lastmod>2026-08-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/?comic=kc-my-brother-is-a-mad-dog</loc>
+    <lastmod>2026-08-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oniverse.sbs/?comic=kc-contract-killer-enrollment</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -6319,12 +6331,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://oniverse.sbs/?comic=kc-my-brother-is-a-mad-dog</loc>
-    <lastmod>2026-07-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/?comic=f47fbf98-9677-4549-8634-14892393320b</loc>
     <lastmod>2026-07-31</lastmod>
     <changefreq>weekly</changefreq>
@@ -6470,12 +6476,6 @@
   </url>
   <url>
     <loc>https://oniverse.sbs/?comic=kc-the-chaebol-familys-genius-monster</loc>
-    <lastmod>2026-07-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/?comic=kc-the-possessed-grappler</loc>
     <lastmod>2026-07-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
