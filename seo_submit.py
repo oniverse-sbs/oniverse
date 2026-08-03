@@ -40,9 +40,11 @@ def generate_sitemap():
         "priority": "1.0"
     })
     
-    # Each comic gets a URL entry (even though it's SPA, helps SEO crawlers understand content)
+    # Each comic gets a URL entry with properly encoded query param
     for s in series:
-        slug = s.get("slug", "") or s.get("title", "").lower().replace(" ", "-")
+        slug = s.get("slug", "") or s.get("id", "") or s.get("title", "").lower().replace(" ", "-")
+        if not slug or slug in ("kc-", "", "undefined"):
+            continue
         title = s.get("title", "")
         updated = s.get("last_updated", "") or s.get("updated_at", "") or today
         
@@ -51,9 +53,18 @@ def generate_sitemap():
             updated = updated[:10]
         elif not updated:
             updated = today
+        
+        # Use clean slug URL (no query params in sitemap for better GSC compatibility)
+        clean_slug = slug.replace(" ", "-").lower()
+        # Remove UUID-only slugs (not meaningful for SEO)
+        if len(clean_slug) == 36 and clean_slug.count("-") == 4:
+            # It's a UUID, use title-based slug instead
+            clean_slug = title.lower().strip().replace(" ", "-").replace("'", "").replace(",", "")[:60] if title else None
+            if not clean_slug:
+                continue
             
         urls.append({
-            "loc": f"{BASE_URL}/?comic={slug}",
+            "loc": f"{BASE_URL}/komik/{clean_slug}/",
             "lastmod": updated[:10] if len(updated) >= 10 else today,
             "changefreq": "weekly",
             "priority": "0.8"
