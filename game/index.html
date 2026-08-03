@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OniVerse MMORPG — Web Browser RPG Game</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- Game Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Top Left HUD -->
+    <div class="hud-top-left">
+      <div class="hud-header">
+        <span class="hud-name" id="hud-name">Player</span>
+        <span class="hud-level" id="hud-level">Lv. 1</span>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-fill hp" id="hud-hp-bar" style="width: 100%;"></div>
+        <span class="bar-text" id="hud-hp-text">100 / 100</span>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-fill mp" id="hud-mp-bar" style="width: 100%;"></div>
+        <span class="bar-text" id="hud-mp-text">50 / 50</span>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-fill exp" id="hud-exp-bar" style="width: 0%;"></div>
+      </div>
+      <div class="hud-info-row">
+        <span id="hud-gold">50 💰</span>
+        <span id="hud-zone">Greenfield Village</span>
+      </div>
+      <button class="btn-stat-alert hidden" id="hud-stat-points" onclick="openStatsModal()">+3 Stat Points</button>
+    </div>
+
+    <!-- Top Right Action Menu -->
+    <div class="hud-action-buttons">
+      <button class="btn-icon-action" onclick="openStatsModal()">📊 Stats</button>
+      <button class="btn-icon-action" onclick="openInventoryModal()">🎒 Bag</button>
+      <button class="btn-icon-action" onclick="openQuestModal()">📜 Quests</button>
+      <button class="btn-icon-action" onclick="saveGamePrompt()">💾 Save</button>
+    </div>
+
+    <!-- Bottom Skill Hotbar -->
+    <div class="hud-hotbar-container" id="hud-hotbar"></div>
+
+    <!-- Bottom Left Chat Window -->
+    <div class="hud-chat">
+      <div class="chat-header">💬 Global Chat</div>
+      <div class="chat-messages" id="chat-messages"></div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CHARACTER CREATION ==================== -->
+  <div class="modal-overlay" id="modal-char-select">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚔️ Pilih Kelas Karakter</h2>
+      </div>
+      <div class="modal-body">
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+          Pilih kelas pahlawan kamu untuk memulai petualangan di OniVerse MMORPG!
+        </p>
+        <div class="class-grid">
+          <div class="class-card selected" onclick="selectClass('warrior', this)">
+            <div class="class-icon">⚔️</div>
+            <h3>Warrior</h3>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">HP Tinggi & Pertahanan Kuat</p>
+          </div>
+          <div class="class-card" onclick="selectClass('mage', this)">
+            <div class="class-icon">🔮</div>
+            <h3>Mage</h3>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Sihir Elemen Area Dmg Besar</p>
+          </div>
+          <div class="class-card" onclick="selectClass('archer', this)">
+            <div class="class-icon">🏹</div>
+            <h3>Archer</h3>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Serangan Jarak Jauh & Crit High</p>
+          </div>
+          <div class="class-card" onclick="selectClass('assassin', this)">
+            <div class="class-icon">🗡️</div>
+            <h3>Assassin</h3>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Kecepatan Tinggi & Burst Damage</p>
+          </div>
+        </div>
+        <button class="btn-battle" style="margin-top: 10px;" onclick="startGameWithClass()">Mulai Petualangan! 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: INVENTORY & BAG ==================== -->
+  <div class="modal-overlay hidden" id="modal-inventory">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🎒 Tas & Peralatan</h2>
+        <button class="btn-modal-close" onclick="closeModal('modal-inventory')">✕</button>
+      </div>
+      <div class="modal-body">
+        <h3>Equipment Dipakai</h3>
+        <div id="equip-slots-wrap" style="display:flex; gap:10px; justify-content:center; margin-bottom:10px;"></div>
+
+        <h3>Isi Tas Inventory (Max 20)</h3>
+        <div class="inventory-grid" id="inventory-grid"></div>
+        <div id="item-detail-preview" style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; font-size:0.85rem;">
+          Pilih item di tas untuk melihat detail.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CHARACTER STATS ==================== -->
+  <div class="modal-overlay hidden" id="modal-stats">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📊 Status Karakter</h2>
+        <button class="btn-modal-close" onclick="closeModal('modal-stats')">✕</button>
+      </div>
+      <div class="modal-body" id="modal-stats-body"></div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: SHOP ==================== -->
+  <div class="modal-overlay hidden" id="modal-shop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🛒 Toko Merchant Rold</h2>
+        <button class="btn-modal-close" onclick="closeModal('modal-shop')">✕</button>
+      </div>
+      <div class="modal-body" id="modal-shop-body"></div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: QUEST LOG ==================== -->
+  <div class="modal-overlay hidden" id="modal-quest">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📜 Jurnal Misi (Quests)</h2>
+        <button class="btn-modal-close" onclick="closeModal('modal-quest')">✕</button>
+      </div>
+      <div class="modal-body" id="modal-quest-body"></div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: BATTLE ARENA ==================== -->
+  <div class="modal-overlay hidden" id="modal-battle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="battle-title">⚔️ Pertarungan!</h2>
+      </div>
+      <div class="modal-body battle-arena">
+        <div class="battle-fighters">
+          <div class="fighter-card">
+            <span class="fighter-sprite" id="battle-player-sprite">🧙‍♂️</span>
+            <strong id="battle-player-name">Player</strong>
+            <div class="bar-wrap" style="width:100%;">
+              <div class="bar-fill hp" id="battle-player-hp-bar" style="width:100%;"></div>
+            </div>
+          </div>
+          <div style="font-size:2rem; font-weight:800; color:var(--accent-red);">VS</div>
+          <div class="fighter-card">
+            <span class="fighter-sprite" id="battle-monster-sprite">🐉</span>
+            <strong id="battle-monster-name">Monster</strong>
+            <div class="bar-wrap" style="width:100%;">
+              <div class="bar-fill hp" id="battle-monster-hp-bar" style="width:100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="battle-log" id="battle-log"></div>
+
+        <div class="battle-actions">
+          <button class="btn-battle" onclick="battleAction('attack')">⚔️ Serang</button>
+          <button class="btn-battle" onclick="toggleBattleSkills()">🔮 Skill</button>
+          <button class="btn-battle flee" onclick="battleAction('flee')">🏃 Kabur</button>
+        </div>
+        <div id="battle-skills-sub" style="display:none; gap:6px; width:100%; flex-wrap:wrap; margin-top:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Game Scripts -->
+  <script src="js/sprites.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/monsters.js"></script>
+  <script src="js/combat.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/quests.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/engine.js"></script>
+
+  <script>
+    let selectedClass = 'warrior';
+
+    function selectClass(className, el) {
+      selectedClass = className;
+      document.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function startGameWithClass() {
+      document.getElementById('modal-char-select').classList.add('hidden');
+      Engine.init(selectedClass);
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function openStatsModal() {
+      const p = Engine.getPlayer();
+      const st = Player.getTotalStats(p);
+      const body = document.getElementById('modal-stats-body');
+
+      body.innerHTML = `
+        <div style="text-align:center; font-size:1.1rem; font-weight:800; color:var(--accent-gold);">
+          ${p.name} — Lv. ${p.level} ${p.className.toUpperCase()}
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px;">
+            <div>❤️ Max HP: <strong>${st.maxHp}</strong></div>
+            <div>🔵 Max MP: <strong>${st.maxMp}</strong></div>
+            <div>⚔️ Attack: <strong>${st.atk}</strong></div>
+            <div>🛡️ Defense: <strong>${st.def}</strong></div>
+            <div>⚡ Speed: <strong>${st.spd}</strong></div>
+            <div>🎯 Crit Rate: <strong>${(st.critRate * 100).toFixed(1)}%</strong></div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px;">
+            <div>Stat Points Sisa: <strong style="color:var(--accent-gold);">${p.statPoints}</strong></div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:10px;">
+              <button class="btn-battle" onclick="addStat('hp')">+10 Max HP</button>
+              <button class="btn-battle" onclick="addStat('mp')">+5 Max MP</button>
+              <button class="btn-battle" onclick="addStat('atk')">+2 ATK</button>
+              <button class="btn-battle" onclick="addStat('def')">+2 DEF</button>
+              <button class="btn-battle" onclick="addStat('spd')">+1 Speed</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-stats').classList.remove('hidden');
+    }
+
+    function addStat(stat) {
+      const p = Engine.getPlayer();
+      if (Player.allocateStat(p, stat)) {
+        openStatsModal();
+        UI.updateHUD(p, Engine.getCurrentZone());
+      }
+    }
+
+    function openInventoryModal() {
+      const p = Engine.getPlayer();
+      const grid = document.getElementById('inventory-grid');
+      const equipWrap = document.getElementById('equip-slots-wrap');
+
+      // Render equipment slots
+      equipWrap.innerHTML = ['weapon', 'armor', 'helmet', 'accessory'].map(slot => {
+        const item = p.equipment[slot];
+        return `
+          <div class="inventory-slot" title="${slot}">
+            <span style="font-size:0.6rem; position:absolute; top:2px; left:2px; color:var(--text-muted);">${slot[0].toUpperCase()}</span>
+            ${item ? `<span style="font-size:1.4rem;">${item.name[0]}</span>` : '<span style="color:#555;">KOSONG</span>'}
+          </div>
+        `;
+      }).join('');
+
+      // Render inventory grid
+      let slotsHtml = '';
+      for (let i = 0; i < 20; i++) {
+        const item = p.inventory[i];
+        slotsHtml += `
+          <div class="inventory-slot" onclick="previewItem(${i})">
+            ${item ? `<span style="font-size:1.4rem;">${item.name[0]}</span><span class="slot-qty">${item.qty > 1 ? item.qty : ''}</span>` : ''}
+          </div>
+        `;
+      }
+      grid.innerHTML = slotsHtml;
+
+      document.getElementById('modal-inventory').classList.remove('hidden');
+    }
+
+    function previewItem(idx) {
+      const p = Engine.getPlayer();
+      const item = p.inventory[idx];
+      const box = document.getElementById('item-detail-preview');
+      if (!item) {
+        box.innerHTML = 'Slot kosong.';
+        return;
+      }
+      box.innerHTML = `
+        <strong>${item.name}</strong> (${item.type.toUpperCase()})<br>
+        <span style="color:var(--text-muted);">${item.desc || ''}</span><br>
+        <div style="margin-top:8px; display:flex; gap:8px;">
+          ${item.slot ? `<button class="btn-battle" onclick="equipItem(${idx})">Pakai (Equip)</button>` : ''}
+          ${item.healHp || item.healMp ? `<button class="btn-battle" onclick="useItem(${idx})">Gunakan</button>` : ''}
+        </div>
+      `;
+    }
+
+    function equipItem(idx) {
+      const p = Engine.getPlayer();
+      if (Player.equipItem(p, idx)) {
+        openInventoryModal();
+        UI.updateHUD(p, Engine.getCurrentZone());
+      }
+    }
+
+    function useItem(idx) {
+      const p = Engine.getPlayer();
+      if (Player.useItem(p, idx)) {
+        openInventoryModal();
+        UI.updateHUD(p, Engine.getCurrentZone());
+      }
+    }
+
+    function openShopModal() {
+      const p = Engine.getPlayer();
+      const catalog = InventorySystem.getShopCatalog();
+      const body = document.getElementById('modal-shop-body');
+
+      body.innerHTML = `
+        <div style="text-align:right; font-weight:800; color:var(--accent-gold);">Gold Kamu: ${p.gold} 💰</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${catalog.map(item => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px;">
+              <div>
+                <strong>${item.name}</strong><br>
+                <span style="font-size:0.75rem; color:var(--text-muted);">${item.desc}</span>
+              </div>
+              <button class="btn-battle" style="flex:none; padding:6px 14px;" onclick="buyItem('${item.id}', ${item.buyPrice})">Beli ${item.buyPrice} 💰</button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('modal-shop').classList.remove('hidden');
+    }
+
+    function buyItem(itemId, price) {
+      const p = Engine.getPlayer();
+      if (p.gold < price) {
+        alert('Gold tidak cukup!');
+        return;
+      }
+      const item = { ...InventorySystem.ITEM_DATABASE[itemId] };
+      if (Player.addItem(p, item)) {
+        p.gold -= price;
+        openShopModal();
+        UI.updateHUD(p, Engine.getCurrentZone());
+      } else {
+        alert('Tas penuh!');
+      }
+    }
+
+    function openQuestModal() {
+      const p = Engine.getPlayer();
+      const active = QuestSystem.getActiveQuests(p);
+      const available = QuestSystem.getAvailableQuests(p);
+      const body = document.getElementById('modal-quest-body');
+
+      body.innerHTML = `
+        <h3>Misi Aktif</h3>
+        ${active.length ? active.map(q => `
+          <div style="background:rgba(124,58,237,0.1); padding:10px; border-radius:8px; margin-bottom:8px;">
+            <strong>${q.title}</strong><br>
+            <span style="font-size:0.8rem;">${q.description}</span><br>
+            <span style="font-size:0.8rem; color:var(--accent-gold);">Progres: ${p.questProgress[q.id]} / ${q.targetCount}</span>
+          </div>
+        `).join('') : '<p style="color:var(--text-muted); font-size:0.85rem;">Tidak ada misi aktif.</p>'}
+
+        <h3 style="margin-top:12px;">Misi Tersedia</h3>
+        ${available.length ? available.map(q => `
+          <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong>${q.title}</strong><br>
+              <span style="font-size:0.8rem; color:var(--text-muted);">${q.description}</span>
+            </div>
+            <button class="btn-battle" style="flex:none; padding:6px 12px;" onclick="acceptQuest('${q.id}')">Ambil Misi</button>
+          </div>
+        `).join('') : '<p style="color:var(--text-muted); font-size:0.85rem;">Semua misi telah diambil/diselesaikan.</p>'}
+      `;
+      document.getElementById('modal-quest').classList.remove('hidden');
+    }
+
+    function acceptQuest(qid) {
+      const p = Engine.getPlayer();
+      if (QuestSystem.acceptQuest(p, qid)) {
+        openQuestModal();
+      }
+    }
+
+    function openBattleModal(monster) {
+      const p = Engine.getPlayer();
+      const bs = Combat.startBattle(p, monster, onBattleEnd);
+
+      document.getElementById('battle-title').textContent = `⚔️ Bertarung vs ${monster.name}`;
+      document.getElementById('battle-player-name').textContent = p.name;
+      document.getElementById('battle-monster-name').textContent = monster.name;
+      document.getElementById('battle-monster-sprite').textContent = monster.icon;
+
+      updateBattleUI();
+      document.getElementById('modal-battle').classList.remove('hidden');
+    }
+
+    function updateBattleUI() {
+      const bs = Combat.getBattleState();
+      if (!bs) return;
+
+      document.getElementById('battle-player-hp-bar').style.width = `${(bs.player.hp / bs.playerStats.maxHp) * 100}%`;
+      document.getElementById('battle-monster-hp-bar').style.width = `${(bs.monster.hp / bs.monster.maxHp) * 100}%`;
+
+      const log = document.getElementById('battle-log');
+      log.innerHTML = bs.log.map(l => `<div>${l}</div>`).join('');
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function battleAction(action, skillId = null) {
+      const bs = Combat.getBattleState();
+      if (!bs || bs.turn !== 'player') return;
+
+      const res = Combat.executePlayerTurn(action, skillId);
+      updateBattleUI();
+
+      if (res && res.type === 'flee' && res.success) {
+        document.getElementById('modal-battle').classList.add('hidden');
+        return;
+      }
+
+      if (Combat.isInBattle()) {
+        setTimeout(() => {
+          Combat.executeMonsterTurn();
+          updateBattleUI();
+        }, 800);
+      }
+    }
+
+    function toggleBattleSkills() {
+      const sub = document.getElementById('battle-skills-sub');
+      if (sub.style.display === 'flex') {
+        sub.style.display = 'none';
+        return;
+      }
+
+      const p = Engine.getPlayer();
+      const skills = Player.getAvailableSkills(p);
+      sub.innerHTML = skills.map(s => `
+        <button class="btn-battle" style="padding:6px 10px; font-size:0.75rem;" onclick="battleAction('skill', '${s.id}')">
+          ${s.icon} ${s.name} (${s.mpCost} MP)
+        </button>
+      `).join('');
+      sub.style.display = 'flex';
+    }
+
+    function onBattleEnd(state) {
+      const p = state.player;
+      if (state.result === 'win') {
+        QuestSystem.updateQuestKill(p, state.monster.type);
+        if (state.loot.leveledUp) {
+          Engine.playSound('levelUp');
+          alert(`🎉 LEVEL UP! Kamu sekarang Level ${p.level}!`);
+        }
+      }
+      setTimeout(() => {
+        document.getElementById('modal-battle').classList.add('hidden');
+        UI.updateHUD(p, Engine.getCurrentZone());
+      }, 1000);
+    }
+
+    function saveGamePrompt() {
+      const p = Engine.getPlayer();
+      const zone = Engine.getCurrentZone();
+      Player.saveGame(p, zone);
+      alert('💾 Game berhasil disimpan ke browser (localStorage)!');
+    }
+
+    // Auto open character creation if no save exists
+    window.addEventListener('load', () => {
+      const saved = Player.loadGame();
+      if (!saved) {
+        document.getElementById('modal-char-select').classList.remove('hidden');
+      } else {
+        document.getElementById('modal-char-select').classList.add('hidden');
+        Engine.init();
+      }
+    });
+  </script>
+</body>
+</html>
