@@ -1462,9 +1462,6 @@
       images = ch.images.filter(img => 
         typeof img === 'string' && 
         img.trim() && 
-        !img.includes('chapter_ch_') && 
-        !img.includes('manga_kc_') && 
-        !img.includes('chapter_kc_') && 
         !img.includes('assets.shinigami.ae')
       );
     }
@@ -1483,7 +1480,7 @@
           const detailData = await detailRes.json();
           const targetCh = (detailData.chapters || []).find(c => (c.number || c.chapter) == (ch.number || ch.chapter) || (c.slug && c.slug === ch.slug) || (c.chapter_id && c.chapter_id === ch.slug));
           if (targetCh && Array.isArray(targetCh.images) && targetCh.images.length > 0) {
-            images = targetCh.images.filter(img => typeof img === 'string' && img.trim() && !img.includes('chapter_ch_') && !img.includes('assets.shinigami.ae'));
+            images = targetCh.images.filter(img => typeof img === 'string' && img.trim() && !img.includes('assets.shinigami.ae'));
             if (images.length > 0) ch.images = images;
           }
         }
@@ -1555,7 +1552,7 @@
       }
 
       if (Array.isArray(images) && images.length > 0) {
-        images = images.filter(img => typeof img === 'string' && !img.includes('picsum.photos') && !img.includes('unsplash') && !img.includes('chapter_ch_') && !img.includes('assets.shinigami.ae'));
+        images = images.filter(img => typeof img === 'string' && !img.includes('picsum.photos') && !img.includes('unsplash') && !img.includes('assets.shinigami.ae'));
       }
 
       const comicTitle = series.title || series.name || 'Komik';
