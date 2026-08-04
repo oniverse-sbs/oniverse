@@ -1024,7 +1024,9 @@
     if (!s.chapters || s.chapters.length === 0) {
       const rawCh = String(s.latest_chapter || s.total_chapters || '15');
       const numMatch = rawCh.match(/\d+/);
-      const totalNum = numMatch ? parseInt(numMatch[0], 10) : 15;
+      let totalNum = numMatch ? parseInt(numMatch[0], 10) : 15;
+      if (isNaN(totalNum) || totalNum <= 0) totalNum = 15;
+
       const slug = getSlug(s);
       const isKC = s.source === 'komikcast' || String(s.id).startsWith('kc_') || slug.startsWith('kc-');
       const kcSlug = slug.replace(/^kc-/, '');
