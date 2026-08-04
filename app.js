@@ -112,6 +112,14 @@
     return ['Action', 'Fantasy'];
   }
 
+  function parseDateScore(s) {
+    if (!s) return 0;
+    const d = s.last_updated || s.updated_at || s.created_at || '';
+    if (!d) return 0;
+    const t = new Date(d).getTime();
+    return isNaN(t) ? 0 : t;
+  }
+
   function saveBookmarks() { localStorage.setItem('oniverse_bookmarks', JSON.stringify(STATE.bookmarks)); }
   function saveHistory() { localStorage.setItem('oniverse_history', JSON.stringify(STATE.history)); }
   function saveStats() { localStorage.setItem('oniverse_stats', JSON.stringify(STATE.readingStats)); }
