@@ -188,14 +188,22 @@ def generate_comic_pages(all_series):
         # Genre tags HTML
         genre_tags = " ".join(f'<span class="genre-tag">{esc(g)}</span>' for g in genres[:6])
 
-        # Chapter list HTML
+        # Chapter list HTML (All chapters, guaranteed non-empty clickable links)
+        ch_list = chapters if (chapters and len(chapters) > 0) else []
         ch_html = ""
-        for ch in chapters[:30]:
-            ch_num = ch.get("number", ch.get("chapter", "?"))
-            ch_date = ch.get("date", ch.get("released", ""))
-            ch_html += f'<li><a href="/komik/{slug}/chapter-{ch_num}/">Chapter {esc(str(ch_num))}</a> <span class="ch-date">{esc(ch_date)}</span></li>\n'
-        if not ch_html:
-            ch_html = f'<li>Chapter 1 - {esc(str(latest_ch))}</li>'
+        if ch_list:
+            for ch in ch_list:
+                ch_num = ch.get("number", ch.get("chapter", "?"))
+                ch_date = ch.get("date", ch.get("released", ""))
+                ch_html += f'<li><a href="/komik/{slug}/chapter-{ch_num}/" class="ch-link">Chapter {esc(str(ch_num))}</a> <span class="ch-date">{esc(ch_date)}</span></li>\n'
+        else:
+            raw_ch = str(s.get("latest_chapter") or s.get("total_chapters") or "15")
+            num_match = re.search(r'\d+', raw_ch)
+            total_num = int(num_match.group(0)) if num_match else 15
+            if total_num <= 0:
+                total_num = 15
+            for i in range(total_num, 0, -1):
+                ch_html += f'<li><a href="/komik/{slug}/chapter-{i}/" class="ch-link">Chapter {i}</a> <span class="ch-date">Update</span></li>\n'
 
         # Related comics (same genre, random 6)
         related = [x for x in all_series if x.get("slug") != slug and any(g in (x.get("genres") or []) for g in genres)][:6]
