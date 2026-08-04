@@ -1381,66 +1381,11 @@
   }
 
   function generateRealMangaPageSvg(title, chNum, pageNum, coverArt) {
-    const safeTitle = (title || 'Komik').replace(/["'&<>]/g, '');
-    const coverSvgTag = coverArt ? `<image href="${coverArt}" x="42" y="42" width="716" height="346" preserveAspectRatio="xMidYMid slice"/>` : '';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200" style="background:#ffffff">
-      <defs>
-        <pattern id="screentone-${pageNum}" width="12" height="12" patternUnits="userSpaceOnUse">
-          <circle cx="6" cy="6" r="2" fill="#1e293b" opacity="0.2"/>
-        </pattern>
-        <radialGradient id="action-radial-${pageNum}" cx="50%" cy="45%" r="60%">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
-          <stop offset="70%" stop-color="#000000" stop-opacity="0.1"/>
-          <stop offset="100%" stop-color="#000000" stop-opacity="0.5"/>
-        </radialGradient>
-      </defs>
-      
-      <rect width="800" height="1200" fill="#f8fafc"/>
-      <rect width="800" height="1200" fill="url(#screentone-${pageNum})"/>
-      <rect x="24" y="24" width="752" height="1152" fill="none" stroke="#0f172a" stroke-width="6"/>
-
-      <!-- TOP PANEL: Dynamic Action Scene -->
-      <rect x="40" y="40" width="720" height="350" fill="#ffffff" stroke="#0f172a" stroke-width="4"/>
-      <rect x="40" y="40" width="720" height="350" fill="url(#action-radial-${pageNum})"/>
-      ${coverSvgTag}
-      
-      <!-- Speed Lines Top Panel -->
-      <path d="M 400 215 L 40 40 M 400 215 L 120 40 M 400 215 L 200 40 M 400 215 L 300 40 M 400 215 L 400 40 M 400 215 L 500 40 M 400 215 L 600 40 M 400 215 L 700 40 M 400 215 L 760 40 M 400 215 L 760 120 M 400 215 L 760 200 M 400 215 L 760 280 M 400 215 L 760 360 M 400 215 L 680 390 M 400 215 L 580 390 M 400 215 L 480 390 M 400 215 L 380 390 M 400 215 L 280 390 M 400 215 L 180 390 M 400 215 L 80 390 M 400 215 L 40 320 M 400 215 L 40 220 M 400 215 L 40 120" stroke="#0f172a" stroke-width="1.5" opacity="0.25"/>
-
-      <!-- Action SFX Text -->
-      <text x="140" y="140" font-family="sans-serif" font-size="56" font-weight="900" fill="#e11d48" transform="rotate(-10 140 140)">ドドド</text>
-      <text x="620" y="150" font-family="sans-serif" font-size="48" font-weight="900" fill="#2563eb" transform="rotate(12 620 150)">ズバッ</text>
-
-      <!-- MIDDLE PANEL LEFT: Dialogue Scene -->
-      <rect x="40" y="410" width="345" height="380" fill="#ffffff" stroke="#0f172a" stroke-width="4"/>
-      <rect x="40" y="410" width="345" height="380" fill="url(#screentone-${pageNum})"/>
-      <path d="M 80 790 Q 120 580 200 560 Q 280 580 320 790 Z" fill="#1e293b" opacity="0.85"/>
-      <ellipse cx="210" cy="510" rx="110" ry="40" fill="#ffffff" stroke="#0f172a" stroke-width="3"/>
-      <polygon points="180,548 150,575 195,550" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
-      <text x="210" y="505" font-family="sans-serif" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">CHAPTER ${chNum} UNLOCKED</text>
-      <text x="210" y="528" font-family="sans-serif" font-size="15" font-weight="900" fill="#2563eb" text-anchor="middle">HALAMAN ${pageNum} / 10</text>
-
-      <!-- MIDDLE PANEL RIGHT: Title & Manga Info Badge -->
-      <rect x="415" y="410" width="345" height="380" fill="#0f172a" stroke="#0f172a" stroke-width="4"/>
-      <text x="587" y="520" font-family="sans-serif" font-size="28" font-weight="900" fill="#fbbf24" text-anchor="middle">ONIVERSE</text>
-      <text x="587" y="555" font-family="sans-serif" font-size="18" font-weight="900" fill="#ffffff" text-anchor="middle">MANGA READER</text>
-      <line x1="455" y1="585" x2="720" y2="585" stroke="#fbbf24" stroke-width="3"/>
-      <text x="587" y="625" font-family="sans-serif" font-size="18" font-weight="bold" fill="#38bdf8" text-anchor="middle">${safeTitle.toUpperCase().slice(0, 22)}</text>
-      <text x="587" y="660" font-family="sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">CHAPTER ${chNum} · PAGE ${pageNum}</text>
-
-      <!-- BOTTOM PANEL: Wide Climax Panel -->
-      <rect x="40" y="810" width="720" height="350" fill="#ffffff" stroke="#0f172a" stroke-width="4"/>
-      <path d="M 40 850 L 760 850 M 40 890 L 760 890 M 40 930 L 760 930 M 40 970 L 760 970 M 40 1010 L 760 1010 M 40 1050 L 760 1050 M 40 1090 L 760 1090 M 40 1130 L 760 1130" stroke="#0f172a" stroke-width="1" stroke-dasharray="4,8" opacity="0.2"/>
-
-      <text x="400" y="980" font-family="sans-serif" font-size="64" font-weight="900" fill="#e11d48" text-anchor="middle">ゴゴゴゴ</text>
-      <text x="400" y="1040" font-family="sans-serif" font-size="22" font-weight="900" fill="#0f172a" text-anchor="middle">— SELAMAT MEMBACA —</text>
-      <text x="400" y="1075" font-family="sans-serif" font-size="15" font-weight="bold" fill="#64748b" text-anchor="middle">OniVerse.SBS Manga &amp; Manhwa Sub Indo</text>
-    </svg>`;
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    return coverArt || '';
   }
 
   function generateMangaPanelSvg(title, chNum, pageNum) {
-    return generateRealMangaPageSvg(title, chNum, pageNum, null);
+    return '';
   }
 
   // ==========================================================================
