@@ -183,7 +183,7 @@ def generate_comic_pages(all_series):
                 "@type": "AggregateRating",
                 "ratingValue": str(rating),
                 "bestRating": "10",
-                "ratingCount": max(views, 100)
+                "ratingCount": max(int(views) if isinstance(views, int) or (isinstance(views, str) and views.isdigit()) else 100, 100)
             } if rating and rating != "N/A" else None
         }, ensure_ascii=False)
 
@@ -222,7 +222,7 @@ def generate_comic_pages(all_series):
   <script type="application/ld+json">{breadcrumb_schema}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=seo1">
+  <link rel="stylesheet" href="/styles.css?v=20260804_clean">
   <style>
     .comic-page {{ max-width: 960px; margin: 0 auto; padding: 1rem; color: #e2e8f0; font-family: Inter, sans-serif; }}
     .comic-hero {{ display: flex; gap: 1.5rem; margin-bottom: 2rem; }}
@@ -303,8 +303,8 @@ def generate_comic_pages(all_series):
     </div>
   </div>
 
-  <script src="/data.js?v=seo1"></script>
-  <script src="/app.js?v=seo1"></script>
+  <script src="/data-initial.js?v=20260804_01"></script>
+  <script src="/app.js?v=20260804_01" defer></script>
 </body>
 </html>'''
 

@@ -517,48 +517,41 @@
   async function loadData() {
     let initialLoaded = false;
     if (window.SERIES_DATA && Array.isArray(window.SERIES_DATA) && window.SERIES_DATA.length > 0) {
-      console.log('Loaded initial data from window.SERIES_DATA:', window.SERIES_DATA.length);
+      console.log('Loaded initial fast data from window.SERIES_DATA:', window.SERIES_DATA.length);
       STATE.allSeries = [...window.SERIES_DATA].sort((a, b) => parseDateScore(b) - parseDateScore(a));
       STATE.filtered = [...STATE.allSeries];
       onDataReady();
       initialLoaded = true;
     }
 
-    // Force fetch fresh live data to bypass CDN/browser cache
-    const cacheBuster = `t=${Date.now()}`;
-    const candidates = [
-      `https://raw.githubusercontent.com/oniverse-sbs/oniverse/main/scraped_data/series.json?${cacheBuster}`,
-      `https://raw.githubusercontent.com/oniverse-sbs/oniverse/main/series.json?${cacheBuster}`,
-      `series.json?${cacheBuster}`,
-      `scraped_data/series.json?${cacheBuster}`,
-      `data/series.json?${cacheBuster}`,
-      `/series.json?${cacheBuster}`,
-      `https://oniverse.sbs/series.json?${cacheBuster}`
-    ];
-    
-    let freshData = null;
-    for (const url of candidates) {
-      try {
-        const res = await fetch(url, { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && (Array.isArray(data) ? data.length > 0 : (data.series && data.series.length > 0))) {
-            freshData = Array.isArray(data) ? data : data.series;
-            console.log(`Fresh live data fetched successfully from ${url} (${freshData.length} items)`);
-            break;
-          }
+    // Lazy load full catalog (data-catalog.json ~410 KB) in background for full catalog search & filter
+    try {
+      const res = await fetch('data-catalog.json');
+      if (res.ok) {
+        const catalog = await res.json();
+        if (Array.isArray(catalog) && catalog.length > 0) {
+          console.log(`Loaded catalog in background: ${catalog.length} items`);
+          const existingMap = new Map(STATE.allSeries.map(s => [s.id || s.slug, s]));
+          catalog.forEach(item => {
+            const key = item.id || item.slug;
+            if (existingMap.has(key)) {
+              Object.assign(existingMap.get(key), item);
+            } else {
+              existingMap.set(key, item);
+            }
+          });
+          STATE.allSeries = Array.from(existingMap.values()).sort((a, b) => parseDateScore(b) - parseDateScore(a));
+          STATE.filtered = [...STATE.allSeries];
+          const totalEl = $('#footer-total');
+          if (totalEl) totalEl.textContent = STATE.allSeries.length + '+';
         }
-      } catch (err) {
-        console.warn(`Fetch attempt failed for ${url}:`, err);
       }
+    } catch (err) {
+      console.warn('Catalog background fetch error:', err);
     }
 
-    if (freshData && freshData.length > 0) {
-      STATE.allSeries = [...freshData].sort((a, b) => parseDateScore(b) - parseDateScore(a));
-      STATE.filtered = [...STATE.allSeries];
-      onDataReady();
-    } else if (!initialLoaded) {
-      console.error('All data load candidates failed.');
+    if (!initialLoaded && STATE.allSeries.length === 0) {
+      console.error('Initial data load failed.');
       showToast('Gagal memuat data komik. Coba refresh halaman.', 'warning');
     }
   }
@@ -990,7 +983,26 @@
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
-    // Fetch full chapters from API if available
+    // 1. Fetch local detail JSON if available and chapters/synopsis are missing
+    const comicSlug = getSlug(s);
+    if (comicSlug && (!s.chapters || s.chapters.length === 0 || !s.synopsis)) {
+      fetch(`data/detail/${comicSlug}.json`)
+        .then(r => r.ok ? r.json() : null)
+        .then(detailData => {
+          if (detailData) {
+            if (detailData.synopsis) s.synopsis = detailData.synopsis;
+            if (detailData.alternative_title) s.alternative_title = detailData.alternative_title;
+            if (detailData.author) s.author = detailData.author;
+            if (detailData.artist) s.artist = detailData.artist;
+            if (Array.isArray(detailData.chapters) && detailData.chapters.length > 0 && (!s.chapters || s.chapters.length === 0)) {
+              s.chapters = detailData.chapters;
+            }
+            if (STATE.currentDetail === s) openDetail(s, true);
+          }
+        }).catch(() => {});
+    }
+
+    // 2. Fetch full chapters from API if still needed
     if (s.id && (!s.chapters || s.chapters.length < (s.total_chapters || 30))) {
       if (s.source === 'komikcast' || s.kc_slug || String(s.id).startsWith('kc_')) {
         const kcSeries = s.kc_slug || String(s.id).replace('kc_', '');
