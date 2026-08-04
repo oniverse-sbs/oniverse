@@ -227,7 +227,8 @@
 
     const route = parseRoute();
     if (route.type === 'comic') {
-      if (STATE.allSeries.length > 0) {
+      const found = STATE.allSeries.some(s => getSlug(s) === route.slug);
+      if (found) {
         handleRoute(route);
       } else {
         _pendingRoute = route;
@@ -1056,6 +1057,7 @@
     STATE.currentDetail = s;
     if (!fromRouter) navigateToComic(s, false);
     const modal = $('#detail-modal');
+    if (modal) modal.classList.remove('hidden');
     const body = $('#modal-body');
     const genres = getGenres(s);
     const isBookmarked = STATE.bookmarks.includes(getSlug(s));
