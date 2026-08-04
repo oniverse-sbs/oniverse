@@ -966,6 +966,33 @@
     const body = $('#modal-body');
     const genres = getGenres(s);
     const isBookmarked = STATE.bookmarks.includes(getSlug(s));
+    
+    // Dynamic Fallback Generator for comics missing chapters or synopsis
+    if (!s.chapters || s.chapters.length === 0) {
+      const rawCh = String(s.latest_chapter || s.total_chapters || '15');
+      const numMatch = rawCh.match(/\d+/);
+      const totalNum = numMatch ? parseInt(numMatch[0], 10) : 15;
+      const slug = getSlug(s);
+      const isKC = s.source === 'komikcast' || String(s.id).startsWith('kc_') || slug.startsWith('kc-');
+      const kcSlug = slug.replace(/^kc-/, '');
+      const genChaps = [];
+      for (let i = totalNum; i >= 1; i--) {
+        genChaps.push({
+          number: String(i),
+          chapter: String(i),
+          slug: isKC ? `kc_ch_${kcSlug}_${i}` : `ch_${i}`,
+          kc_index: isKC ? i : null,
+          kc_series_slug: isKC ? kcSlug : null,
+          date: (s.last_updated || '').slice(0, 10)
+        });
+      }
+      s.chapters = genChaps;
+    }
+
+    if (!s.synopsis || s.synopsis === 'Belum ada deskripsi.') {
+      s.synopsis = `Baca komik ${s.title || s.name || 'ini'} bahasa Indonesia gratis di OniVerse.SBS. Komik ${s.type || 'Manhwa'} bergenre ${genres.slice(0, 3).join(', ') || 'Action'} dengan kualitas gambar HD terbaik dan update chapter terbaru.`;
+    }
+
     const chapters = s.chapters || [];
     const sortedChapters = [...chapters].sort((a, b) => parseFloat(b.number || b.chapter || 0) - parseFloat(a.number || a.chapter || 0));
 

@@ -94,14 +94,46 @@ def split_data(all_series):
     # Individual detail files (synopsis + chapters)
     detail_dir = os.path.join(PROJECT, "data", "detail")
     os.makedirs(detail_dir, exist_ok=True)
+    import re
     for s in all_series:
         slug = s.get("slug") or s.get("id", "unknown")
+        syn = s.get("synopsis", "") or s.get("description", "")
+        if not syn:
+            title_str = s.get("title", "Komik")
+            type_str = s.get("type", "Manhwa")
+            genres_list = s.get("genres") or []
+            genres_str = ", ".join(genres_list[:3]) if genres_list else "Action, Fantasy"
+            syn = f"Baca komik {title_str} bahasa Indonesia gratis di OniVerse.SBS. Komik {type_str} bergenre {genres_str} dengan kualitas gambar HD terbaik dan update chapter terbaru."
+
+        chaps = s.get("chapters") or []
+        if not chaps:
+            raw_ch = str(s.get("latest_chapter") or s.get("total_chapters") or "0")
+            num_match = re.search(r'\d+', raw_ch)
+            total_num = int(num_match.group(0)) if num_match else 0
+            if total_num <= 0:
+                total_num = 15 # default fallback chapters count
+            
+            is_kc = s.get("source") == "komikcast" or str(s.get("id","")).startswith("kc_") or slug.startswith("kc-")
+            kc_slug = slug.replace("kc-", "") if slug.startswith("kc-") else slug
+            for i in range(total_num, 0, -1):
+                chaps.append({
+                    "number": str(i),
+                    "chapter": str(i),
+                    "slug": f"kc_ch_{kc_slug}_{i}" if is_kc else f"ch_{i}",
+                    "kc_index": i if is_kc else None,
+                    "kc_series_slug": kc_slug if is_kc else None,
+                    "date": (s.get("last_updated") or "")[:10]
+                })
+
+        s["chapters"] = chaps
+        s["synopsis"] = syn
+
         detail = {
-            "synopsis": s.get("synopsis", "") or s.get("description", ""),
+            "synopsis": syn,
             "alternative_title": s.get("alternative_title", ""),
             "author": s.get("author", ""),
             "artist": s.get("artist", ""),
-            "chapters": s.get("chapters", []),
+            "chapters": chaps,
         }
         with open(os.path.join(detail_dir, f"{slug}.json"), "w", encoding="utf-8") as f:
             json.dump(detail, f, ensure_ascii=False, separators=(',', ':'))
