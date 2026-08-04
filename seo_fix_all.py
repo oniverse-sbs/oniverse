@@ -659,7 +659,89 @@ def generate_sitemap(all_series, genre_count):
         f.write(sitemap_index)
 
 # ============================================================
-# 5. UPDATE ROBOTS.TXT
+# 5. PRE-RENDER INDEX.HTML CARDS (Instant Zero-Delay Painting)
+# ============================================================
+def pre_render_index_html(all_series):
+    print("\n[Pre-rendering index.html cards...]")
+    idx_path = os.path.join(PROJECT, "index.html")
+    if not os.path.exists(idx_path):
+        return
+
+    with open(idx_path, "r", encoding="utf-8") as f:
+        html = f.read()
+
+    sorted_series = sorted(all_series, key=lambda s: s.get("last_updated", ""), reverse=True)
+
+    update_cards = ""
+    for i, s in enumerate(sorted_series[:30]):
+        title = esc(s.get("title") or s.get("name") or "Unknown")
+        slug = esc(s.get("slug") or s.get("id", ""))
+        cover = esc(s.get("cover") or s.get("thumbnail") or "https://picsum.photos/300/400")
+        type_name = esc(s.get("type") or "Manhwa")
+        ch_text = f"Chapter {esc(str(s.get('latest_chapter') or s.get('total_chapters') or '15'))}"
+        type_badge = f'<span class="update-type-tag {type_name.lower()}">{type_name}</span>' if type_name else ''
+        is_new = ' <span class="update-new-badge">NEW</span>' if i < 8 else ''
+        update_cards += f'''
+        <div class="update-item" data-slug="{slug}" data-idx="{i}">
+          <div class="update-thumb-wrap">
+            <img src="{cover}" class="update-thumb" alt="{title}" loading="lazy" decoding="async">
+            {type_badge}
+          </div>
+          <div class="update-info">
+            <div class="update-title">{title}</div>
+            <div class="update-meta">
+              <span class="update-chapter"><i class="fa-solid fa-book-open" style="color:var(--accent-light);font-size:0.75rem;margin-right:3px"></i>{ch_text}</span>
+              <span class="update-time"><i class="fa-regular fa-clock" style="font-size:0.7rem;margin-right:2px"></i>Baru</span>
+            </div>
+          </div>
+          {is_new}
+        </div>'''
+
+    def safe_float(v):
+        try:
+            return float(v)
+        except Exception:
+            return 0.0
+
+    trending_series = sorted(all_series, key=lambda x: safe_float(x.get("rating")), reverse=True)[:15]
+    trending_cards = ""
+    for i, s in enumerate(trending_series):
+        title = esc(s.get("title") or s.get("name") or "Unknown")
+        slug = esc(s.get("slug") or s.get("id", ""))
+        cover = esc(s.get("cover") or s.get("thumbnail") or "https://picsum.photos/300/400")
+        rating = esc(str(s.get("rating") or "N/A"))
+        trending_cards += f'''
+      <div class="trending-card" data-slug="{slug}" data-idx="{i}">
+        <span class="trending-rank">{i + 1}</span>
+        <div class="trending-poster">
+          <img src="{cover}" alt="{title}" loading="lazy">
+        </div>
+        <div class="trending-info">
+          <div class="trending-title">{title}</div>
+          <div class="trending-rating"><i class="fa-solid fa-star"></i> {rating}</div>
+        </div>
+      </div>'''
+
+    html = re.sub(
+        r'<div class="update-list" id="update-list">.*?</div>(?=\s*<div class="comic-grid)',
+        f'<div class="update-list" id="update-list">{update_cards}\n        </div>',
+        html,
+        flags=re.DOTALL
+    )
+
+    html = re.sub(
+        r'<div class="trending-row" id="trending-row">.*?</div>(?=\s*<button class="scroll-arrow scroll-next-btn")',
+        f'<div class="trending-row" id="trending-row">{trending_cards}\n          </div>',
+        html,
+        flags=re.DOTALL
+    )
+
+    with open(idx_path, "w", encoding="utf-8") as f:
+        f.write(html)
+    print("  -> index.html pre-rendered with initial comic cards!")
+
+# ============================================================
+# 6. UPDATE ROBOTS.TXT
 # ============================================================
 def update_robots():
     print("\n[5/5] Updating robots.txt...")
@@ -695,6 +777,7 @@ def main():
     print(f"Loaded {len(all_series)} series from data")
 
     split_data(all_series)
+    pre_render_index_html(all_series)
     comic_count = generate_comic_pages(all_series)
     genre_count = generate_genre_pages(all_series)
     generate_sitemap(all_series, genre_count)
