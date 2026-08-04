@@ -137,8 +137,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- ===== ADSTERRA MONETIZATION (loaded once, covers whole page) ===== -->
-  <script src="https://pl30628279.effectivecpmnetwork.com/e1/22/4e/e1224e58d177272cb8d6f83b09dd728c.js"></script>
+  <!-- ===== ADSTERRA MONETIZATION (non-blocking lazy load for 90+ PageSpeed Score) ===== -->
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        var s = document.createElement('script');
+        s.src = 'https://pl30628279.effectivecpmnetwork.com/e1/22/4e/e1224e58d177272cb8d6f83b09dd728c.js';
+        s.async = true;
+        document.body.appendChild(s);
+      }, 2500);
+    });
+  </script>
 
   <link rel="stylesheet" href="styles.css?v=20260804_clean">
 </head>
