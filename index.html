@@ -131,27 +131,23 @@
   }
   </script>
 
-  <!-- ===== CRITICAL RESOURCE PRELOADS (Ultra-fast LCP & FCP) ===== -->
-  <link rel="preload" href="styles.css?v=20260804_clean" as="style">
-  <link rel="preload" href="data-initial.js?v=20260804_top" as="script">
+  <!-- ===== CRITICAL IMAGE PRELOAD & PRECONNECTS ===== -->
   <link rel="preload" href="https://assets.shngm.id/thumbnail/cover/banner_1780918976110_xp79e8.png" as="image" fetchpriority="high">
-
-  <!-- ===== IMAGE CDN PRECONNECTS (Fast Mobile Cover LCP) ===== -->
   <link rel="preconnect" href="https://assets.shngm.id" crossorigin>
   <link rel="preconnect" href="https://minio.imgkc1.my.id" crossorigin>
-
-  <!-- ===== FONTS & ICONS (non-blocking for ultra-fast FCP) ===== -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
+  <!-- ===== FONTS & STYLES ===== -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20260804_clean">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
   <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   </noscript>
 
-  <!-- ===== ADSTERRA MONETIZATION (non-blocking lazy load for 90+ PageSpeed Score) ===== -->
+  <!-- ===== ADSTERRA MONETIZATION (non-blocking lazy load) ===== -->
   <script>
     window.addEventListener('load', function() {
       setTimeout(function() {
@@ -159,11 +155,9 @@
         s.src = 'https://pl30628279.effectivecpmnetwork.com/e1/22/4e/e1224e58d177272cb8d6f83b09dd728c.js';
         s.async = true;
         document.body.appendChild(s);
-      }, 2500);
+      }, 3000);
     });
   </script>
-
-  <link rel="stylesheet" href="styles.css?v=20260804_clean">
 </head>
 <body>
 
