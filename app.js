@@ -1565,12 +1565,12 @@
       const chNum = ch.number || ch.chapter || (idx + 1);
 
       if (!images.length) {
-        images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(p => generateRealMangaPageSvg(comicTitle, chNum, p, coverArt));
+        images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(p => generateRealMangaPageSvg(comicTitle, chNum, p, ''));
       }
 
       content.innerHTML = `
         <div class="reader-images-wrap">
-          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';if('${coverArt}'){this.src='${coverArt}';}else{this.style.display='none';}}else{this.style.display='none';}">`).join('')}
+          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='${generateRealMangaPageSvg(comicTitle, chNum, i + 1, '')}';}else{this.style.display='none';}">`).join('')}
         </div>
         <div class="reader-footer-nav">
           <p style="color:var(--text-muted);font-size:0.85rem">— Akhir Chapter ${ch.number || ch.chapter || idx + 1} —</p>
