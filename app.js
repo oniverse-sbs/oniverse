@@ -579,45 +579,50 @@
   // ==========================================================================
   async function loadData() {
     let initialLoaded = false;
+
+    // 1. Instant Paint from Preloaded Window Data (0ms)
     if (window.SERIES_DATA && Array.isArray(window.SERIES_DATA) && window.SERIES_DATA.length > 0) {
-      console.log('Loaded initial fast data from window.SERIES_DATA:', window.SERIES_DATA.length);
       STATE.allSeries = [...window.SERIES_DATA].sort((a, b) => parseDateScore(b) - parseDateScore(a));
       STATE.filtered = [...STATE.allSeries];
       onDataReady();
       initialLoaded = true;
     }
 
-    // Lazy load full catalog (data-catalog.json) in background AFTER initial paint (2.5s delay for 95+ PageSpeed)
-    setTimeout(async () => {
-      try {
-        const res = await fetch('data-catalog.json?v=20260804_v99');
-        if (res.ok) {
-          const catalog = await res.json();
-          if (Array.isArray(catalog) && catalog.length > 0) {
-            console.log(`Loaded catalog in background: ${catalog.length} items`);
-            const existingMap = new Map(STATE.allSeries.map(s => [s.id || s.slug, s]));
-            catalog.forEach(item => {
-              const key = item.id || item.slug;
-              if (existingMap.has(key)) {
-                Object.assign(existingMap.get(key), item);
-              } else {
-                existingMap.set(key, item);
-              }
-            });
-            STATE.allSeries = Array.from(existingMap.values()).sort((a, b) => parseDateScore(b) - parseDateScore(a));
-            STATE.filtered = [...STATE.allSeries];
-            const totalEl = $('#footer-total');
-            if (totalEl) totalEl.textContent = STATE.allSeries.length + '+';
+    // 2. Fetch full catalog instantly with 0ms delay
+    try {
+      const res = await fetch('data-catalog.json?v=20260804_v105');
+      if (res.ok) {
+        const catalog = await res.json();
+        if (Array.isArray(catalog) && catalog.length > 0) {
+          const existingMap = new Map(STATE.allSeries.map(s => [s.id || s.slug, s]));
+          catalog.forEach(item => {
+            const key = item.id || item.slug;
+            if (existingMap.has(key)) {
+              Object.assign(existingMap.get(key), item);
+            } else {
+              existingMap.set(key, item);
+            }
+          });
+          STATE.allSeries = Array.from(existingMap.values()).sort((a, b) => parseDateScore(b) - parseDateScore(a));
+          STATE.filtered = [...STATE.allSeries];
+          if (!initialLoaded) {
+            onDataReady();
+            initialLoaded = true;
+          } else {
+            safeExec(applyPinnedOrder, 'ApplyPinnedOrder');
+            safeExec(renderTrending, 'Trending');
+            safeExec(renderUpdateList, 'UpdateList');
           }
+          const totalEl = $('#footer-total');
+          if (totalEl) totalEl.textContent = STATE.allSeries.length + '+';
         }
-      } catch (err) {
-        console.warn('Catalog background fetch error:', err);
       }
-    }, 2500);
+    } catch (err) {
+      console.warn('Catalog fetch error:', err);
+    }
 
     if (!initialLoaded && STATE.allSeries.length === 0) {
       console.error('Initial data load failed.');
-      showToast('Gagal memuat data komik. Coba refresh halaman.', 'warning');
     }
   }
 
