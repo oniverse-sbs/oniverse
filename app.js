@@ -469,9 +469,61 @@
     });
   }
 
+  const DEFAULT_PINNED_SLUGS = [
+    '4ef0b99b-20d3-4da8-bb73-9c3768f32699', // The Count's Secret Maid (#1)
+    '11ecc266-ead4-4728-b21a-5ac34afb140c', // She's Not Our Daughter! (#2)
+    '56c552be-3ba1-41b8-975e-d77fd4e1bc2c'  // My Bias Gets On The Last Train (#3)
+  ];
+  let PINNED_SLUGS = JSON.parse(localStorage.getItem('oniverse_pinned_slugs') || 'null') || DEFAULT_PINNED_SLUGS;
+
+  function applyPinnedOrder() {
+    if (!STATE.allSeries.length) return;
+    const pinnedItems = [];
+    PINNED_SLUGS.forEach(slug => {
+      const match = STATE.allSeries.find(s => getSlug(s) === slug || s.id === slug);
+      if (match && !pinnedItems.includes(match)) pinnedItems.push(match);
+    });
+    const restItems = STATE.allSeries.filter(s => !pinnedItems.includes(s));
+    STATE.allSeries = [...pinnedItems, ...restItems];
+    STATE.filtered = [...STATE.allSeries];
+  }
+
+  function populateAdminPinSelect() {
+    const sel = $('#admin-pin-select');
+    if (!sel || !STATE.allSeries.length) return;
+    sel.innerHTML = STATE.allSeries.map(s => `<option value="${getSlug(s)}">${s.title || s.name}</option>`).join('');
+  }
+
+  function handleAdminPinComic() {
+    const sel = $('#admin-pin-select');
+    const posSel = $('#admin-pin-pos');
+    if (!sel || !posSel) return;
+    const targetSlug = sel.value;
+    const pos = parseInt(posSel.value, 10);
+    
+    PINNED_SLUGS = PINNED_SLUGS.filter(s => s !== targetSlug);
+    PINNED_SLUGS[pos] = targetSlug;
+    localStorage.setItem('oniverse_pinned_slugs', JSON.stringify(PINNED_SLUGS));
+    
+    applyPinnedOrder();
+    renderHero();
+    renderTrending();
+    showToast(`📌 Komik berhasil dipin ke Posisi #${pos + 1}!`, 'success');
+  }
+
+  function handleAdminUnpinComics() {
+    PINNED_SLUGS = [...DEFAULT_PINNED_SLUGS];
+    localStorage.setItem('oniverse_pinned_slugs', JSON.stringify(PINNED_SLUGS));
+    applyPinnedOrder();
+    renderHero();
+    renderTrending();
+    showToast('📌 Urutan Pin berhasil di-reset ke default!', 'info');
+  }
+
   function openAdminModal() {
     $('#admin-modal')?.classList.remove('hidden');
     renderAdminModList();
+    populateAdminPinSelect();
     const onlineEl = $('#admin-online-count');
     if (onlineEl) onlineEl.textContent = rand(145, 168);
   }
@@ -563,6 +615,7 @@
   }
 
   function onDataReady() {
+    safeExec(applyPinnedOrder, 'ApplyPinnedOrder');
     safeExec(populateGenreFilter, 'GenreFilter');
     safeExec(renderHero, 'Hero');
     safeExec(renderTrending, 'Trending');
@@ -1010,10 +1063,13 @@
           </div>
           <div class="detail-tags">${genres.map(g => `<span class="detail-badge genre">${g}</span>`).join('')}</div>
           <p class="detail-synopsis">${s.synopsis || s.description || 'Belum ada deskripsi.'}</p>
-          <div class="detail-action-row">
+          <div class="detail-action-row" style="flex-wrap:wrap;">
             <button class="btn-baca" id="detail-read-first"><i class="fa-solid fa-book-open"></i> Baca Chapter 1</button>
             <button class="btn-bookmark-hero ${isBookmarked ? 'bookmarked' : ''}" id="detail-bookmark-btn">
               <i class="fa-${isBookmarked ? 'solid' : 'regular'} fa-bookmark"></i> ${isBookmarked ? 'Tersimpan' : 'Bookmark'}
+            </button>
+            <button class="btn-bookmark-hero" id="detail-pin-btn" style="background:rgba(245,158,11,0.18); border-color:rgba(245,158,11,0.4); color:#f59e0b;">
+              <i class="fa-solid fa-thumbtack"></i> Pin Top #1
             </button>
             <button class="btn-bookmark-hero" id="detail-share-btn" style="background:linear-gradient(135deg, #25D366, #128C7E);color:#fff;border:none;">
               <i class="fa-brands fa-whatsapp"></i> Bagikan
@@ -1063,6 +1119,17 @@
     $('#detail-bookmark-btn').onclick = () => {
       toggleBookmark(s);
       openDetail(s);
+    };
+
+    $('#detail-pin-btn').onclick = () => {
+      const slug = getSlug(s);
+      PINNED_SLUGS = PINNED_SLUGS.filter(p => p !== slug);
+      PINNED_SLUGS[0] = slug;
+      localStorage.setItem('oniverse_pinned_slugs', JSON.stringify(PINNED_SLUGS));
+      applyPinnedOrder();
+      renderHero();
+      renderTrending();
+      showToast(`📌 Komik "${s.title || 'ini'}" berhasil dipin ke Banner Top #1 HP & Web!`, 'success');
     };
 
     $('#detail-share-btn').onclick = () => {
@@ -1836,6 +1903,8 @@
     $('#admin-broadcast-btn')?.addEventListener('click', adminBroadcastMessage);
     $('#admin-clear-chat-btn')?.addEventListener('click', adminClearChat);
     $('#admin-refresh-data-btn')?.addEventListener('click', () => { location.reload(); });
+    $('#admin-pin-btn')?.addEventListener('click', handleAdminPinComic);
+    $('#admin-unpin-btn')?.addEventListener('click', handleAdminUnpinComics);
 
     // Secret Admin Triggers: 5 Clicks on Logo or ?admin=1 URL parameter
     let logoClicks = 0;
