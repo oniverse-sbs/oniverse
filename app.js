@@ -590,7 +590,7 @@
 
     // 2. Fetch full catalog instantly with 0ms delay
     try {
-      const res = await fetch('data-catalog.json?v=20260804_v105');
+      const res = await fetch('/data-catalog.json?v=20260804_wurmz_v2');
       if (res.ok) {
         const catalog = await res.json();
         if (Array.isArray(catalog) && catalog.length > 0) {
