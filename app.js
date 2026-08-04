@@ -1032,7 +1032,7 @@
     if (series) {
       openDetail(series);
     } else {
-      fetch(`data/detail/${cleanSlug}.json?v=20260804_v105`)
+      fetch(`/data/detail/${cleanSlug}.json?v=20260804_v105`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (data) openDetail(data);
@@ -1260,9 +1260,10 @@
     const comicId = String(s.id || '');
 
     function applyDetailData(detailData) {
-      if (!detailData) return;
+      if (!detailData || s._detailLoaded) return;
+      s._detailLoaded = true;
       let updated = false;
-      if (detailData.synopsis && detailData.synopsis !== s.synopsis && detailData.synopsis !== 'Belum ada deskripsi.') {
+      if (detailData.synopsis && detailData.synopsis !== 'Belum ada deskripsi.') {
         s.synopsis = detailData.synopsis;
         updated = true;
       }
@@ -1274,14 +1275,33 @@
         updated = true;
       }
       if (updated && STATE.currentDetail && getSlug(STATE.currentDetail) === comicSlug) {
-        openDetail(s, true);
+        // Re-render chapter list & synopsis without re-triggering fetch loop
+        const gridEl = $('#chapter-grid');
+        const countEl = $('.chapter-header h3', $('#detail-modal'));
+        const synEl = $('.detail-synopsis', $('#detail-modal'));
+        
+        if (synEl && s.synopsis) synEl.textContent = s.synopsis;
+        if (s.chapters) {
+          const sorted = [...s.chapters].sort((a, b) => parseFloat(b.number || b.chapter || 0) - parseFloat(a.number || a.chapter || 0));
+          if (countEl) countEl.innerHTML = `<i class="fa-solid fa-list"></i> Daftar Chapter (${sorted.length})`;
+          if (gridEl) {
+            gridEl.innerHTML = sorted.map((ch, i) => `
+              <div class="chapter-item" data-ch-idx="${i}">
+                <span class="ch-num">Ch. ${ch.number || ch.chapter || i + 1}</span>
+                <span class="ch-date">${ch.date || ch.released || ''}</span>
+              </div>`).join('');
+            $$('.chapter-item', gridEl).forEach(ci => {
+              ci.onclick = () => openReader(s, sorted, +ci.dataset.chIdx);
+            });
+          }
+        }
       }
     }
 
-    if (comicSlug) {
+    if (comicSlug && !s._detailLoaded) {
       const cacheBuster = Date.now();
-      fetch(`data/detail/${comicSlug}.json?v=${cacheBuster}`)
-        .then(r => r.ok ? r.json() : (comicId && comicId !== comicSlug ? fetch(`data/detail/${comicId}.json?v=${cacheBuster}`).then(r2 => r2.ok ? r2.json() : null) : null))
+      fetch(`/data/detail/${comicSlug}.json?v=${cacheBuster}`)
+        .then(r => r.ok ? r.json() : (comicId && comicId !== comicSlug ? fetch(`/data/detail/${comicId}.json?v=${cacheBuster}`).then(r2 => r2.ok ? r2.json() : null) : null))
         .then(applyDetailData)
         .catch(() => {});
     }
@@ -1435,27 +1455,42 @@
     const isKC = series.source === 'komikcast' || series.kc_slug || ch.kc_series_slug || (series.id && String(series.id).startsWith('kc_'));
     let images = [];
 
-    // Instant check & detail JSON fetch to ensure latest real scraped WebP image arrays
-    if (!Array.isArray(ch.images) || ch.images.length === 0) {
+    // Filter out any known fake/broken URLs from static JSON
+    if (Array.isArray(ch.images) && ch.images.length > 0) {
+      images = ch.images.filter(img => 
+        typeof img === 'string' && 
+        img.trim() && 
+        !img.includes('chapter_ch_') && 
+        !img.includes('manga_kc_') && 
+        !img.includes('chapter_kc_') && 
+        !img.includes('assets.shinigami.ae')
+      );
+    }
+
+    // Instant check & detail JSON fetch if empty
+    if (!images.length) {
       try {
-        const detailRes = await fetchWithTimeout(`data/detail/${slug}.json?v=${Date.now()}`, 1500);
+        const sid = String(series.id || '');
+        let detailRes = await fetchWithTimeout(`/data/detail/${slug}.json?v=${Date.now()}`, 1500);
+        if (!detailRes || !detailRes.ok) {
+          if (sid && sid !== slug) {
+            detailRes = await fetchWithTimeout(`/data/detail/${sid}.json?v=${Date.now()}`, 1500);
+          }
+        }
         if (detailRes && detailRes.ok) {
           const detailData = await detailRes.json();
-          const targetCh = (detailData.chapters || []).find(c => (c.number || c.chapter) == (ch.number || ch.chapter) || c.slug === ch.slug);
+          const targetCh = (detailData.chapters || []).find(c => (c.number || c.chapter) == (ch.number || ch.chapter) || (c.slug && c.slug === ch.slug) || (c.chapter_id && c.chapter_id === ch.slug));
           if (targetCh && Array.isArray(targetCh.images) && targetCh.images.length > 0) {
-            ch.images = targetCh.images;
+            images = targetCh.images.filter(img => typeof img === 'string' && img.trim() && !img.includes('chapter_ch_') && !img.includes('assets.shinigami.ae'));
+            if (images.length > 0) ch.images = images;
           }
         }
       } catch (e) {}
     }
 
     try {
-      if (Array.isArray(ch.images) && ch.images.length > 0) {
-        images = ch.images.filter(img => typeof img === 'string' && !img.includes('manga_kc_') && !img.includes('chapter_kc_'));
-      }
-      
       if (!images.length && isKC) {
-        const kcSeries = series.kc_slug || ch.kc_series_slug || (series.id ? String(series.id).replace('kc_', '') : '');
+        const kcSeries = series.kc_slug || ch.kc_series_slug || (series.id ? String(series.id).replace('kc_', '').replace('kc-', '') : series.slug);
         const kcIndex = ch.kc_index || ch.number || ch.chapter;
         const targetUrl = `https://be.komikcast.cc/series/${kcSeries}/chapters/${kcIndex}`;
         const urls = [
@@ -1464,83 +1499,87 @@
           `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
         ];
         for (const u of urls) {
-          const res = await fetchWithTimeout(u, 1800);
+          const res = await fetchWithTimeout(u, 2500);
           if (res && res.ok) {
             try {
               const jsonRes = await res.json();
               const chData = jsonRes.data?.data || jsonRes.data || {};
               if (Array.isArray(chData.images) && chData.images.length > 0) {
                 images = chData.images;
+                ch.images = images;
                 break;
               }
             } catch (e) {}
           }
         }
+
+        // Direct CDN fallback for Komikcast if API rate-limited
+        if (!images.length && kcSeries && kcIndex) {
+          images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(p => `https://sv1.imgkc1.my.id/wp-content/uploads/${kcSeries}/ch_${kcIndex}/${p}.jpg`);
+        }
       } else if (!images.length) {
-        const chSlug = ch.slug || ch.chapter_slug || ch.chapter_id || ch.id || '';
-        if (chSlug && chSlug.length > 10 && !chSlug.startsWith('ch_')) {
+        const chSlug = ch.chapter_id || ch.id || ch.slug || ch.chapter_slug || '';
+        if (chSlug && chSlug.length > 10) {
           const targetUrl = `https://api.shngm.io/v1/chapter/detail/${chSlug}`;
           const urls = [
             targetUrl,
-            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+            `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
           ];
           for (const u of urls) {
-            const res = await fetchWithTimeout(u, 1200);
+            const res = await fetchWithTimeout(u, 3000);
             if (res && res.ok) {
-              const jsonRes = await res.json();
-              const d = jsonRes.data || {};
-              const baseUrl = d.base_url || d.base_url_low || 'https://assets.shngm.id';
-              const chData = d.chapter || {};
-              const chPath = chData.path || '';
-              const filenames = chData.data || chData.images || [];
+              try {
+                const jsonRes = await res.json();
+                const d = jsonRes.data || {};
+                const baseUrl = d.base_url || d.base_url_low || 'https://assets.shngm.id';
+                const chData = d.chapter || {};
+                const chPath = chData.path || '';
+                const filenames = chData.data || chData.images || [];
 
-              if (Array.isArray(filenames) && filenames.length > 0) {
-                images = filenames.map(fn => typeof fn === 'string' ? (fn.startsWith('http') ? fn : baseUrl + chPath + fn) : fn.url || fn.src || '');
-                break;
-              } else if (Array.isArray(d.images) && d.images.length > 0) {
-                images = d.images.map(i => typeof i === 'string' ? (i.startsWith('http') ? i : baseUrl + i) : i.url || i.src);
-                break;
-              }
+                if (Array.isArray(filenames) && filenames.length > 0) {
+                  images = filenames.map(fn => typeof fn === 'string' ? (fn.startsWith('http') ? fn : baseUrl + chPath + fn) : (fn.url || fn.src || ''));
+                  ch.images = images;
+                  break;
+                } else if (Array.isArray(d.images) && d.images.length > 0) {
+                  images = d.images.map(i => typeof i === 'string' ? (i.startsWith('http') ? i : baseUrl + i) : (i.url || i.src));
+                  ch.images = images;
+                  break;
+                }
+              } catch (e) {}
             }
           }
         }
       }
 
       if (Array.isArray(images) && images.length > 0) {
-        images = images.filter(img => typeof img === 'string' && !img.includes('picsum.photos') && !img.includes('unsplash'));
+        images = images.filter(img => typeof img === 'string' && !img.includes('picsum.photos') && !img.includes('unsplash') && !img.includes('chapter_ch_') && !img.includes('assets.shinigami.ae'));
       }
 
-      const coverArt = getCover(series) || '';
       const comicTitle = series.title || series.name || 'Komik';
       const chNum = ch.number || ch.chapter || (idx + 1);
 
-      if (!images.length) {
-        const sid = String(series.id || '');
-        const cslug = String(ch.slug || ch.chapter_slug || '');
-        const kcSlug = series.kc_slug || (sid.startsWith('kc_') ? sid.replace('kc_', '') : series.slug);
-
-        if (isKC && kcSlug) {
-          images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(p => `https://sv1.imgkc1.my.id/wp-content/uploads/${kcSlug}/ch_${chNum}/${p}.jpg`);
-        } else if (sid && cslug && cslug.length > 10 && !cslug.startsWith('ch_')) {
-          images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(p => `https://assets.shngm.id/chapter/manga_${sid}/chapter_${cslug}/${p}.webp`);
-        } else if (coverArt) {
-          images = [coverArt];
-        }
-      }
+      const imagesContent = images.length > 0 ? `
+        <div class="reader-images-wrap">
+          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';if(this.src.startsWith('https://assets.shngm.id')){this.src='https://corsproxy.io/?'+encodeURIComponent(this.src);}else{this.style.display='none';}}else{this.style.display='none';}">`).join('')}
+        </div>` : `
+        <div class="reader-empty" style="text-align:center; padding:3.5rem 1.5rem; color:var(--text-muted);">
+          <i class="fa-solid fa-book-open" style="font-size:2.8rem; margin-bottom:1.2rem; color:var(--accent-light); opacity:0.85;"></i>
+          <h4 style="color:var(--text-main); margin:0 0 0.5rem 0; font-family:'Outfit'; font-size:1.15rem;">Gambar Chapter Belum Memuat</h4>
+          <p style="font-size:0.88rem; max-width:420px; margin:0 auto 1.5rem auto; line-height:1.5;">Gagal mengambil gambar chapter ini dari server asal. Silakan klik tombol di bawah untuk mencoba memuat kembali.</p>
+          <button class="btn-baca" onclick="openReader(STATE.currentReader.series, STATE.currentReader.chapters, STATE.currentReader.chapterIdx)" style="padding:0.7rem 1.5rem; font-size:0.9rem;"><i class="fa-solid fa-rotate-right"></i> Coba Muat Ulang</button>
+        </div>`;
 
       content.innerHTML = `
-        <div class="reader-images-wrap">
-          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';if('${coverArt}' && this.src!=='${coverArt}'){this.src='${coverArt}';}else{this.style.display='none';}}else{this.style.display='none';}">`).join('')}
-        </div>
+        ${imagesContent}
         <div class="reader-footer-nav">
-          <p style="color:var(--text-muted);font-size:0.85rem">— Akhir Chapter ${ch.number || ch.chapter || idx + 1} —</p>
-          <!-- Reader End Sponsored Ad (Non-Intrusive) -->
+          <p style="color:var(--text-muted);font-size:0.85rem">— Akhir Chapter ${chNum} —</p>
           <div style="margin: 1rem 0; min-height: 90px; text-align: center;" id="reader-ad-slot"></div>
 
           <!-- Chapter Comment Section -->
           <div class="chapter-comment-box" style="margin: 1.5rem auto; max-width: 720px; text-align: left; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem;">
             <h4 style="margin:0 0 1rem 0; font-family:'Outfit'; font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:0.5rem; color:var(--text-main);">
-              <i class="fa-solid fa-comments" style="color:var(--accent-light)"></i> Diskusi Chapter ${ch.number || ch.chapter || idx + 1} <span id="ch-comment-count" style="font-size:0.75rem; background:rgba(124,58,237,0.2); color:var(--accent-light); padding:0.15rem 0.5rem; border-radius:var(--radius-full);">0</span>
+              <i class="fa-solid fa-comments" style="color:var(--accent-light)"></i> Diskusi Chapter ${chNum} <span id="ch-comment-count" style="font-size:0.75rem; background:rgba(124,58,237,0.2); color:var(--accent-light); padding:0.15rem 0.5rem; border-radius:var(--radius-full);">0</span>
             </h4>
             
             <div style="display:flex; gap:0.65rem; margin-bottom:1.25rem;">
