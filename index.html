@@ -134,10 +134,11 @@
   <!-- ===== CRITICAL RESOURCE PRELOADS (Ultra-fast LCP & FCP) ===== -->
   <link rel="preload" href="styles.css?v=20260804_clean" as="style">
   <link rel="preload" href="data-initial.js?v=20260804_top" as="script">
+  <link rel="preload" href="https://assets.shngm.id/thumbnail/cover/banner_1780918976110_xp79e8.png" as="image" fetchpriority="high">
 
   <!-- ===== IMAGE CDN PRECONNECTS (Fast Mobile Cover LCP) ===== -->
-  <link rel="preconnect" href="https://assets.shngm.id">
-  <link rel="preconnect" href="https://minio.imgkc1.my.id">
+  <link rel="preconnect" href="https://assets.shngm.id" crossorigin>
+  <link rel="preconnect" href="https://minio.imgkc1.my.id" crossorigin>
 
   <!-- ===== FONTS & ICONS (non-blocking for ultra-fast FCP) ===== -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -388,18 +389,18 @@
           </div>
           <div class="hero-slides" id="hero-slides">
             <div class="hero-slide active">
-              <div class="hero-bg" id="hero-bg-0"></div>
+              <div class="hero-bg" id="hero-bg-0" style="background-image: url('https://assets.shngm.id/thumbnail/cover/banner_1780918976110_xp79e8.png');"></div>
               <div class="hero-overlay"></div>
               <div class="hero-content" id="hero-content">
                 <div class="hero-info">
                   <div class="hero-badges">
-                    <span class="badge-star"><i class="fa-solid fa-star"></i> <span id="hero-rating">9.8</span></span>
-                    <span class="badge-chapter"><i class="fa-solid fa-book"></i> <span id="hero-chapter">652 Chapter</span></span>
-                    <span class="badge-views"><i class="fa-solid fa-eye"></i> <span id="hero-views">12.4M Views</span></span>
+                    <span class="badge-star"><i class="fa-solid fa-star"></i> <span id="hero-rating">7.0</span></span>
+                    <span class="badge-chapter"><i class="fa-solid fa-book"></i> <span id="hero-chapter">100 Chapter</span></span>
+                    <span class="badge-views"><i class="fa-solid fa-eye"></i> <span id="hero-views">153.5K Views</span></span>
                   </div>
-                  <h2 class="hero-title" id="hero-title">Memuat Komik...</h2>
-                  <div class="hero-genres" id="hero-genres"></div>
-                  <p class="hero-synopsis" id="hero-synopsis">Memuat data komik pilihan terbaik...</p>
+                  <h2 class="hero-title" id="hero-title">The Count’s Secret Maid</h2>
+                  <div class="hero-genres" id="hero-genres"><span class="hero-genre-tag">Romance</span><span class="hero-genre-tag">Fantasy</span><span class="hero-genre-tag">Drama</span></div>
+                  <p class="hero-synopsis" id="hero-synopsis">Pelayan rahasia sang count yang menyembunyikan rahasia terbesar kerajaan...</p>
                   <div class="hero-actions">
                     <button class="btn-baca" id="hero-read-btn">
                       <i class="fa-solid fa-book-open"></i> Baca Sekarang

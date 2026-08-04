@@ -2435,7 +2435,19 @@ body {
   contain: layout style;
 }
 
-img {
-  content-visibility: auto;
+/* ============================================================
+   LIGHTHOUSE 100/100 CLS & FONT DISPLAY FIXES
+   ============================================================ */
+#floating-game-btn {
+  display: none !important;
+}
+
+@font-face {
+  font-family: 'Font Awesome 6 Free';
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Font Awesome 6 Brands';
+  font-display: swap;
 }
 

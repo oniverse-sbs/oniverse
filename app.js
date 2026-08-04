@@ -628,8 +628,6 @@
       const s = featured[idx];
       const bg = $('#hero-bg-0');
       bg.style.backgroundImage = `url(${getCover(s)})`;
-      bg.style.transform = 'scale(1)';
-      void bg.offsetWidth;
       bg.style.transform = 'scale(1.06)';
 
       $('#hero-title').textContent = s.title || s.name || 'Unknown';
