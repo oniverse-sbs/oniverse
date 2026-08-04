@@ -1279,8 +1279,9 @@
     }
 
     if (comicSlug) {
-      fetch(`data/detail/${comicSlug}.json?v=20260804_v99`)
-        .then(r => r.ok ? r.json() : (comicId && comicId !== comicSlug ? fetch(`data/detail/${comicId}.json?v=20260804_v99`).then(r2 => r2.ok ? r2.json() : null) : null))
+      const cacheBuster = Date.now();
+      fetch(`data/detail/${comicSlug}.json?v=${cacheBuster}`)
+        .then(r => r.ok ? r.json() : (comicId && comicId !== comicSlug ? fetch(`data/detail/${comicId}.json?v=${cacheBuster}`).then(r2 => r2.ok ? r2.json() : null) : null))
         .then(applyDetailData)
         .catch(() => {});
     }
@@ -1519,6 +1520,10 @@
             }
           }
         }
+      }
+
+      if (Array.isArray(images) && images.length > 0) {
+        images = images.filter(img => typeof img === 'string' && !img.includes('picsum.photos') && !img.includes('unsplash'));
       }
 
       if (!images.length) {
