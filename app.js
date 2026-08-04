@@ -2305,6 +2305,24 @@
     }
   }
 
+  function syncForumWithServer() {
+    try {
+      const stored = localStorage.getItem('oniverse_forum_msgs');
+      if (stored) {
+        const msgs = JSON.parse(stored);
+        if (Array.isArray(msgs) && msgs.length > 0) {
+          FORUM_STATE.messages = msgs;
+        }
+      }
+    } catch(e) {}
+  }
+
+  function pushForumToServer() {
+    try {
+      localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+    } catch(e) {}
+  }
+
   // ==========================================================================
   //  INIT
   // ==========================================================================
