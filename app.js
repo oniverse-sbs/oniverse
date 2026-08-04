@@ -1922,6 +1922,8 @@
   // ==========================================================================
   //  FORUM DISKUSI & CHAT MODULE (REAL-TIME PERSISTENT COMMUNITY FORUM)
   // ==========================================================================
+  const FORUM_SERVER_URL = 'https://jsonblob.com/api/jsonBlob/019fcb1d-1e9f-7f4c-b00c-50934fceb12e';
+
   const FORUM_STATE = {
     activeChannel: 'general',
     userName: localStorage.getItem('oniverse_username') || `Kultivator_${rand(1000, 9999)}`,
@@ -1940,6 +1942,42 @@
       { id: 9, channel: 'pengumuman', author: 'Admin_Oni', avatar: '📢', userRank: { badge: '📢', name: 'Official Staff', color: '#ef4444' }, text: '⚡ Update Server 2.0: Performa mobile ditingkatkan, loading FCP & LCP < 1s, fitur Komentar Komik & Forum Real-time aktif!', time: '08:00', isAdmin: true, likes: 45 }
     ]
   };
+
+  async function syncForumWithServer() {
+    try {
+      const res = await fetch(FORUM_SERVER_URL, { headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        const serverMsgs = await res.json();
+        if (Array.isArray(serverMsgs) && serverMsgs.length > 0) {
+          const existingMap = new Map(FORUM_STATE.messages.map(m => [m.id, m]));
+          serverMsgs.forEach(m => {
+            if (!existingMap.has(m.id)) {
+              existingMap.set(m.id, m);
+            } else {
+              Object.assign(existingMap.get(m.id), m);
+            }
+          });
+          FORUM_STATE.messages = Array.from(existingMap.values()).sort((a, b) => (a.id || 0) - (b.id || 0));
+          localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+          renderForumMessages();
+        }
+      }
+    } catch (e) {
+      console.warn('Forum server sync warning:', e);
+    }
+  }
+
+  async function pushForumToServer() {
+    try {
+      await fetch(FORUM_SERVER_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(FORUM_STATE.messages.slice(-100))
+      });
+    } catch (e) {
+      console.warn('Forum server push warning:', e);
+    }
+  }
 
   const COMMUNITY_BOT_RESPONSES = [
     "Wah mantap bro! Sepemikiran banget ama opini kamu 🔥",
@@ -2051,6 +2089,7 @@
 
     FORUM_STATE.messages.push(newMsg);
     localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+    pushForumToServer();
     input.value = '';
     FORUM_STATE.currentReplyAuthor = null;
     renderForumMessages();
@@ -2078,6 +2117,7 @@
 
     FORUM_STATE.messages.push(botMsg);
     localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+    pushForumToServer();
     
     // Only re-render if modal is currently open and channel matches
     const modal = $('#forum-modal');
@@ -2094,6 +2134,10 @@
     loadData();
     updateBookmarkCount();
     initRouter();
+    
+    // Global Real-time Cross-Device Sync Server
+    syncForumWithServer();
+    setInterval(syncForumWithServer, 4000);
   }
 
   if (document.readyState === 'loading') {
