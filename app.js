@@ -1147,19 +1147,23 @@
         }
       };
     }
-    if (comicSlug && (!s.chapters || s.chapters.length === 0 || !s.synopsis)) {
+    if (comicSlug) {
       fetch(`data/detail/${comicSlug}.json`)
         .then(r => r.ok ? r.json() : null)
         .then(detailData => {
           if (detailData) {
-            if (detailData.synopsis) s.synopsis = detailData.synopsis;
+            let updated = false;
+            if (detailData.synopsis && detailData.synopsis !== s.synopsis) { s.synopsis = detailData.synopsis; updated = true; }
             if (detailData.alternative_title) s.alternative_title = detailData.alternative_title;
             if (detailData.author) s.author = detailData.author;
             if (detailData.artist) s.artist = detailData.artist;
-            if (Array.isArray(detailData.chapters) && detailData.chapters.length > 0 && (!s.chapters || s.chapters.length === 0)) {
+            if (Array.isArray(detailData.chapters) && detailData.chapters.length > 0 && (!s.chapters || s.chapters.length !== detailData.chapters.length)) {
               s.chapters = detailData.chapters;
+              updated = true;
             }
-            if (STATE.currentDetail === s) openDetail(s, true);
+            if (updated && STATE.currentDetail && getSlug(STATE.currentDetail) === comicSlug) {
+              openDetail(s, true);
+            }
           }
         }).catch(() => {});
     }
