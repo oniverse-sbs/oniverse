@@ -2422,3 +2422,20 @@ body {
   line-height: 1.5 !important;
 }
 
+/* ============================================================
+   LIGHTHOUSE & PAGESPEED INSIGHTS MOBILE OPTIMIZATIONS
+   ============================================================ */
+.series-card, .update-item, .trending-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 260px;
+}
+
+/* Eliminate layout shifts (CLS 0) */
+.hero-slider, .comic-grid, .update-list {
+  contain: layout style;
+}
+
+img {
+  content-visibility: auto;
+}
+
