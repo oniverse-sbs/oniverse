@@ -870,7 +870,7 @@
       const isNew = i < 8;
       const typeBadge = s.type ? `<span class="update-type-tag ${s.type.toLowerCase()}">${s.type}</span>` : '';
       return `
-        <div class="update-item" data-idx="${i}">
+        <div class="update-item" data-slug="${getSlug(s)}" data-idx="${i}">
           <div class="update-thumb-wrap">
             <img src="${getCover(s)}" class="update-thumb" alt="${s.title || s.name}" loading="lazy" decoding="async" onerror="this.style.background='#14122c'">
             ${typeBadge}
@@ -916,7 +916,7 @@
     list.innerHTML = ranked.map((s, i) => {
       const cls = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
       return `
-        <li class="ranking-item" data-idx="${i}">
+        <li class="ranking-item" data-slug="${getSlug(s)}" data-idx="${i}">
           <span class="rank-num ${cls}">${i + 1}</span>
           <img src="${getCover(s)}" class="rank-thumb" alt="${s.title || s.name}" loading="lazy">
           <div class="rank-info">
@@ -1025,9 +1025,33 @@
     `).join('');
   }
 
-  // ==========================================================================
-  //  DETAIL MODAL
-  // ==========================================================================
+  function openDetailBySlug(slug) {
+    if (!slug) return;
+    const cleanSlug = String(slug).trim();
+    const series = STATE.allSeries.find(x => getSlug(x) === cleanSlug || String(x.id) === cleanSlug || x.slug === cleanSlug);
+    if (series) {
+      openDetail(series);
+    } else {
+      fetch(`data/detail/${cleanSlug}.json?v=20260804_v105`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data) openDetail(data);
+          else showToast('Gagal memuat detail komik', 'warning');
+        })
+        .catch(() => showToast('Gagal memuat detail komik', 'warning'));
+    }
+  }
+
+  // Global Event Delegation for all comic cards across Mobile & Desktop
+  document.addEventListener('click', e => {
+    const card = e.target.closest('.update-item, .trending-card, .series-card, .continue-card, .comic-card, [data-slug]');
+    if (card && card.dataset && card.dataset.slug) {
+      if (e.target.closest('button, a, .btn-baca, .social-link, .btn-bookmark-hero')) return;
+      e.preventDefault();
+      openDetailBySlug(card.dataset.slug);
+    }
+  });
+
   function openDetail(s, fromRouter) {
     STATE.currentDetail = s;
     if (!fromRouter) navigateToComic(s, false);
