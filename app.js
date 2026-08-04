@@ -1222,11 +1222,14 @@
         .then(detailData => {
           if (detailData) {
             let updated = false;
-            if (detailData.synopsis && detailData.synopsis !== s.synopsis) { s.synopsis = detailData.synopsis; updated = true; }
+            if (detailData.synopsis && detailData.synopsis !== s.synopsis && detailData.synopsis !== 'Belum ada deskripsi.') {
+              s.synopsis = detailData.synopsis;
+              updated = true;
+            }
             if (detailData.alternative_title) s.alternative_title = detailData.alternative_title;
             if (detailData.author) s.author = detailData.author;
             if (detailData.artist) s.artist = detailData.artist;
-            if (Array.isArray(detailData.chapters) && detailData.chapters.length > 0 && (!s.chapters || s.chapters.length !== detailData.chapters.length)) {
+            if (Array.isArray(detailData.chapters) && detailData.chapters.length > 0) {
               s.chapters = detailData.chapters;
               updated = true;
             }
@@ -1237,8 +1240,8 @@
         }).catch(() => {});
     }
 
-    // 2. Fetch full chapters from API if still needed
-    if (s.id && (!s.chapters || s.chapters.length < (s.total_chapters || 30))) {
+    // 2. Fetch full chapters from API only if chapters count is less than target
+    if (s.id && (!s.chapters || s.chapters.length < (s.total_chapters || 15))) {
       if (s.source === 'komikcast' || s.kc_slug || String(s.id).startsWith('kc_')) {
         const kcSeries = s.kc_slug || String(s.id).replace('kc_', '');
         fetch(`https://be.komikcast.cc/series/${kcSeries}/chapters`)
@@ -1246,7 +1249,7 @@
           .then(d => {
             const items = d.data || [];
             if (Array.isArray(items) && items.length > 0) {
-              s.chapters = items.map(ch => {
+              const mapped = items.map(ch => {
                 const cd = ch.data || {};
                 const idx = cd.index || ch.id;
                 return {
@@ -1258,21 +1261,27 @@
                   date: (ch.createdAt || '').slice(0, 10)
                 };
               });
-              if (STATE.currentDetail === s) openDetail(s, true);
+              if (mapped.length > 0) {
+                s.chapters = mapped;
+                if (STATE.currentDetail && getSlug(STATE.currentDetail) === comicSlug) openDetail(s, true);
+              }
             }
           }).catch(e => console.warn('KC Chapter API error:', e));
       } else {
         fetch(`https://api.shngm.io/v1/chapter/${s.id}/list?page=1&page_size=500&sort_by=chapter_number&sort_order=desc`)
           .then(r => r.json())
           .then(d => {
-            if (d && d.retcode === 0 && Array.isArray(d.data)) {
-              s.chapters = d.data.map(c => ({
+            if (d && d.retcode === 0 && Array.isArray(d.data) && d.data.length > 0) {
+              const mapped = d.data.map(c => ({
                 number: String(c.chapter_number || ''),
                 chapter: String(c.chapter_number || ''),
                 slug: c.chapter_id || '',
-                date: c.release_date || c.created_at || ''
+                date: (c.release_date || c.created_at || '').slice(0, 10)
               }));
-              if (STATE.currentDetail === s) openDetail(s, true);
+              if (mapped.length > 0) {
+                s.chapters = mapped;
+                if (STATE.currentDetail && getSlug(STATE.currentDetail) === comicSlug) openDetail(s, true);
+              }
             }
           }).catch(e => console.warn('Shinigami Chapter API error:', e));
       }
