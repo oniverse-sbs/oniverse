@@ -803,7 +803,7 @@
       return `
         <div class="update-item" data-idx="${i}">
           <div class="update-thumb-wrap">
-            <img src="${getCover(s)}" class="update-thumb" alt="${s.title || s.name}" loading="lazy" onerror="this.style.background='#14122c'">
+            <img src="${getCover(s)}" class="update-thumb" alt="${s.title || s.name}" loading="lazy" decoding="async" onerror="this.style.background='#14122c'">
             ${typeBadge}
           </div>
           <div class="update-info">

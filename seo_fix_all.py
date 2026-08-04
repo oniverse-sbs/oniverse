@@ -41,9 +41,9 @@ def split_data(all_series):
     # Sort by last_updated desc
     all_series.sort(key=lambda s: s.get("last_updated", ""), reverse=True)
 
-    # Initial data: top 50 comics, stripped down (no synopsis, no chapters)
+    # Initial data: top 30 comics, stripped down for instant FCP < 0.4s
     initial = []
-    for s in all_series[:50]:
+    for s in all_series[:30]:
         initial.append({
             "id": s.get("id", ""),
             "slug": s.get("slug", ""),
