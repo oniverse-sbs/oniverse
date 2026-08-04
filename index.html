@@ -132,7 +132,7 @@
   </script>
 
   <!-- ===== CRITICAL IMAGE PRELOAD & PRECONNECTS ===== -->
-  <link rel="preload" href="https://assets.shngm.id/thumbnail/cover/banner_1780918976110_xp79e8.png" as="image" fetchpriority="high">
+  <link rel="preload" href="/hero-cover.webp" as="image" fetchpriority="high">
   <link rel="preconnect" href="https://assets.shngm.id" crossorigin>
   <link rel="preconnect" href="https://minio.imgkc1.my.id" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -140,10 +140,11 @@
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
   <!-- ===== FONTS & STYLES ===== -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=20260804_clean">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
   <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   </noscript>
 
@@ -383,7 +384,7 @@
           </div>
           <div class="hero-slides" id="hero-slides">
             <div class="hero-slide active">
-              <div class="hero-bg" id="hero-bg-0" style="background-image: url('https://assets.shngm.id/thumbnail/cover/banner_1780918976110_xp79e8.png');"></div>
+              <div class="hero-bg" id="hero-bg-0" style="background-image: url('/hero-cover.webp');"></div>
               <div class="hero-overlay"></div>
               <div class="hero-content" id="hero-content">
                 <div class="hero-info">
