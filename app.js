@@ -1563,7 +1563,7 @@
 
       const imagesContent = images.length > 0 ? `
         <div class="reader-images-wrap">
-          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';if(this.src.startsWith('https://assets.shngm.id')){this.src='https://corsproxy.io/?'+encodeURIComponent(this.src);}else{this.style.display='none';}}else{this.style.display='none';}">`).join('')}
+          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='https://corsproxy.io/?'+encodeURIComponent(this.src);}else if(!this.dataset.tried2){this.dataset.tried2='1';this.src='https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(this.src);}else{this.outerHTML='<div style=\\'padding:1.5rem;margin:0.8rem 0;background:rgba(255,255,255,0.03);border:1px dashed var(--border);border-radius:var(--radius-md);text-align:center;color:var(--text-muted);font-size:0.85rem;cursor:pointer;\\' onclick=\\'openReader(STATE.currentReader.series, STATE.currentReader.chapters, STATE.currentReader.chapterIdx)\\'>⚠️ Halaman ${i + 1} belum memuat — <span style=\\'color:var(--accent-light);font-weight:600;\\'><i class=\\'fa-solid fa-rotate-right\\'></i> Klik untuk Muat Ulang</span></div>';}">`).join('')}
         </div>` : `
         <div class="reader-empty" style="text-align:center; padding:3.5rem 1.5rem; color:var(--text-muted);">
           <i class="fa-solid fa-book-open" style="font-size:2.8rem; margin-bottom:1.2rem; color:var(--accent-light); opacity:0.85;"></i>
