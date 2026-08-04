@@ -1408,44 +1408,54 @@
     saveHistory();
     trackRead(series.title);
     
+    // Helper for ultra-fast 1200ms timeout fetch (no long hangs)
+    async function fetchWithTimeout(url, ms = 1200) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), ms);
+      try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timer);
+        return res;
+      } catch (e) {
+        clearTimeout(timer);
+        return null;
+      }
+    }
+
     // Fetch chapter images with robust multi-proxy fallback
     const isKC = series.source === 'komikcast' || series.kc_slug || ch.kc_series_slug || (series.id && String(series.id).startsWith('kc_'));
     let images = [];
     try {
       if (isKC) {
-        const kcSeries = series.kc_slug || (series.id ? String(series.id).replace('kc_', '') : '');
+        const kcSeries = series.kc_slug || ch.kc_series_slug || (series.id ? String(series.id).replace('kc_', '') : '');
         const kcIndex = ch.kc_index || ch.number || ch.chapter;
         const targetUrl = `https://be.komikcast.cc/series/${kcSeries}/chapters/${kcIndex}`;
         const urls = [
           targetUrl,
-          `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+          `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
         ];
         for (const u of urls) {
-          try {
-            const res = await fetch(u);
-            if (res.ok) {
-              const jsonRes = await res.json();
-              const chData = jsonRes.data?.data || jsonRes.data || {};
-              if (Array.isArray(chData.images) && chData.images.length > 0) {
-                images = chData.images;
-                break;
-              }
+          const res = await fetchWithTimeout(u, 1200);
+          if (res && res.ok) {
+            const jsonRes = await res.json();
+            const chData = jsonRes.data?.data || jsonRes.data || {};
+            if (Array.isArray(chData.images) && chData.images.length > 0) {
+              images = chData.images;
+              break;
             }
-          } catch (e) {}
+          }
         }
       } else {
         const chSlug = ch.slug || ch.chapter_slug || ch.chapter_id || ch.id || '';
-        const targetUrl = `https://api.shngm.io/v1/chapter/detail/${chSlug}`;
-        const urls = [
-          targetUrl,
-          `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
-        ];
-        for (const u of urls) {
-          try {
-            const res = await fetch(u);
-            if (res.ok) {
+        if (chSlug && chSlug.length > 10 && !chSlug.startsWith('ch_')) {
+          const targetUrl = `https://api.shngm.io/v1/chapter/detail/${chSlug}`;
+          const urls = [
+            targetUrl,
+            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+          ];
+          for (const u of urls) {
+            const res = await fetchWithTimeout(u, 1200);
+            if (res && res.ok) {
               const jsonRes = await res.json();
               const d = jsonRes.data || {};
               const baseUrl = d.base_url || d.base_url_low || 'https://assets.shngm.id';
@@ -1461,7 +1471,7 @@
                 break;
               }
             }
-          } catch (e) {}
+          }
         }
       }
 
