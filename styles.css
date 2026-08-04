@@ -56,42 +56,42 @@ input, textarea, [contenteditable="true"],
    CSS VARIABLES
 ============================================================ */
 :root {
-  --bg-root:    #0d0a1a;
-  --bg-sidebar: #100e1e;
-  --bg-card:    rgba(20, 18, 35, 0.85);
-  --bg-card-solid: #14122c;
-  --bg-glass:   rgba(255,255,255,0.04);
-  --border:     rgba(255,255,255,0.07);
-  --border-purple: rgba(124,58,237,0.4);
+  --bg-root:    #090714;
+  --bg-sidebar: #0e0c1b;
+  --bg-card:    rgba(18, 15, 34, 0.75);
+  --bg-card-solid: #131026;
+  --bg-glass:   rgba(255, 255, 255, 0.04);
+  --border:     rgba(255, 255, 255, 0.08);
+  --border-purple: rgba(139, 92, 246, 0.35);
 
-  --purple:     #7c3aed;
-  --purple-light: #a855f7;
-  --purple-glow: rgba(124,58,237,0.35);
+  --purple:     #8b5cf6;
+  --purple-light: #a78bfa;
+  --purple-glow: rgba(139, 92, 246, 0.3);
   --cyan:       #06b6d4;
   --pink:       #ec4899;
   --gold:       #f59e0b;
   --orange:     #f97316;
-  --green:      #22c55e;
+  --green:      #10b981;
   --red:        #ef4444;
 
-  --text:       #f3f4f6;
-  --text-muted: #9ca3af;
-  --text-dim:   #6b7280;
+  --text:       #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim:   #64748b;
 
-  --navbar-h:   58px;
+  --navbar-h:   60px;
   --sidebar-l:  210px;
   --sidebar-r:  250px;
-  --bottom-nav: 60px;
+  --bottom-nav: 62px;
 
-  --radius-xl:  20px;
+  --radius-xl:  18px;
   --radius-lg:  14px;
   --radius-md:  10px;
   --radius-sm:  6px;
   --radius-full: 9999px;
 
-  --shadow-card: 0 8px 24px rgba(0,0,0,0.5);
-  --shadow-glow: 0 0 20px rgba(124,58,237,0.4);
-  --transition:  all 0.25s cubic-bezier(0.4,0,0.2,1);
+  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 25px rgba(139, 92, 246, 0.25);
+  --transition:  all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ============================================================

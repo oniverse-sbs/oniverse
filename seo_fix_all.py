@@ -58,6 +58,8 @@ def split_data(all_series):
             "views": s.get("views", 0),
             "total_chapters": s.get("total_chapters", 0),
             "source": s.get("source", ""),
+            "synopsis": s.get("synopsis", ""),
+            "chapters": s.get("chapters", [])
         })
 
     # Write initial data
@@ -65,9 +67,9 @@ def split_data(all_series):
     init_path = os.path.join(PROJECT, "data-initial.js")
     with open(init_path, "w", encoding="utf-8") as f:
         f.write(init_js)
-    print(f"  → data-initial.js: {os.path.getsize(init_path)/1024:.1f} KB (50 comics)")
+    print(f"  → data-initial.js: {os.path.getsize(init_path)/1024:.1f} KB (30 comics)")
 
-    # Full data (stripped of chapters/synopsis for catalog browsing)
+    # Full data catalog (with pre-filled chapters & synopsis)
     catalog = []
     for s in all_series:
         catalog.append({
@@ -84,6 +86,8 @@ def split_data(all_series):
             "views": s.get("views", 0),
             "total_chapters": s.get("total_chapters", 0),
             "source": s.get("source", ""),
+            "synopsis": s.get("synopsis", ""),
+            "chapters": s.get("chapters", [])
         })
 
     cat_path = os.path.join(PROJECT, "data-catalog.json")
