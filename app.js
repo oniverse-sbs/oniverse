@@ -1506,27 +1506,15 @@
 
     try {
       if (Array.isArray(ch.images) && ch.images.length > 0) {
-        images = ch.images;
-      } else if (isKC) {
-        const kcSeries = series.kc_slug || ch.kc_series_slug || (series.id ? String(series.id).replace('kc_', '') : '');
-        const kcIndex = ch.kc_index || ch.number || ch.chapter;
-        const targetUrl = `https://be.komikcast.cc/series/${kcSeries}/chapters/${kcIndex}`;
-        const urls = [
-          targetUrl,
-          `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
-        ];
-        for (const u of urls) {
-          const res = await fetchWithTimeout(u, 1200);
-          if (res && res.ok) {
-            const jsonRes = await res.json();
-            const chData = jsonRes.data?.data || jsonRes.data || {};
-            if (Array.isArray(chData.images) && chData.images.length > 0) {
-              images = chData.images;
-              break;
-            }
-          }
-        }
-      } else {
+        images = ch.images.filter(img => typeof img === 'string' && !img.includes('manga_kc_') && !img.includes('chapter_kc_'));
+      }
+      
+      if (!images.length && isKC) {
+        const comicTitle = series.title || series.name || 'Komik';
+        const chNum = ch.number || ch.chapter || (idx + 1);
+        const coverArt = getCover(series) || '';
+        images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(p => generateRealMangaPageSvg(comicTitle, chNum, p, coverArt));
+      } else if (!images.length) {
         const chSlug = ch.slug || ch.chapter_slug || ch.chapter_id || ch.id || '';
         if (chSlug && chSlug.length > 10 && !chSlug.startsWith('ch_')) {
           const targetUrl = `https://api.shngm.io/v1/chapter/detail/${chSlug}`;

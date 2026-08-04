@@ -422,8 +422,8 @@ def generate_comic_pages(all_series):
     </div>
   </div>
 
-  <script src="/data-initial.js?v=20260804_vNO_REPEATED_COVER"></script>
-  <script src="/app.js?v=20260804_vNO_REPEATED_COVER" defer></script>
+  <script src="/data-initial.js?v=20260804_vPERFECT_CATALOG"></script>
+  <script src="/app.js?v=20260804_vPERFECT_CATALOG" defer></script>
 </body>
 </html>'''
 
