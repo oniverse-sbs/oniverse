@@ -105,17 +105,25 @@ def split_data(all_series):
             genres_str = ", ".join(genres_list[:3]) if genres_list else "Action, Fantasy"
             syn = f"Baca komik {title_str} bahasa Indonesia gratis di OniVerse.SBS. Komik {type_str} bergenre {genres_str} dengan kualitas gambar HD terbaik dan update chapter terbaru."
 
-        chaps = s.get("chapters") or []
-        if not chaps:
-            raw_ch = str(s.get("latest_chapter") or s.get("total_chapters") or "0")
-            num_match = re.search(r'\d+', raw_ch)
-            total_num = int(num_match.group(0)) if num_match else 0
-            if total_num <= 0:
-                total_num = 15 # default fallback chapters count
-            
-            is_kc = s.get("source") == "komikcast" or str(s.get("id","")).startswith("kc_") or slug.startswith("kc-")
-            kc_slug = slug.replace("kc-", "") if slug.startswith("kc-") else slug
-            for i in range(total_num, 0, -1):
+        chaps = list(s.get("chapters") or [])
+        raw_ch = str(s.get("latest_chapter") or s.get("total_chapters") or "0")
+        num_match = re.search(r'\d+', raw_ch)
+        parsed_latest = int(num_match.group(0)) if num_match else 0
+        tot_ch = int(s.get("total_chapters") or 0)
+        target_num = max(15, tot_ch, parsed_latest)
+
+        existing_nums = set()
+        for c in chaps:
+            c_num_str = str(c.get("number", c.get("chapter", "")))
+            m = re.search(r'\d+', c_num_str)
+            if m:
+                existing_nums.add(int(m.group(0)))
+
+        is_kc = s.get("source") == "komikcast" or str(s.get("id","")).startswith("kc_") or slug.startswith("kc-")
+        kc_slug = slug.replace("kc-", "") if slug.startswith("kc-") else slug
+
+        for i in range(target_num, 0, -1):
+            if i not in existing_nums:
                 chaps.append({
                     "number": str(i),
                     "chapter": str(i),
@@ -124,6 +132,12 @@ def split_data(all_series):
                     "kc_series_slug": kc_slug if is_kc else None,
                     "date": (s.get("last_updated") or "")[:10]
                 })
+
+        def get_ch_num(c):
+            m = re.search(r'\d+(\.\d+)?', str(c.get("number", c.get("chapter", 0))))
+            return float(m.group(0)) if m else 0.0
+
+        chaps.sort(key=get_ch_num, reverse=True)
 
         s["chapters"] = chaps
         s["synopsis"] = syn
