@@ -1,5 +1,5 @@
 """
-SEO Fix Script — All-in-One
+SEO Fix Script - All-in-One
 1. Split data.js into small initial load + lazy-load chunks
 2. Generate static HTML pages for every comic (/komik/slug/index.html)
 3. Generate genre pages (/genre/action/index.html, etc.)
@@ -67,7 +67,7 @@ def split_data(all_series):
     init_path = os.path.join(PROJECT, "data-initial.js")
     with open(init_path, "w", encoding="utf-8") as f:
         f.write(init_js)
-    print(f"  → data-initial.js: {os.path.getsize(init_path)/1024:.1f} KB (30 comics)")
+    print(f"   -> data-initial.js: {os.path.getsize(init_path)/1024:.1f} KB (30 comics)")
 
     # Full data catalog (with pre-filled chapters & synopsis)
     catalog = []
@@ -93,7 +93,7 @@ def split_data(all_series):
     cat_path = os.path.join(PROJECT, "data-catalog.json")
     with open(cat_path, "w", encoding="utf-8") as f:
         json.dump(catalog, f, ensure_ascii=False, separators=(',', ':'))
-    print(f"  → data-catalog.json: {os.path.getsize(cat_path)/1024:.1f} KB ({len(catalog)} comics)")
+    print(f"   -> data-catalog.json: {os.path.getsize(cat_path)/1024:.1f} KB ({len(catalog)} comics)")
 
     # Individual detail files (synopsis + chapters)
     detail_dir = os.path.join(PROJECT, "data", "detail")
@@ -142,7 +142,7 @@ def split_data(all_series):
         with open(os.path.join(detail_dir, f"{slug}.json"), "w", encoding="utf-8") as f:
             json.dump(detail, f, ensure_ascii=False, separators=(',', ':'))
 
-    print(f"  → data/detail/ : {len(all_series)} individual detail files")
+    print(f"   -> data/detail/ : {len(all_series)} individual detail files")
 
 # ============================================================
 # 2. GENERATE STATIC COMIC PAGES
@@ -404,7 +404,7 @@ def generate_comic_pages(all_series):
             f.write(page_html)
         count += 1
 
-    print(f"  → Generated {count} static comic pages in /komik/")
+    print(f"  -> Generated {count} static comic pages in /komik/")
     return count
 
 # ============================================================
@@ -547,7 +547,7 @@ def generate_genre_pages(all_series):
     with open(os.path.join(genre_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(genre_index)
 
-    print(f"  → Generated {count} genre pages + index in /genre/")
+    print(f"  -> Generated {count} genre pages + index in /genre/")
     return count
 
 # ============================================================
@@ -618,7 +618,7 @@ def generate_sitemap(all_series, genre_count):
 
     with open(os.path.join(PROJECT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(sitemap)
-    print(f"  → sitemap.xml: {len(urls)} URLs")
+    print(f"  -> sitemap.xml: {len(urls)} URLs")
 
     # Sitemap index
     sitemap_index = f'''<?xml version="1.0" encoding="UTF-8"?>
@@ -653,7 +653,7 @@ Sitemap: https://oniverse.sbs/sitemap_index.xml
 """
     with open(os.path.join(PROJECT, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(robots)
-    print("  → robots.txt updated")
+    print("  -> robots.txt updated")
 
 
 # ============================================================
@@ -661,7 +661,7 @@ Sitemap: https://oniverse.sbs/sitemap_index.xml
 # ============================================================
 def main():
     print("=" * 60)
-    print("  ONIVERSE SEO FIX — All-in-One Implementation")
+    print("  ONIVERSE SEO FIX - All-in-One Implementation")
     print("=" * 60)
 
     all_series = load_data()
@@ -674,7 +674,7 @@ def main():
     update_robots()
 
     print(f"\n{'=' * 60}")
-    print(f"  ✅ SEO FIX COMPLETE!")
+    print(f"  [OK] SEO FIX COMPLETE!")
     print(f"  - {comic_count} static comic pages generated")
     print(f"  - {genre_count} genre pages generated")
     print(f"  - data.js split into initial + catalog + detail chunks")

@@ -278,16 +278,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://oniverse.sbs/komik/4ef0b99b-20d3-4da8-bb73-9c3768f32699/</loc>
-    <lastmod>2026-08-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1780918976110_xp79e8.png</image:loc>
-      <image:title>The Count’s Secret Maid</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/komik/11ecc266-ead4-4728-b21a-5ac34afb140c/</loc>
     <lastmod>2026-08-04</lastmod>
     <changefreq>weekly</changefreq>
@@ -295,6 +285,16 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1785776595819_b2btke.jpg</image:loc>
       <image:title>She’s Not Our Daughter!</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/4ef0b99b-20d3-4da8-bb73-9c3768f32699/</loc>
+    <lastmod>2026-08-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1780918976110_xp79e8.png</image:loc>
+      <image:title>The Count’s Secret Maid</image:title>
     </image:image>
   </url>
   <url>
