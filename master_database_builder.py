@@ -3,13 +3,17 @@ import os
 import re
 
 print("=========================================================")
-print("  MASTER DATABASE BUILDER (Komik -> Genre -> Chapter -> Gambar)")
+print("  MASTER DATABASE BUILDER (Clean Real Chapters Only)")
 print("=========================================================")
 
-with open('series.json', 'r', encoding='utf-8') as f:
+source_file = os.path.join('scraped_data', 'series.json')
+if not os.path.exists(source_file):
+    source_file = 'series.json'
+
+with open(source_file, 'r', encoding='utf-8') as f:
     raw_catalog = json.load(f)
 
-print(f"Loaded {len(raw_catalog)} series from series.json")
+print(f"Loaded {len(raw_catalog)} series from {source_file}")
 
 master_catalog = []
 detail_dir = os.path.join('data', 'detail')
@@ -38,20 +42,27 @@ for item in raw_catalog:
 
     # 3. Chapter & Gambar Normalization
     raw_chaps = item.get('chapters') or []
-    unified_chaps = []
+    
+    # Filter chapters: if any chapter has valid images, keep only chapters that have valid images or real dates
+    chaps_with_images = [c for c in raw_chaps if isinstance(c.get('images'), list) and len(c.get('images')) > 0]
+    
+    # If we have chapters with real images, filter out empty dummy placeholders!
+    if len(chaps_with_images) > 0:
+        target_chaps = chaps_with_images
+    else:
+        target_chaps = raw_chaps
 
-    for c in raw_chaps:
+    unified_chaps = []
+    for c in target_chaps:
         ch_num = str(c.get('number') or c.get('chapter') or '')
         ch_id = c.get('id') or c.get('chapter_id') or c.get('slug') or f'ch_{ch_num}'
 
-        # Filter and validate images (remove fake / 404 placeholder URLs)
         raw_imgs = c.get('images', [])
         valid_imgs = []
         if isinstance(raw_imgs, list):
             for img in raw_imgs:
                 if isinstance(img, str) and img.strip():
-                    if not any(x in img for x in ['chapter_ch_', 'manga_kc_', 'chapter_kc_', 'assets.shinigami.ae']):
-                        valid_imgs.append(img)
+                    valid_imgs.append(img.strip())
 
         total_valid_images += len(valid_imgs)
 
@@ -94,7 +105,7 @@ for item in raw_catalog:
 
     master_catalog.append(master_item)
 
-    # 4. Save to Static Detail Database (data/detail/<slug>.json)
+    # 4. Save to Static Detail Database (data/detail/<slug>.json & sid.json)
     detail_payload = {
         'title': master_item['title'],
         'synopsis': master_item['synopsis'],
