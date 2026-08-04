@@ -2451,3 +2451,21 @@ body {
   font-display: swap;
 }
 
+/* ============================================================
+   ULTRA-SMOOTH MOBILE 60FPS HARDWARE ACCELERATION
+   ============================================================ */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  .series-card, .trending-item, .update-item, .hero-slider, .btn-baca {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  .glass-card, .modal-content {
+    backdrop-filter: none !important;
+    background: rgba(18, 15, 34, 0.95) !important;
+  }
+}
+

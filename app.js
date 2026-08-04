@@ -29,22 +29,7 @@
     if (e.ctrlKey && e.shiftKey && (e.key === 'K' || e.key === 'k')) { e.preventDefault(); return false; }
   });
 
-  // 3. Anti-debugging: detect DevTools open via debugger timing
-  let _devtoolsOpen = false;
-  const _antiDebug = function() {
-    const start = performance.now();
-    debugger;
-    const end = performance.now();
-    if (end - start > 100) {
-      if (!_devtoolsOpen) {
-        _devtoolsOpen = true;
-        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d0a1a;color:#7c3aed;font-family:Outfit,sans-serif;font-size:2rem;text-align:center;padding:2rem"><div><h1>⛔ Akses Ditolak</h1><p style="font-size:1rem;color:#94a3b8;margin-top:1rem">DevTools terdeteksi. Halaman ini dilindungi.</p><p style="font-size:0.85rem;color:#64748b;margin-top:0.5rem">Tutup DevTools dan refresh halaman untuk melanjutkan.</p></div></div>';
-      }
-    } else {
-      _devtoolsOpen = false;
-    }
-  };
-  setInterval(_antiDebug, 3000);
+  // Anti-debugging disabled for max mobile performance
 
   // 4. Disable text selection on protected elements (images, covers)
   document.addEventListener('selectstart', function(e) {
