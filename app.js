@@ -1489,6 +1489,21 @@
     // Fetch chapter images with robust multi-proxy fallback
     const isKC = series.source === 'komikcast' || series.kc_slug || ch.kc_series_slug || (series.id && String(series.id).startsWith('kc_'));
     let images = [];
+
+    // Instant check & detail JSON fetch to ensure latest real scraped WebP image arrays
+    if (!Array.isArray(ch.images) || ch.images.length === 0) {
+      try {
+        const detailRes = await fetchWithTimeout(`data/detail/${slug}.json?v=${Date.now()}`, 1500);
+        if (detailRes && detailRes.ok) {
+          const detailData = await detailRes.json();
+          const targetCh = (detailData.chapters || []).find(c => (c.number || c.chapter) == (ch.number || ch.chapter) || c.slug === ch.slug);
+          if (targetCh && Array.isArray(targetCh.images) && targetCh.images.length > 0) {
+            ch.images = targetCh.images;
+          }
+        }
+      } catch (e) {}
+    }
+
     try {
       if (Array.isArray(ch.images) && ch.images.length > 0) {
         images = ch.images;
