@@ -579,7 +579,7 @@
     // Lazy load full catalog (data-catalog.json) in background AFTER initial paint (2.5s delay for 95+ PageSpeed)
     setTimeout(async () => {
       try {
-        const res = await fetch('data-catalog.json');
+        const res = await fetch('data-catalog.json?v=20260804_v99');
         if (res.ok) {
           const catalog = await res.json();
           if (Array.isArray(catalog) && catalog.length > 0) {
@@ -1240,8 +1240,8 @@
     }
 
     if (comicSlug) {
-      fetch(`data/detail/${comicSlug}.json`)
-        .then(r => r.ok ? r.json() : (comicId && comicId !== comicSlug ? fetch(`data/detail/${comicId}.json`).then(r2 => r2.ok ? r2.json() : null) : null))
+      fetch(`data/detail/${comicSlug}.json?v=20260804_v99`)
+        .then(r => r.ok ? r.json() : (comicId && comicId !== comicSlug ? fetch(`data/detail/${comicId}.json?v=20260804_v99`).then(r2 => r2.ok ? r2.json() : null) : null))
         .then(applyDetailData)
         .catch(() => {});
     }
