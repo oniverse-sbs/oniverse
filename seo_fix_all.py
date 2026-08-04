@@ -135,10 +135,19 @@ def split_data(all_series):
             "artist": s.get("artist", ""),
             "chapters": chaps,
         }
-        with open(os.path.join(detail_dir, f"{slug}.json"), "w", encoding="utf-8") as f:
-            json.dump(detail, f, ensure_ascii=False, separators=(',', ':'))
+        
+        # Save by slug
+        if slug:
+            with open(os.path.join(detail_dir, f"{slug}.json"), "w", encoding="utf-8") as f:
+                json.dump(detail, f, ensure_ascii=False, separators=(',', ':'))
+        
+        # Save by id if different from slug
+        item_id = str(s.get("id", ""))
+        if item_id and item_id != slug:
+            with open(os.path.join(detail_dir, f"{item_id}.json"), "w", encoding="utf-8") as f:
+                json.dump(detail, f, ensure_ascii=False, separators=(',', ':'))
 
-    print(f"   -> data/detail/ : {len(all_series)} individual detail files")
+    print(f"   -> data/detail/ : generated detail files for {len(all_series)} series")
 
 # ============================================================
 # 2. GENERATE STATIC COMIC PAGES

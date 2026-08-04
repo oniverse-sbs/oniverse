@@ -1216,28 +1216,34 @@
         }
       };
     }
+    // 1. Fetch detailed synopsis & chapter list from pre-generated static detail files
+    const comicSlug = getSlug(s);
+    const comicId = String(s.id || '');
+
+    function applyDetailData(detailData) {
+      if (!detailData) return;
+      let updated = false;
+      if (detailData.synopsis && detailData.synopsis !== s.synopsis && detailData.synopsis !== 'Belum ada deskripsi.') {
+        s.synopsis = detailData.synopsis;
+        updated = true;
+      }
+      if (detailData.alternative_title) s.alternative_title = detailData.alternative_title;
+      if (detailData.author) s.author = detailData.author;
+      if (detailData.artist) s.artist = detailData.artist;
+      if (Array.isArray(detailData.chapters) && detailData.chapters.length > 0) {
+        s.chapters = detailData.chapters;
+        updated = true;
+      }
+      if (updated && STATE.currentDetail && getSlug(STATE.currentDetail) === comicSlug) {
+        openDetail(s, true);
+      }
+    }
+
     if (comicSlug) {
       fetch(`data/detail/${comicSlug}.json`)
-        .then(r => r.ok ? r.json() : null)
-        .then(detailData => {
-          if (detailData) {
-            let updated = false;
-            if (detailData.synopsis && detailData.synopsis !== s.synopsis && detailData.synopsis !== 'Belum ada deskripsi.') {
-              s.synopsis = detailData.synopsis;
-              updated = true;
-            }
-            if (detailData.alternative_title) s.alternative_title = detailData.alternative_title;
-            if (detailData.author) s.author = detailData.author;
-            if (detailData.artist) s.artist = detailData.artist;
-            if (Array.isArray(detailData.chapters) && detailData.chapters.length > 0) {
-              s.chapters = detailData.chapters;
-              updated = true;
-            }
-            if (updated && STATE.currentDetail && getSlug(STATE.currentDetail) === comicSlug) {
-              openDetail(s, true);
-            }
-          }
-        }).catch(() => {});
+        .then(r => r.ok ? r.json() : (comicId && comicId !== comicSlug ? fetch(`data/detail/${comicId}.json`).then(r2 => r2.ok ? r2.json() : null) : null))
+        .then(applyDetailData)
+        .catch(() => {});
     }
 
     // 2. Fetch full chapters from API only if chapters count is less than target
