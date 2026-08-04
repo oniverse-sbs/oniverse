@@ -890,6 +890,73 @@
   }
 
   // ==========================================================================
+  //  COMIC DETAIL COMMENTS
+  // ==========================================================================
+  function getComicCommentsKey(slug) {
+    return `oniverse_comic_comments_${slug}`;
+  }
+
+  function getComicComments(slug) {
+    const key = getComicCommentsKey(slug);
+    let comments = [];
+    try { comments = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
+    if (!comments.length) {
+      comments = [
+        {
+          id: 101,
+          author: 'Kultivator_Sejati',
+          userRank: { badge: '🔥', name: 'Pendekar Utama', color: '#f59e0b' },
+          text: 'Alur ceritanya seru banget! Update chapter terbarunya selalu ditunggu-tunggu.',
+          time: '2 jam lalu',
+          likes: 15
+        },
+        {
+          id: 102,
+          author: 'Pembaca_Setia',
+          userRank: { badge: '⚡', name: 'Kultivator Ranah Atas', color: '#8b5cf6' },
+          text: 'Rekomendasi banget buat yang suka genre ini. Gambar jernih & terjemahan rapi!',
+          time: '5 jam lalu',
+          likes: 9
+        }
+      ];
+      localStorage.setItem(key, JSON.stringify(comments));
+    }
+    return comments;
+  }
+
+  function renderComicComments(slug) {
+    const list = $('#comic-comment-list');
+    const countEl = $('#comic-comment-count');
+    if (!list) return;
+
+    const comments = getComicComments(slug);
+    if (countEl) countEl.textContent = comments.length;
+
+    list.innerHTML = comments.map(c => `
+      <div class="comic-comment-card" style="background:var(--bg-main); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.85rem 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg, #7c3aed, #ec4899); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:0.75rem;">
+              ${(c.author || 'A')[0].toUpperCase()}
+            </div>
+            <strong style="font-size:0.88rem; color:var(--text-main);">${c.author}</strong>
+            <span style="font-size:0.68rem; background:${c.userRank?.color || '#7c3aed'}22; color:${c.userRank?.color || '#a78bfa'}; border:1px solid ${c.userRank?.color || '#7c3aed'}44; padding:0.1rem 0.45rem; border-radius:var(--radius-full); font-weight:600;">
+              ${c.userRank?.badge || '🔥'} ${c.userRank?.name || 'Kultivator'}
+            </span>
+          </div>
+          <span style="font-size:0.72rem; color:var(--text-muted);">${c.time}</span>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin:0 0 0.5rem 0; line-height:1.4;">${c.text}</p>
+        <div style="display:flex; gap:1rem; align-items:center;">
+          <button class="btn-like-comment" data-comment-id="${c.id}" style="background:none; border:none; color:var(--text-dim); font-size:0.78rem; cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+            <i class="fa-solid fa-thumbs-up"></i> <span>${c.likes || 0}</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ==========================================================================
   //  DETAIL MODAL
   // ==========================================================================
   function openDetail(s, fromRouter) {
@@ -942,6 +1009,23 @@
             </div>`).join('')}
           ${sortedChapters.length === 0 ? '<p style="color:var(--text-dim);font-size:0.82rem;grid-column:1/-1;text-align:center;padding:1rem">Belum ada chapter tersedia.</p>' : ''}
         </div>
+      </div>
+      
+      <!-- ===== KOMIK DETAIL COMMENT SECTION ===== -->
+      <div class="comic-comment-section" style="margin-top: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <h3 style="margin:0; font-family:'Outfit'; font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:0.5rem; color:var(--text-main);">
+            <i class="fa-solid fa-comments" style="color:var(--accent-light)"></i> Kolom Komentar & Diskusi
+            <span id="comic-comment-count" style="font-size:0.75rem; background:rgba(124,58,237,0.2); color:var(--accent-light); padding:0.15rem 0.55rem; border-radius:var(--radius-full);">0</span>
+          </h3>
+        </div>
+
+        <div style="display:flex; gap:0.65rem; margin-bottom:1.25rem;">
+          <input type="text" id="comic-comment-input" placeholder="Tulis komentar atau kesanmu tentang komik ini..." style="flex:1; background:var(--bg-main); border:1px solid var(--border); color:var(--text-main); padding:0.65rem 0.85rem; border-radius:var(--radius-md); font-size:0.85rem; font-family:inherit;">
+          <button id="comic-comment-send" class="btn-baca" style="padding:0.65rem 1.2rem; font-size:0.85rem;"><i class="fa-solid fa-paper-plane"></i> Kirim</button>
+        </div>
+
+        <div id="comic-comment-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
       </div>`;
 
     // Events
@@ -983,8 +1067,59 @@
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
-    // 1. Fetch local detail JSON if available and chapters/synopsis are missing
+    // Initialize Comic Comment Section
     const comicSlug = getSlug(s);
+    renderComicComments(comicSlug);
+
+    const comicCommentInput = $('#comic-comment-input');
+    const comicCommentSendBtn = $('#comic-comment-send');
+
+    const sendComicComment = () => {
+      if (!comicCommentInput || !comicCommentInput.value.trim()) return;
+      const text = comicCommentInput.value.trim();
+      const key = getComicCommentsKey(comicSlug);
+      let comments = [];
+      try { comments = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
+      const { rank } = getCultivationRealm();
+      const authorName = FORUM_STATE.userName || 'Kultivator_Anonim';
+
+      comments.unshift({
+        id: Date.now(),
+        author: authorName,
+        userRank: { badge: rank.badge, name: rank.name, color: rank.color },
+        text: text,
+        time: 'Baru saja',
+        likes: 0
+      });
+
+      localStorage.setItem(key, JSON.stringify(comments));
+      comicCommentInput.value = '';
+      renderComicComments(comicSlug);
+      showToast('Komentar berhasil dikirim!', 'success');
+    };
+
+    if (comicCommentSendBtn) comicCommentSendBtn.onclick = sendComicComment;
+    if (comicCommentInput) comicCommentInput.onkeydown = e => { if (e.key === 'Enter') sendComicComment(); };
+
+    const commentListEl = $('#comic-comment-list');
+    if (commentListEl) {
+      commentListEl.onclick = e => {
+        const btn = e.target.closest('.btn-like-comment');
+        if (btn) {
+          const commentId = +btn.dataset.commentId;
+          const key = getComicCommentsKey(comicSlug);
+          let comments = [];
+          try { comments = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
+          const target = comments.find(c => c.id === commentId);
+          if (target) {
+            target.likes = (target.likes || 0) + 1;
+            localStorage.setItem(key, JSON.stringify(comments));
+            renderComicComments(comicSlug);
+            showToast('Suka komentar!', 'info');
+          }
+        }
+      };
+    }
     if (comicSlug && (!s.chapters || s.chapters.length === 0 || !s.synopsis)) {
       fetch(`data/detail/${comicSlug}.json`)
         .then(r => r.ok ? r.json() : null)
@@ -1119,38 +1254,60 @@
     saveHistory();
     trackRead(series.title);
     
-    // Fetch chapter images
-    const chSlug = ch.slug || ch.chapter_slug || ch.chapter_id || '';
+    // Fetch chapter images with robust multi-proxy fallback
+    const isKC = series.source === 'komikcast' || series.kc_slug || ch.kc_series_slug || (series.id && String(series.id).startsWith('kc_'));
     let images = [];
     try {
-      if (series.source === 'komikcast' || series.kc_slug || ch.kc_series_slug || (series.id && String(series.id).startsWith('kc_'))) {
+      if (isKC) {
         const kcSeries = series.kc_slug || (series.id ? String(series.id).replace('kc_', '') : '');
         const kcIndex = ch.kc_index || ch.number || ch.chapter;
-        const res = await fetch(`https://be.komikcast.cc/series/${kcSeries}/chapters/${kcIndex}`);
-        if (!res.ok) throw new Error('Komikcast API error');
-        const jsonRes = await res.json();
-        const chData = jsonRes.data?.data || jsonRes.data || {};
-        images = chData.images || [];
-      } else {
-        const res = await fetch(`https://api.shngm.io/v1/chapter/detail/${chSlug}`);
-        if (!res.ok) throw new Error('API error');
-        const jsonRes = await res.json();
-        const d = jsonRes.data || {};
-        const baseUrl = d.base_url || d.base_url_low || 'https://assets.shngm.id';
-        const chData = d.chapter || {};
-        const chPath = chData.path || '';
-        const filenames = chData.data || chData.images || [];
-
-        if (Array.isArray(filenames) && filenames.length > 0) {
-          images = filenames.map(fn => {
-            if (typeof fn === 'string') {
-              if (fn.startsWith('http')) return fn;
-              return baseUrl + chPath + fn;
+        const targetUrl = `https://be.komikcast.cc/series/${kcSeries}/chapters/${kcIndex}`;
+        const urls = [
+          targetUrl,
+          `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+        ];
+        for (const u of urls) {
+          try {
+            const res = await fetch(u);
+            if (res.ok) {
+              const jsonRes = await res.json();
+              const chData = jsonRes.data?.data || jsonRes.data || {};
+              if (Array.isArray(chData.images) && chData.images.length > 0) {
+                images = chData.images;
+                break;
+              }
             }
-            return fn.url || fn.src || '';
-          });
-        } else if (Array.isArray(d.images)) {
-          images = d.images.map(i => typeof i === 'string' ? (i.startsWith('http') ? i : baseUrl + i) : i.url || i.src);
+          } catch (e) {}
+        }
+      } else {
+        const chSlug = ch.slug || ch.chapter_slug || ch.chapter_id || ch.id || '';
+        const targetUrl = `https://api.shngm.io/v1/chapter/detail/${chSlug}`;
+        const urls = [
+          targetUrl,
+          `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+        ];
+        for (const u of urls) {
+          try {
+            const res = await fetch(u);
+            if (res.ok) {
+              const jsonRes = await res.json();
+              const d = jsonRes.data || {};
+              const baseUrl = d.base_url || d.base_url_low || 'https://assets.shngm.id';
+              const chData = d.chapter || {};
+              const chPath = chData.path || '';
+              const filenames = chData.data || chData.images || [];
+
+              if (Array.isArray(filenames) && filenames.length > 0) {
+                images = filenames.map(fn => typeof fn === 'string' ? (fn.startsWith('http') ? fn : baseUrl + chPath + fn) : fn.url || fn.src || '');
+                break;
+              } else if (Array.isArray(d.images) && d.images.length > 0) {
+                images = d.images.map(i => typeof i === 'string' ? (i.startsWith('http') ? i : baseUrl + i) : i.url || i.src);
+                break;
+              }
+            }
+          } catch (e) {}
         }
       }
 

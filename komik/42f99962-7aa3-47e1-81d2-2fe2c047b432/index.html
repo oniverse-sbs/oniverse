@@ -122,6 +122,62 @@ Choi Younghoon yang melihat takdir melalui penerawangan dan taji Bisakah kamu be
 
     </ul>
 
+    <!-- ===== KOMIK COMMENTS SECTION ===== -->
+    <div style="margin-top: 2rem; background: rgba(20,18,44,0.8); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 1.25rem;">
+      <h2 style="margin: 0 0 1rem 0; font-family: Outfit, sans-serif; font-size: 1.2rem; color: #a855f7; display: flex; align-items: center; gap: 8px;">
+        💬 Diskusi & Komentar Office Worker Who Sees Fate
+      </h2>
+      <div style="display: flex; gap: 8px; margin-bottom: 1.25rem;">
+        <input type="text" id="static-comment-input" placeholder="Tulis komentar kamu tentang komik ini..." style="flex: 1; background: #0d0a1a; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+        <button id="static-comment-send" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">Kirim</button>
+      </div>
+      <div id="static-comment-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    </div>
+
+    <script>
+      (function() {
+        var slug = "42f99962-7aa3-47e1-81d2-2fe2c047b432";
+        var key = "oniverse_comic_comments_" + slug;
+        function loadComments() {
+          var list = document.getElementById("static-comment-list");
+          if (!list) return;
+          var comments = [];
+          try { comments = JSON.parse(localStorage.getItem(key) || "[]"); } catch(e) {}
+          if (!comments.length) {
+            comments = [
+              { author: "Kultivator_Sejati", rank: "🔥 Pendekar Utama", text: "Alur ceritanya seru banget! Update chapter terbarunya selalu ditunggu-tunggu.", time: "2 jam lalu" },
+              { author: "Pembaca_Setia", rank: "⚡ Kultivator Ranah Atas", text: "Rekomendasi banget buat yang suka genre ini. Gambar jernih & terjemahan rapi!", time: "5 jam lalu" }
+            ];
+            localStorage.setItem(key, JSON.stringify(comments));
+          }
+          list.innerHTML = comments.map(function(c) {
+            return '<div style="background:#14122c; border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:10px 14px;">' +
+              '<div style="display:flex; justify-content:space-between; margin-bottom:4px;">' +
+                '<strong style="color:#e2e8f0; font-size:0.88rem;">' + (c.author || 'Anonim') + ' <span style="font-size:0.7rem; color:#a855f7;">[' + (c.rank || c.userRank?.name || 'Kultivator') + ']</span></strong>' +
+                '<span style="font-size:0.72rem; color:#6b7280;">' + (c.time || '') + '</span>' +
+              '</div>' +
+              '<p style="margin:0; font-size:0.85rem; color:#9ca3af;">' + (c.text || '') + '</p>' +
+            '</div>';
+          }).join('');
+        }
+        loadComments();
+        var btn = document.getElementById("static-comment-send");
+        var inp = document.getElementById("static-comment-input");
+        if (btn && inp) {
+          btn.onclick = function() {
+            var txt = inp.value.trim();
+            if (!txt) return;
+            var comments = [];
+            try { comments = JSON.parse(localStorage.getItem(key) || "[]"); } catch(e) {}
+            comments.unshift({ author: "Kultivator_Anonim", rank: "🔥 Pendekar", text: txt, time: "Baru saja" });
+            localStorage.setItem(key, JSON.stringify(comments));
+            inp.value = "";
+            loadComments();
+          };
+        }
+      })();
+    </script>
+
     <div class="related-section">
       <h2>Komik Serupa</h2>
       <div class="related-grid">
