@@ -89,9 +89,27 @@
   const fmtNum = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n);
 
   function getSlug(s) {
+    if (!s) return 'unknown';
     if (s.slug) return s.slug;
-    if (s.id) return s.id;
+    if (s.id) return String(s.id);
     return (s.title || s.name || 'unknown').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  function getCover(s) {
+    if (!s) return 'https://picsum.photos/300/400';
+    if (s.cover) return s.cover;
+    if (s.thumbnail) return s.thumbnail;
+    if (s.cover_image_url) return s.cover_image_url;
+    if (s.cover_portrait_url) return s.cover_portrait_url;
+    return 'https://picsum.photos/300/400';
+  }
+
+  function getGenres(s) {
+    if (!s) return ['Action', 'Fantasy'];
+    if (Array.isArray(s.genres) && s.genres.length > 0) return s.genres;
+    if (typeof s.genre === 'string' && s.genre.trim()) return s.genre.split(',').map(g => g.trim()).filter(Boolean);
+    if (Array.isArray(s.genre) && s.genre.length > 0) return s.genre;
+    return ['Action', 'Fantasy'];
   }
 
   function saveBookmarks() { localStorage.setItem('oniverse_bookmarks', JSON.stringify(STATE.bookmarks)); }
