@@ -2,7 +2,7 @@ import urllib.request
 import json
 import ssl
 import os
-import time
+from datetime import datetime
 
 PROJECT_DIR = r"C:\Users\Jett\.gemini\antigravity-ide\scratch\shinigami-app"
 DATA_FILE = os.path.join(PROJECT_DIR, "scraped_data", "series.json")
@@ -139,7 +139,7 @@ def fetch_single_series(manga_id):
         "author": ", ".join(authors) if authors else "",
         "artist": ", ".join(artists) if artists else "",
         "latest_chapter": str(d.get("latest_chapter_number") or (clean_chaps[0]["number"] if clean_chaps else "")),
-        "last_updated": "2026-08-04T11:00:00+07:00",
+        "last_updated": datetime.now().astimezone().isoformat()[:19] + "+07:00",
         "total_chapters": len(clean_chaps),
         "chapters": clean_chaps
     }
