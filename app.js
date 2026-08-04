@@ -1570,12 +1570,22 @@
       const chNum = ch.number || ch.chapter || (idx + 1);
 
       if (!images.length) {
-        images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(p => generateRealMangaPageSvg(comicTitle, chNum, p, ''));
+        const sid = String(series.id || '');
+        const cslug = String(ch.slug || ch.chapter_slug || '');
+        const kcSlug = series.kc_slug || (sid.startsWith('kc_') ? sid.replace('kc_', '') : series.slug);
+
+        if (isKC && kcSlug) {
+          images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(p => `https://sv1.imgkc1.my.id/wp-content/uploads/${kcSlug}/ch_${chNum}/${p}.jpg`);
+        } else if (sid && cslug && cslug.length > 10 && !cslug.startsWith('ch_')) {
+          images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(p => `https://assets.shngm.id/chapter/manga_${sid}/chapter_${cslug}/${p}.webp`);
+        } else if (coverArt) {
+          images = [coverArt];
+        }
       }
 
       content.innerHTML = `
         <div class="reader-images-wrap">
-          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='${generateRealMangaPageSvg(comicTitle, chNum, i + 1, '')}';}else{this.style.display='none';}">`).join('')}
+          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';if('${coverArt}' && this.src!=='${coverArt}'){this.src='${coverArt}';}else{this.style.display='none';}}else{this.style.display='none';}">`).join('')}
         </div>
         <div class="reader-footer-nav">
           <p style="color:var(--text-muted);font-size:0.85rem">— Akhir Chapter ${ch.number || ch.chapter || idx + 1} —</p>
