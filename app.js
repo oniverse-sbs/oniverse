@@ -1257,7 +1257,6 @@
       };
     }
     // 1. Fetch detailed synopsis & chapter list from pre-generated static detail files
-    const comicSlug = getSlug(s);
     const comicId = String(s.id || '');
 
     function applyDetailData(detailData) {
