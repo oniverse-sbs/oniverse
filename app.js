@@ -1379,6 +1379,50 @@
     }).join('');
   }
 
+  function generateMangaPanelSvg(title, chNum, pageNum) {
+    const safeTitle = (title || 'Komik').replace(/["'&<>]/g, '');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200" style="background:#0b0a1a">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#14122c"/>
+          <stop offset="50%" stop-color="#0b0a1a"/>
+          <stop offset="100%" stop-color="#1a103c"/>
+        </linearGradient>
+        <pattern id="manga-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-width="0.3" opacity="0.08"/>
+        </pattern>
+      </defs>
+      <rect width="800" height="1200" fill="url(#bg)"/>
+      <rect width="800" height="1200" fill="url(#manga-grid)"/>
+
+      <!-- Manga Panel Outlines -->
+      <rect x="40" y="50" width="720" height="340" fill="#181534" stroke="#818cf8" stroke-width="3" rx="8" opacity="0.9"/>
+      <rect x="40" y="420" width="345" height="360" fill="#181534" stroke="#818cf8" stroke-width="3" rx="8" opacity="0.9"/>
+      <rect x="415" y="420" width="345" height="360" fill="#181534" stroke="#818cf8" stroke-width="3" rx="8" opacity="0.9"/>
+      <rect x="40" y="810" width="720" height="330" fill="#181534" stroke="#818cf8" stroke-width="3" rx="8" opacity="0.9"/>
+
+      <!-- Speech Bubbles & Badges -->
+      <ellipse cx="220" cy="180" rx="150" ry="50" fill="#ffffff" stroke="#6366f1" stroke-width="3"/>
+      <polygon points="180,225 150,260 210,228" fill="#ffffff" stroke="#6366f1" stroke-width="2"/>
+      <text x="220" y="186" font-family="sans-serif" font-size="20" font-weight="bold" fill="#0f172a" text-anchor="middle">SUB INDO ONIVERSE</text>
+
+      <ellipse cx="580" cy="240" rx="140" ry="45" fill="#6366f1" stroke="#a5b4fc" stroke-width="3"/>
+      <text x="580" y="246" font-family="sans-serif" font-size="18" font-weight="bold" fill="#ffffff" text-anchor="middle">MANGA PANEL #${pageNum}</text>
+
+      <!-- Center Title & Chapter Badge -->
+      <text x="400" y="580" font-family="sans-serif" font-size="26" font-weight="900" fill="#a5b4fc" text-anchor="middle">${safeTitle.toUpperCase()}</text>
+      <text x="400" y="625" font-family="sans-serif" font-size="22" font-weight="bold" fill="#38bdf8" text-anchor="middle">CHAPTER ${chNum} · HALAMAN ${pageNum}</text>
+      
+      <line x1="180" y1="660" x2="620" y2="660" stroke="#6366f1" stroke-width="2" stroke-dasharray="6,6"/>
+      <text x="400" y="695" font-family="sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">Pembacaan Komik Resmi OniVerse.SBS</text>
+
+      <!-- Action Effects -->
+      <path d="M 60 840 L 740 840 M 80 870 L 720 870 M 100 900 L 700 900" stroke="#ffffff" stroke-width="1" opacity="0.15"/>
+      <text x="400" y="980" font-family="sans-serif" font-size="44" font-weight="900" fill="#f43f5e" text-anchor="middle" opacity="0.85">⚡ MANGA PANEL ⚡</text>
+    </svg>`;
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
   // ==========================================================================
   //  READER
   // ==========================================================================
@@ -1478,16 +1522,9 @@
       }
 
       if (!images.length) {
-        const titleSlug = (series.title || series.name || 'comic').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const comicTitle = series.title || series.name || 'Komik';
         const chNum = ch.number || ch.chapter || (idx + 1);
-        const seed = `${titleSlug}_ch_${chNum}`;
-        images = [
-          `https://picsum.photos/seed/${seed}_1/800/1200`,
-          `https://picsum.photos/seed/${seed}_2/800/1200`,
-          `https://picsum.photos/seed/${seed}_3/800/1200`,
-          `https://picsum.photos/seed/${seed}_4/800/1200`,
-          `https://picsum.photos/seed/${seed}_5/800/1200`
-        ];
+        images = [1, 2, 3, 4, 5].map(p => generateMangaPanelSvg(comicTitle, chNum, p));
       }
 
       content.innerHTML = `
