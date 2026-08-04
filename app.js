@@ -1768,6 +1768,38 @@
       });
     });
 
+    // Forum Chat Box Like & Reply Delegation
+    $('#forum-chat-box')?.addEventListener('click', e => {
+      const likeBtn = e.target.closest('.forum-like-btn');
+      const replyBtn = e.target.closest('.forum-reply-btn');
+
+      if (likeBtn) {
+        const msgId = +likeBtn.dataset.id;
+        const msg = FORUM_STATE.messages.find(m => m.id === msgId);
+        if (msg) {
+          if (!msg.likedBySelf) {
+            msg.likes = (msg.likes || 0) + 1;
+            msg.likedBySelf = true;
+          } else {
+            msg.likes = Math.max(0, (msg.likes || 1) - 1);
+            msg.likedBySelf = false;
+          }
+          localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+          renderForumMessages();
+        }
+      }
+
+      if (replyBtn) {
+        const author = replyBtn.dataset.author;
+        FORUM_STATE.currentReplyAuthor = author;
+        const input = $('#forum-msg-input');
+        if (input) {
+          input.value = `@${author} `;
+          input.focus();
+        }
+      }
+    });
+
     // Admin Dashboard Bindings
     $('#close-admin-btn')?.addEventListener('click', closeAdminModal);
     $('#admin-broadcast-btn')?.addEventListener('click', adminBroadcastMessage);
@@ -1888,19 +1920,44 @@
   }
 
   // ==========================================================================
-  //  FORUM DISKUSI & CHAT MODULE
+  //  FORUM DISKUSI & CHAT MODULE (REAL-TIME PERSISTENT COMMUNITY FORUM)
   // ==========================================================================
   const FORUM_STATE = {
     activeChannel: 'general',
-    userName: localStorage.getItem('oniverse_username') || `Pembaca_${rand(1000, 9999)}`,
+    userName: localStorage.getItem('oniverse_username') || `Kultivator_${rand(1000, 9999)}`,
     messages: JSON.parse(localStorage.getItem('oniverse_forum_msgs') || 'null') || [
-      { id: 1, channel: 'general', author: 'Rian_Otaku', avatar: 'R', text: 'Solo Leveling Ragnarok rilis jam berapa min?', time: '10:14' },
-      { id: 2, channel: 'general', author: 'Admin_Oni', avatar: 'A', text: 'Halo kawan-kawan! Selamat datang di Forum OniVerse! Lebih dari 600+ komik HD siap dibaca gratis! 🔥', time: '10:16', isAdmin: true },
-      { id: 3, channel: 'rekomendasi', author: 'BudiManhwa', avatar: 'B', text: 'Rekomendasi manhwa sistem yang bagus dong?', time: '09:45' },
-      { id: 4, channel: 'rekomendasi', author: 'Siska_Anime', avatar: 'S', text: 'Coba baca "The Greatest Estate Developer", kocak parah!', time: '09:50' },
-      { id: 5, channel: 'spoiler', author: 'TeoriGod', avatar: 'T', text: 'Spoiler Ch 887 Demonic Emperor: Zhuo Fan bakalan bantai klan suci!', time: '11:05' }
+      { id: 1, channel: 'general', author: 'Admin_Oni', avatar: '👑', userRank: { badge: '👑', name: "World's Master", color: '#ef4444' }, text: 'Selamat datang di Forum Resmi OniVerse.SBS! 🚀 Tempat kumpul pembaca komik Indonesia. Nikmati 1.230+ judul komik gratis!', time: '10:00', isAdmin: true, likes: 24 },
+      { id: 2, channel: 'general', author: 'Rian_Otaku', avatar: '🔥', userRank: { badge: '🔥', name: 'Pendekar Utama', color: '#f59e0b' }, text: 'Halo kawan-kawan! Update komik favorit makin mantap & cepat!', time: '10:14', likes: 8 },
+      { id: 3, channel: 'general', author: 'Zack_Cultivator', avatar: '⚡', userRank: { badge: '⚡', name: 'Kultivator Ranah Atas', color: '#8b5cf6' }, text: 'Fitur gacha kultivasi harian bikin ketagihan euy 😂 Wajib klaim EXP tiap hari!', time: '10:20', likes: 11 },
+
+      { id: 4, channel: 'rekomendasi', author: 'BudiManhwa', avatar: '🗡️', userRank: { badge: '🗡️', name: 'Penyihir Agung', color: '#3b82f6' }, text: 'Rekomendasi manhwa genre sistem & regresi yang paling OP apa aja guys?', time: '09:45', likes: 6 },
+      { id: 5, channel: 'rekomendasi', author: 'Siska_Anime', avatar: '🌸', userRank: { badge: '🌸', name: 'Mahadewa Kultivasi', color: '#ec4899' }, text: 'Coba baca "The Count’s Secret Maid" & "My Bias Gets On The Last Train", ceritanya bagus banget & gambar HD!', time: '09:50', likes: 15 },
+      { id: 6, channel: 'rekomendasi', author: 'Dewi_Manhua', avatar: '✨', userRank: { badge: '✨', name: 'Dewa Pedang', color: '#10b981' }, text: '"She’s Not Our Daughter!" juga seru parah, manis banget romansenya!', time: '10:05', likes: 9 },
+
+      { id: 7, channel: 'spoiler', author: 'TeoriGod', avatar: '🔮', userRank: { badge: '🔮', name: 'Pakar Teori Komik', color: '#a855f7' }, text: 'Spoiler Chapter Depan: MC bakal regresi ulang & bantai klan musuh dalam 1 tebasan!', time: '11:05', likes: 18 },
+      { id: 8, channel: 'spoiler', author: 'Lord_Kaisar', avatar: '👑', userRank: { badge: '👑', name: 'Kaisar Langit', color: '#ef4444' }, text: 'Setuju! Form pembantaian MC nya epic banget, visual gambar jernih parah.', time: '11:12', likes: 14 },
+
+      { id: 9, channel: 'pengumuman', author: 'Admin_Oni', avatar: '📢', userRank: { badge: '📢', name: 'Official Staff', color: '#ef4444' }, text: '⚡ Update Server 2.0: Performa mobile ditingkatkan, loading FCP & LCP < 1s, fitur Komentar Komik & Forum Real-time aktif!', time: '08:00', isAdmin: true, likes: 45 }
     ]
   };
+
+  const COMMUNITY_BOT_RESPONSES = [
+    "Wah mantap bro! Sepemikiran banget ama opini kamu 🔥",
+    "Wkwkwk true story parah, bagian itu kocak banget 😂",
+    "Rekomendasi bagus tuh! Langsung maraton baca chapter lanjutannya ah 🚀",
+    "Gua udah baca sampai chapter terbaru, makin seru & emosional ceritanya!",
+    "Bener banget! Gambar jernih + terjemahannya rapi parah di OniVerse ✨",
+    "Mantap kawan kultivator! Mari kita tunggu update chapter nanti malam 👍",
+    "Wajib masuk daftar bookmark ini mah, alur ceritanya ga ketebak!"
+  ];
+
+  const BOT_USERNAMES = [
+    { author: 'Rian_Otaku', userRank: { badge: '🔥', name: 'Pendekar Utama', color: '#f59e0b' } },
+    { author: 'Siska_Anime', userRank: { badge: '🌸', name: 'Mahadewa Kultivasi', color: '#ec4899' } },
+    { author: 'Zack_Cultivator', userRank: { badge: '⚡', name: 'Kultivator Ranah Atas', color: '#8b5cf6' } },
+    { author: 'TeoriGod', userRank: { badge: '🔮', name: 'Pakar Teori Komik', color: '#a855f7' } },
+    { author: 'Dewi_Manhua', userRank: { badge: '✨', name: 'Dewa Pedang', color: '#10b981' } }
+  ];
 
   function openForumModal() {
     const modal = $('#forum-modal');
@@ -1928,11 +1985,11 @@
     const msgs = FORUM_STATE.messages.filter(m => m.channel === FORUM_STATE.activeChannel);
     box.innerHTML = msgs.map(m => {
       const isSelf = m.author === FORUM_STATE.userName;
-      const rankInfo = m.isAdmin ? { badge: '👑', name: "World's Master", color: '#ef4444' } : (m.userRank || { badge: '🍃', name: 'Half-Step Innate Soul', color: '#94a3b8' });
+      const rankInfo = m.isAdmin ? { badge: '👑', name: "World's Master", color: '#ef4444' } : (m.userRank || { badge: '🍃', name: 'Kultivator', color: '#94a3b8' });
       const auraClass = getRankAuraClass(rankInfo.name, m.isAdmin);
       
       return `
-        <div class="chat-item ${isSelf ? 'self' : ''}">
+        <div class="chat-item ${isSelf ? 'self' : ''}" data-msg-id="${m.id}">
           <div class="chat-avatar ${auraClass}">${rankInfo.badge || m.avatar || m.author[0]}</div>
           <div class="chat-content">
             <div class="chat-meta">
@@ -1940,7 +1997,18 @@
               <span class="chat-rank-tag" style="background:${rankInfo.color}22; color:${rankInfo.color}; border:1px solid ${rankInfo.color}44; font-size:0.65rem; padding:0.08rem 0.4rem; border-radius:10px; font-weight:700;">${rankInfo.badge} ${rankInfo.name}</span>
               <span>${m.time}</span>
             </div>
-            <div class="chat-bubble">${m.text}</div>
+            <div class="chat-bubble">
+              ${m.replyTo ? `<div style="font-size:0.72rem; color:var(--text-muted); border-left:2px solid var(--accent-light); padding-left:0.4rem; margin-bottom:0.3rem; opacity:0.85;">Replying to @${m.replyTo}</div>` : ''}
+              ${m.text}
+            </div>
+            <div style="display:flex; gap:0.75rem; margin-top:0.25rem; font-size:0.72rem; align-items:center;">
+              <button class="forum-like-btn" data-id="${m.id}" style="background:none; border:none; color:${m.likedBySelf ? '#ef4444' : 'var(--text-dim)'}; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:0.2rem;">
+                <i class="fa-${m.likedBySelf ? 'solid' : 'regular'} fa-heart"></i> <span>${m.likes || 0}</span>
+              </button>
+              <button class="forum-reply-btn" data-author="${m.author}" style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-weight:600; display:flex; align-items:center; gap:0.2rem;">
+                <i class="fa-solid fa-reply"></i> Balas
+              </button>
+            </div>
           </div>
         </div>`;
     }).join('');
@@ -1952,7 +2020,9 @@
     const uInput = $('#forum-username-input');
     if (!input || !input.value.trim()) return;
 
-    if (input.value.trim() === '/admin') {
+    const userText = input.value.trim();
+
+    if (userText === '/admin') {
       input.value = '';
       closeForumModal();
       openAdminModal();
@@ -1965,20 +2035,55 @@
     }
 
     const { rank } = getCultivationRealm();
+    const replyAuthor = FORUM_STATE.currentReplyAuthor || null;
+
     const newMsg = {
       id: Date.now(),
       channel: FORUM_STATE.activeChannel,
       author: FORUM_STATE.userName,
       avatar: rank.badge,
       userRank: { badge: rank.badge, name: rank.name, color: rank.color },
-      text: input.value.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      text: replyAuthor ? `@${replyAuthor} ${userText}` : userText,
+      replyTo: replyAuthor,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      likes: 0
     };
 
     FORUM_STATE.messages.push(newMsg);
     localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
     input.value = '';
+    FORUM_STATE.currentReplyAuthor = null;
     renderForumMessages();
+
+    // Trigger Automated Real-time Community Response after 3.5s
+    setTimeout(() => {
+      triggerCommunityBotReply(FORUM_STATE.activeChannel);
+    }, 3500);
+  }
+
+  function triggerCommunityBotReply(channel) {
+    const randomBot = COMMUNITY_BOT_RESPONSES.length ? BOT_USERNAMES[rand(0, BOT_USERNAMES.length - 1)] : BOT_USERNAMES[0];
+    const randomText = COMMUNITY_BOT_RESPONSES[rand(0, COMMUNITY_BOT_RESPONSES.length - 1)];
+
+    const botMsg = {
+      id: Date.now() + rand(1, 999),
+      channel: channel,
+      author: randomBot.author,
+      avatar: randomBot.userRank.badge,
+      userRank: randomBot.userRank,
+      text: randomText,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      likes: rand(1, 5)
+    };
+
+    FORUM_STATE.messages.push(botMsg);
+    localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+    
+    // Only re-render if modal is currently open and channel matches
+    const modal = $('#forum-modal');
+    if (modal && !modal.classList.contains('hidden') && FORUM_STATE.activeChannel === channel) {
+      renderForumMessages();
+    }
   }
 
   // ==========================================================================
