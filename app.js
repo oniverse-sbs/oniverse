@@ -1527,9 +1527,14 @@
       }
 
       if (!images.length) {
-        const comicTitle = series.title || series.name || 'Komik';
-        const chNum = ch.number || ch.chapter || (idx + 1);
-        images = [1, 2, 3, 4, 5].map(p => generateMangaPanelSvg(comicTitle, chNum, p));
+        const coverArt = getCover(series);
+        const sid = String(series.id || '');
+        const cslug = String(ch.slug || '');
+        if (series.source === 'shinigami' && sid && cslug && cslug.length > 10 && !cslug.startsWith('ch_')) {
+          images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(p => `https://assets.shngm.id/chapter/manga_${sid}/chapter_${cslug}/${p}.webp`);
+        } else if (coverArt) {
+          images = [coverArt];
+        }
       }
 
       content.innerHTML = `
