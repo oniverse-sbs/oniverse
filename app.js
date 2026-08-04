@@ -1426,7 +1426,9 @@
     const isKC = series.source === 'komikcast' || series.kc_slug || ch.kc_series_slug || (series.id && String(series.id).startsWith('kc_'));
     let images = [];
     try {
-      if (isKC) {
+      if (Array.isArray(ch.images) && ch.images.length > 0) {
+        images = ch.images;
+      } else if (isKC) {
         const kcSeries = series.kc_slug || ch.kc_series_slug || (series.id ? String(series.id).replace('kc_', '') : '');
         const kcIndex = ch.kc_index || ch.number || ch.chapter;
         const targetUrl = `https://be.komikcast.cc/series/${kcSeries}/chapters/${kcIndex}`;
