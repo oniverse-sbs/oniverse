@@ -106,6 +106,14 @@ for item in raw_catalog:
     master_catalog.append(master_item)
 
     # 4. Save to Static Detail Database (data/detail/<slug>.json & sid.json)
+    # Cap image URLs per chapter in static detail file to max 15 items to keep JSON size under 5 MB
+    detail_chaps = []
+    for c in master_item['chapters']:
+        dc = dict(c)
+        if isinstance(dc.get('images'), list) and len(dc['images']) > 15:
+            dc['images'] = dc['images'][:15]
+        detail_chaps.append(dc)
+
     detail_payload = {
         'title': master_item['title'],
         'synopsis': master_item['synopsis'],
@@ -113,7 +121,7 @@ for item in raw_catalog:
         'author': master_item['author'],
         'artist': master_item['artist'],
         'genres': master_item['genres'],
-        'chapters': master_item['chapters']
+        'chapters': detail_chaps
     }
 
     detail_path = os.path.join(detail_dir, f"{clean_slug}.json")

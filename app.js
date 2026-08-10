@@ -1518,8 +1518,19 @@
         }
       } else if (!images.length) {
         const chSlug = ch.chapter_id || ch.id || ch.slug || ch.chapter_slug || '';
-        if (chSlug && chSlug.length > 10) {
-          const targetUrl = `https://api.shngm.io/v1/chapter/detail/${chSlug}`;
+        const seriesId = series.id || series.slug || '';
+        
+        // Build list of target API endpoints
+        const targetUrls = [];
+        if (chSlug) {
+          targetUrls.push(`https://api.shngm.io/v1/chapter/detail/${chSlug}`);
+        }
+        if (seriesId && (ch.number || ch.chapter)) {
+          targetUrls.push(`https://api.shngm.io/v1/chapter/${seriesId}/detail/${ch.number || ch.chapter}`);
+        }
+
+        for (const targetUrl of targetUrls) {
+          if (images.length > 0) break;
           const urls = [
             targetUrl,
             `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
@@ -1534,7 +1545,7 @@
                 const baseUrl = d.base_url || d.base_url_low || 'https://assets.shngm.id';
                 const chData = d.chapter || {};
                 const chPath = chData.path || '';
-                const filenames = chData.data || chData.images || [];
+                const filenames = chData.data || chData.images || chData.chapter_data_data || [];
 
                 if (Array.isArray(filenames) && filenames.length > 0) {
                   images = filenames.map(fn => typeof fn === 'string' ? (fn.startsWith('http') ? fn : baseUrl + chPath + fn) : (fn.url || fn.src || ''));
@@ -1560,13 +1571,16 @@
 
       const imagesContent = images.length > 0 ? `
         <div class="reader-images-wrap">
-          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='https://corsproxy.io/?'+encodeURIComponent(this.src);}else if(!this.dataset.tried2){this.dataset.tried2='1';this.src='https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(this.src);}else{this.outerHTML='<div style=\\'padding:1.5rem;margin:0.8rem 0;background:rgba(255,255,255,0.03);border:1px dashed var(--border);border-radius:var(--radius-md);text-align:center;color:var(--text-muted);font-size:0.85rem;cursor:pointer;\\' onclick=\\'openReader(STATE.currentReader.series, STATE.currentReader.chapters, STATE.currentReader.chapterIdx)\\'>⚠️ Halaman ${i + 1} belum memuat — <span style=\\'color:var(--accent-light);font-weight:600;\\'><i class=\\'fa-solid fa-rotate-right\\'></i> Klik untuk Muat Ulang</span></div>';}">`).join('')}
+          ${images.map((img, i) => `<img src="${img}" class="reader-page-img" alt="${comicTitle} - Halaman ${i + 1}" loading="lazy" decoding="async" onerror="if(!this.dataset.tried){this.dataset.tried='1';if(this.src.includes('assets.shngm.id')){this.src=this.src.replace('assets.shngm.id','storage.shngm.io');}else{this.src='https://corsproxy.io/?'+encodeURIComponent(this.src);}}else if(!this.dataset.tried2){this.dataset.tried2='1';this.src='https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(this.src);}else{this.outerHTML='<div style=\\'padding:1.2rem;margin:0.8rem 0;background:rgba(255,255,255,0.03);border:1px dashed var(--border);border-radius:var(--radius-md);text-align:center;color:var(--text-muted);font-size:0.85rem;cursor:pointer;\\' onclick=\\'openReader(STATE.currentReader.series, STATE.currentReader.chapters, STATE.currentReader.chapterIdx)\\'>⚠️ Halaman ${i + 1} sedang direfresh — <span style=\\'color:var(--accent-light);font-weight:600;\\'><i class=\\'fa-solid fa-rotate-right\\'></i> Klik untuk Muat Ulang</span></div>';}">`).join('')}
         </div>` : `
         <div class="reader-empty" style="text-align:center; padding:3.5rem 1.5rem; color:var(--text-muted);">
-          <i class="fa-solid fa-book-open" style="font-size:2.8rem; margin-bottom:1.2rem; color:var(--accent-light); opacity:0.85;"></i>
-          <h4 style="color:var(--text-main); margin:0 0 0.5rem 0; font-family:'Outfit'; font-size:1.15rem;">Gambar Chapter Belum Memuat</h4>
-          <p style="font-size:0.88rem; max-width:420px; margin:0 auto 1.5rem auto; line-height:1.5;">Gagal mengambil gambar chapter ini dari server asal. Silakan klik tombol di bawah untuk mencoba memuat kembali.</p>
-          <button class="btn-baca" onclick="openReader(STATE.currentReader.series, STATE.currentReader.chapters, STATE.currentReader.chapterIdx)" style="padding:0.7rem 1.5rem; font-size:0.9rem;"><i class="fa-solid fa-rotate-right"></i> Coba Muat Ulang</button>
+          <i class="fa-solid fa-sync fa-spin" style="font-size:2.8rem; margin-bottom:1.2rem; color:var(--accent-light); opacity:0.85;"></i>
+          <h4 style="color:var(--text-main); margin:0 0 0.5rem 0; font-family:'Outfit'; font-size:1.15rem;">Chapter Sedang Disinkronkan</h4>
+          <p style="font-size:0.88rem; max-width:420px; margin:0 auto 1.5rem auto; line-height:1.5;">Gambar chapter ini sedang diperbarui dari server asal. Silakan klik tombol di bawah untuk muat ulang atau lanjut ke chapter berikutnya.</p>
+          <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button class="btn-baca" onclick="openReader(STATE.currentReader.series, STATE.currentReader.chapters, STATE.currentReader.chapterIdx)" style="padding:0.7rem 1.5rem; font-size:0.9rem;"><i class="fa-solid fa-rotate-right"></i> Coba Muat Ulang</button>
+            ${idx < chapters.length - 1 ? `<button class="btn-baca" onclick="openReader(STATE.currentReader.series, STATE.currentReader.chapters, ${idx + 1})" style="padding:0.7rem 1.5rem; font-size:0.9rem; background:var(--bg-card);"><i class="fa-solid fa-chevron-right"></i> Chapter Berikutnya</button>` : ''}
+          </div>
         </div>`;
 
       content.innerHTML = `
