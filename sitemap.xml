@@ -278,6 +278,76 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oniverse.sbs/komik/eefbdd4d-a794-43da-9725-180c98114d40/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1780414226428_ng198m.jpg</image:loc>
+      <image:title>The Regressed Mercenary’s Machinations</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/f0a8f3d7-d509-4ea7-b55f-b0a8127fdb99/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/97d484ecb5fa.jpeg</image:loc>
+      <image:title>Absolute Sword Sense</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/f166beb7-67d8-47ea-9fa2-54aea1df6dd7/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/4629d00c-a3c0-414b-a8bd-b64a53f45723.jpg</image:loc>
+      <image:title>The Villain Of Destiny</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/cf54ac12-830b-49a7-9d83-bf74c4b27197/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/07edde75-7c64-4a0c-adc2-b87d898d652d.jpg</image:loc>
+      <image:title>The Wandering Knight’s Survival Manual</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/935b0a6e-1fcb-4ea4-b9ae-dcf6540a9f10/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/a766092c-59f1-4ab6-a1a3-6636b22de7b8.jpg</image:loc>
+      <image:title>Solo Leveling : Ragnarok</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/daf22638-d5ef-4060-af9a-f7a0b925fcb9/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1780414298811_rqgtsj.jpg</image:loc>
+      <image:title>The World After The Fall</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/6c767153-d1ed-44e2-8804-0cb32030ff01/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/560d04cf-d726-4157-a509-fd369f0c28e3.jpg</image:loc>
+      <image:title>Return Of The Apocalypse-Class Death Knight</image:title>
+    </image:image>
+  </url>
+  <url>
     <loc>https://oniverse.sbs/komik/b112f871-7ea4-4adb-a311-711ae31a1e1f/</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -455,16 +525,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1785759887256_zj52u9.jpg</image:loc>
       <image:title>Contract Killer Enrollment</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/f166beb7-67d8-47ea-9fa2-54aea1df6dd7/</loc>
-    <lastmod>2026-08-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/4629d00c-a3c0-414b-a8bd-b64a53f45723.jpg</image:loc>
-      <image:title>The Villain Of Destiny</image:title>
     </image:image>
   </url>
   <url>
@@ -2308,36 +2368,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://oniverse.sbs/komik/eefbdd4d-a794-43da-9725-180c98114d40/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1780414226428_ng198m.jpg</image:loc>
-      <image:title>The Regressed Mercenary’s Machinations</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/daf22638-d5ef-4060-af9a-f7a0b925fcb9/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1780414298811_rqgtsj.jpg</image:loc>
-      <image:title>The World After The Fall</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/f0a8f3d7-d509-4ea7-b55f-b0a8127fdb99/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/97d484ecb5fa.jpeg</image:loc>
-      <image:title>Absolute Sword Sense</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/komik/4a0b6c8f-1500-4e14-b2ed-364c72fa2963/</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -2998,16 +3028,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://oniverse.sbs/komik/6c767153-d1ed-44e2-8804-0cb32030ff01/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/560d04cf-d726-4157-a509-fd369f0c28e3.jpg</image:loc>
-      <image:title>Return Of The Apocalypse-Class Death Knight</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/komik/a0c1a899-4669-4a66-8963-661f318c4c49/</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -3035,16 +3055,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1781445256270_xgdx79.jpg</image:loc>
       <image:title>Surviving As A Genius On Borrowed Time</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/935b0a6e-1fcb-4ea4-b9ae-dcf6540a9f10/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/a766092c-59f1-4ab6-a1a3-6636b22de7b8.jpg</image:loc>
-      <image:title>Solo Leveling : Ragnarok</image:title>
     </image:image>
   </url>
   <url>
@@ -3825,16 +3835,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/cover/97ba695c1b61.jpeg</image:loc>
       <image:title>Be The Actor</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/cf54ac12-830b-49a7-9d83-bf74c4b27197/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/07edde75-7c64-4a0c-adc2-b87d898d652d.jpg</image:loc>
-      <image:title>The Wandering Knight’s Survival Manual</image:title>
     </image:image>
   </url>
   <url>

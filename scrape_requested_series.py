@@ -12,18 +12,13 @@ PROJECT_DIR = r"C:\Users\Jett\.gemini\antigravity-ide\scratch\shinigami-app"
 DATA_FILE = os.path.join(PROJECT_DIR, "scraped_data", "series.json")
 
 TARGET_IDS = [
-    "d3b05787-4c8e-42bb-ba9a-6b2fafd92f3c",
-    "1aba726d-fb23-4e05-aafa-f6b5bb67c489",
-    "4bf6c017-842e-48a1-8a2a-f6160c1d8d44",
-    "09223329-6528-476d-bb37-40905a29bd34",
-    "a0ebc4cb-b9c5-4b71-a1c9-41193d2d67be",
-    "15495a79-526d-4349-b23d-ba2fa866a6bd",
-    "42a015ae-107b-4634-a14c-9b9f9ecbf404",
-    "3b1cbf24-4648-4b1d-9f5b-c92238e701a7",
-    "c12b2ddc-557f-4f2b-afd2-116926129899",
-    "c6082f01-2ce9-4595-bbe1-b4be67843f16",
-    "27eaf36a-fb72-4a73-b5f9-d53c03f88dd0",
-    "b112f871-7ea4-4adb-a311-711ae31a1e1f"
+    "6c767153-d1ed-44e2-8804-0cb32030ff01",
+    "daf22638-d5ef-4060-af9a-f7a0b925fcb9",
+    "935b0a6e-1fcb-4ea4-b9ae-dcf6540a9f10",
+    "cf54ac12-830b-49a7-9d83-bf74c4b27197",
+    "f166beb7-67d8-47ea-9fa2-54aea1df6dd7",
+    "f0a8f3d7-d509-4ea7-b55f-b0a8127fdb99",
+    "eefbdd4d-a794-43da-9725-180c98114d40"
 ]
 
 ctx = ssl.create_default_context()
