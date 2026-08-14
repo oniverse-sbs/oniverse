@@ -278,6 +278,26 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oniverse.sbs/komik/2aeb3a71-a6f6-4e4b-b463-12df48db80e3/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/1f5f5b90c23a.webp</image:loc>
+      <image:title>I’m Trapped in This Day for One Thousand Years</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/05bbcbc4-56a6-47e6-ac36-1d482339a322/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/08d8cb84-973a-4995-8b3e-bdfd9e305174.jpg</image:loc>
+      <image:title>Eleceed</image:title>
+    </image:image>
+  </url>
+  <url>
     <loc>https://oniverse.sbs/komik/0cd57307-27f7-4222-8d01-918c93827f15/</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -2305,16 +2325,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/image/8c4fdbee-ffb8-427d-ace7-f21fe6b72f77.jpg</image:loc>
       <image:title>Demonic Emperor</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/05bbcbc4-56a6-47e6-ac36-1d482339a322/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/08d8cb84-973a-4995-8b3e-bdfd9e305174.jpg</image:loc>
-      <image:title>Eleceed</image:title>
     </image:image>
   </url>
   <url>
@@ -7355,16 +7365,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/cover/7acd3f59fb8f.webp</image:loc>
       <image:title>My School Life Pretending to Be a Worthless Person</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/2aeb3a71-a6f6-4e4b-b463-12df48db80e3/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/1f5f5b90c23a.webp</image:loc>
-      <image:title>I’m Trapped in This Day for One Thousand Years</image:title>
     </image:image>
   </url>
   <url>
