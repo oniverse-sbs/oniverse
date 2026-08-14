@@ -110,7 +110,7 @@ def split_data(all_series):
         num_match = re.search(r'\d+', raw_ch)
         parsed_latest = int(num_match.group(0)) if num_match else 0
         tot_ch = int(s.get("total_chapters") or 0)
-        target_num = max(15, tot_ch, parsed_latest)
+        target_num = min(max(15, tot_ch, parsed_latest), 1000)
 
         existing_nums = set()
         for c in chaps:
@@ -139,7 +139,17 @@ def split_data(all_series):
 
         chaps.sort(key=get_ch_num, reverse=True)
 
-        s["chapters"] = chaps
+        clean_chaps = []
+        for c in chaps:
+            clean_chaps.append({
+                "number": str(c.get("number", c.get("chapter", ""))),
+                "chapter": str(c.get("number", c.get("chapter", ""))),
+                "slug": c.get("slug", ""),
+                "title": c.get("title", f"Chapter {c.get('number', '')}"),
+                "date": (c.get("date") or "")[:10]
+            })
+
+        s["chapters"] = clean_chaps
         s["synopsis"] = syn
 
         detail = {
@@ -147,7 +157,7 @@ def split_data(all_series):
             "alternative_title": s.get("alternative_title", ""),
             "author": s.get("author", ""),
             "artist": s.get("artist", ""),
-            "chapters": chaps,
+            "chapters": clean_chaps,
         }
         
         # Save by slug

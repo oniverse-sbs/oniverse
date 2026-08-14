@@ -3,279 +3,399 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://oniverse.sbs/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/action/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/adult/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/adventure/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/comedy/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/cooking/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/crime/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/demon/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/demons/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/drama/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/ecchi/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/fantasy/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/fight/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/game/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/gender-bender/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/harem/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/historical/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/horror/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/isekai/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/josei/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/latest/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/magic/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/martial-arts/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/mature/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/mecha/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/medical/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/murim/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/mystery/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/psychological/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/revenge/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/romance/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/school-life/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/sci-fi/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/seinen/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/shoujo/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/shounen/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/slice-of-life/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/smut/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/sports/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/supernatural/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/supranatural/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/thriller/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/tragedy/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/violence/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://oniverse.sbs/genre/wuxia/</loc>
-    <lastmod>2026-08-10</lastmod>
+    <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/b112f871-7ea4-4adb-a311-711ae31a1e1f/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/c28e5f097294.jpeg</image:loc>
+      <image:title>One Punch Man</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/27eaf36a-fb72-4a73-b5f9-d53c03f88dd0/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/c8f95f760223.jpeg</image:loc>
+      <image:title>Leveling In The Future</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/c6082f01-2ce9-4595-bbe1-b4be67843f16/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/06b96afd-7680-43d2-a966-b07579792ab2.jpg</image:loc>
+      <image:title>The Demon Slayer’s Restaurant</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/c12b2ddc-557f-4f2b-afd2-116926129899/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1782376240675_wy288e.jpg</image:loc>
+      <image:title>Tomb Raider King: End Line</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/42a015ae-107b-4634-a14c-9b9f9ecbf404/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/8339bbff59b6.jpeg</image:loc>
+      <image:title>The Youngest Son Of A Rich Family</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/3b1cbf24-4648-4b1d-9f5b-c92238e701a7/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/4da333e78b2c.webp</image:loc>
+      <image:title>I Am the Virus Monarch</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/15495a79-526d-4349-b23d-ba2fa866a6bd/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/016c54be-82d5-42a5-a4e0-f14f8c67e21b.jpg</image:loc>
+      <image:title>I Start With 13 Hidden Traits</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/a0ebc4cb-b9c5-4b71-a1c9-41193d2d67be/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1785928973755_x28jwr.jpg</image:loc>
+      <image:title>Murim’s Debt King</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/09223329-6528-476d-bb37-40905a29bd34/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1785929171809_wx41q2.jpg</image:loc>
+      <image:title>The Former Absolute Supreme</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/1aba726d-fb23-4e05-aafa-f6b5bb67c489/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1776174203775_i71j1y.jpg</image:loc>
+      <image:title>Return Of The Mount Hua Sect</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/4bf6c017-842e-48a1-8a2a-f6160c1d8d44/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/8e38baef-c9c5-4662-adab-778237de2eb3.jpg</image:loc>
+      <image:title>Star-Embracing Swordmaster</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/d3b05787-4c8e-42bb-ba9a-6b2fafd92f3c/</loc>
+    <lastmod>2026-08-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/27994c6a-415a-41cf-8569-de7e9b6ae7d9.jpg</image:loc>
+      <image:title>Nano Machine</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://oniverse.sbs/komik/703f6c7a-ad78-4d50-b5cc-c768c0a12fdb/</loc>
@@ -968,16 +1088,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://oniverse.sbs/komik/a0ebc4cb-b9c5-4b71-a1c9-41193d2d67be/</loc>
-    <lastmod>2026-08-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1781139543755_l9y5sa.webp</image:loc>
-      <image:title>Murim’s Debt King</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/komik/kc-transcendence-due-to-a-system-error/</loc>
     <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
@@ -1175,16 +1285,6 @@
     <image:image>
       <image:loc>https://minio.imgkc1.my.id/prod/series/became-the-owner-of-a-poor-estate/cover/cOVERPENGUASA.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=Zgozh0pCiplFv4J3%2F20260804%2Fap-northeast-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260804T012101Z&amp;X-Amz-Expires=86400&amp;X-Amz-Signature=0e3b23a9a1b634a639dba72d0b97ec721fd0e71deee485e3e277f317ee8b0855&amp;X-Amz-SignedHeaders=host&amp;x-amz-checksum-mode=ENABLED&amp;x-id=GetObject</image:loc>
       <image:title>Became the Owner of a Poor Estate</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/09223329-6528-476d-bb37-40905a29bd34/</loc>
-    <lastmod>2026-08-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1785333796500_xw1zzk.jpg</image:loc>
-      <image:title>The Former Absolute Supreme</image:title>
     </image:image>
   </url>
   <url>
@@ -1778,16 +1878,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://oniverse.sbs/komik/b112f871-7ea4-4adb-a311-711ae31a1e1f/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/c28e5f097294.jpeg</image:loc>
-      <image:title>One Punch Man</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/komik/0230fc25-5bff-4827-a210-931d870721ac/</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -2028,16 +2118,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://oniverse.sbs/komik/1aba726d-fb23-4e05-aafa-f6b5bb67c489/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1776174203775_i71j1y.jpg</image:loc>
-      <image:title>Return Of The Mount Hua Sect</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/komik/bbac53f5-fe33-4e28-a0dd-bebebf98bc41/</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -2125,16 +2205,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/image/8c4fdbee-ffb8-427d-ace7-f21fe6b72f77.jpg</image:loc>
       <image:title>Demonic Emperor</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/d3b05787-4c8e-42bb-ba9a-6b2fafd92f3c/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/27994c6a-415a-41cf-8569-de7e9b6ae7d9.jpg</image:loc>
-      <image:title>Nano Machine</image:title>
     </image:image>
   </url>
   <url>
@@ -2245,16 +2315,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1780414226428_ng198m.jpg</image:loc>
       <image:title>The Regressed Mercenary’s Machinations</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/4bf6c017-842e-48a1-8a2a-f6160c1d8d44/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/8e38baef-c9c5-4662-adab-778237de2eb3.jpg</image:loc>
-      <image:title>Star-Embracing Swordmaster</image:title>
     </image:image>
   </url>
   <url>
@@ -2515,16 +2575,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/image/a31de1ab-f097-4b02-bcf8-dd662d6e1ac8.jpg</image:loc>
       <image:title>Eternally Regressing Knight</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/27eaf36a-fb72-4a73-b5f9-d53c03f88dd0/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/c8f95f760223.jpeg</image:loc>
-      <image:title>Leveling In The Future</image:title>
     </image:image>
   </url>
   <url>
@@ -3308,16 +3358,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://oniverse.sbs/komik/42a015ae-107b-4634-a14c-9b9f9ecbf404/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/8339bbff59b6.jpeg</image:loc>
-      <image:title>The Youngest Son Of A Rich Family</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/komik/9ca54deb-209f-423f-b2ad-4af1b3b77a46/</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -4008,16 +4048,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://oniverse.sbs/komik/15495a79-526d-4349-b23d-ba2fa866a6bd/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/016c54be-82d5-42a5-a4e0-f14f8c67e21b.jpg</image:loc>
-      <image:title>I Start With 13 Hidden Traits</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/komik/19fba4b4-98fd-48e1-9672-a4a7d3cd7dc9/</loc>
     <lastmod>2026-08-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -4615,16 +4645,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/image/ca8dcb89-36e1-4d0a-8d17-177536f28efe.jpg</image:loc>
       <image:title>I Really Don’t Want to Be Reborn</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/c6082f01-2ce9-4595-bbe1-b4be67843f16/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/06b96afd-7680-43d2-a966-b07579792ab2.jpg</image:loc>
-      <image:title>The Demon Slayer’s Restaurant</image:title>
     </image:image>
   </url>
   <url>
@@ -5695,16 +5715,6 @@
     <image:image>
       <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1773496376993_gy6gap.webp</image:loc>
       <image:title>The Returnee’s Hidden Strategy Stream</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/3b1cbf24-4648-4b1d-9f5b-c92238e701a7/</loc>
-    <lastmod>2026-08-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/4da333e78b2c.webp</image:loc>
-      <image:title>I Am the Virus Monarch</image:title>
     </image:image>
   </url>
   <url>

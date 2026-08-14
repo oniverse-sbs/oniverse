@@ -103,17 +103,20 @@ for item in raw_catalog:
         'chapters': unified_chaps
     }
 
+       # Strip images from chapters in master item catalog to prevent 100MB+ files
+    clean_master_chaps = []
+    for c in unified_chaps:
+        clean_master_chaps.append({
+            'id': str(c.get('id', '')),
+            'number': str(c.get('number', '')),
+            'title': c.get('title') or f"Chapter {c.get('number', '')}",
+            'date': (c.get('date') or '')[:10]
+        })
+
+    master_item['chapters'] = clean_master_chaps
     master_catalog.append(master_item)
 
     # 4. Save to Static Detail Database (data/detail/<slug>.json & sid.json)
-    # Cap image URLs per chapter in static detail file to max 15 items to keep JSON size under 5 MB
-    detail_chaps = []
-    for c in master_item['chapters']:
-        dc = dict(c)
-        if isinstance(dc.get('images'), list) and len(dc['images']) > 15:
-            dc['images'] = dc['images'][:15]
-        detail_chaps.append(dc)
-
     detail_payload = {
         'title': master_item['title'],
         'synopsis': master_item['synopsis'],
@@ -121,7 +124,7 @@ for item in raw_catalog:
         'author': master_item['author'],
         'artist': master_item['artist'],
         'genres': master_item['genres'],
-        'chapters': detail_chaps
+        'chapters': clean_master_chaps
     }
 
     detail_path = os.path.join(detail_dir, f"{clean_slug}.json")
