@@ -96,12 +96,13 @@
   }
 
   function getCover(s) {
-    if (!s) return 'https://picsum.photos/300/400';
-    if (s.cover) return s.cover;
-    if (s.thumbnail) return s.thumbnail;
-    if (s.cover_image_url) return s.cover_image_url;
-    if (s.cover_portrait_url) return s.cover_portrait_url;
-    return 'https://picsum.photos/300/400';
+    if (!s) return "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='280' fill='%2314122c'%3E%3Crect width='200' height='280'/%3E%3Ctext x='50%25' y='50%25' fill='%235b21b6' font-size='14' text-anchor='middle' dominant-baseline='middle'%3ENo Cover%3C/text%3E%3C/svg%3E";
+    if (s.cover && typeof s.cover === 'string' && s.cover.trim()) return s.cover;
+    if (s.thumbnail && typeof s.thumbnail === 'string' && s.thumbnail.trim()) return s.thumbnail;
+    if (s.cover_image_url && typeof s.cover_image_url === 'string' && s.cover_image_url.trim()) return s.cover_image_url;
+    if (s.cover_portrait_url && typeof s.cover_portrait_url === 'string' && s.cover_portrait_url.trim()) return s.cover_portrait_url;
+    if (s.image && typeof s.image === 'string' && s.image.trim()) return s.image;
+    return "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='280' fill='%2314122c'%3E%3Crect width='200' height='280'/%3E%3Ctext x='50%25' y='50%25' fill='%235b21b6' font-size='14' text-anchor='middle' dominant-baseline='middle'%3ENo Cover%3C/text%3E%3C/svg%3E";
   }
 
   function getGenres(s) {
@@ -237,12 +238,13 @@
   }
 
   function getCover(s) {
-    if (s.cover) return s.cover;
-    if (s.thumbnail) return s.thumbnail;
-    if (s.cover_image_url) return s.cover_image_url;
-    if (s.cover_portrait_url) return s.cover_portrait_url;
-    if (s.image) return s.image;
-    return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" fill="%2314122c"><rect width="200" height="280"/><text x="50%" y="50%" fill="%235b21b6" font-size="14" text-anchor="middle" dominant-baseline="middle">No Cover</text></svg>';
+    if (!s) return "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='280' fill='%2314122c'%3E%3Crect width='200' height='280'/%3E%3Ctext x='50%25' y='50%25' fill='%235b21b6' font-size='14' text-anchor='middle' dominant-baseline='middle'%3ENo Cover%3C/text%3E%3C/svg%3E";
+    if (s.cover && typeof s.cover === 'string' && s.cover.trim()) return s.cover;
+    if (s.thumbnail && typeof s.thumbnail === 'string' && s.thumbnail.trim()) return s.thumbnail;
+    if (s.cover_image_url && typeof s.cover_image_url === 'string' && s.cover_image_url.trim()) return s.cover_image_url;
+    if (s.cover_portrait_url && typeof s.cover_portrait_url === 'string' && s.cover_portrait_url.trim()) return s.cover_portrait_url;
+    if (s.image && typeof s.image === 'string' && s.image.trim()) return s.image;
+    return "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='280' fill='%2314122c'%3E%3Crect width='200' height='280'/%3E%3Ctext x='50%25' y='50%25' fill='%235b21b6' font-size='14' text-anchor='middle' dominant-baseline='middle'%3ENo Cover%3C/text%3E%3C/svg%3E";
   }
 
   // ==========================================================================
