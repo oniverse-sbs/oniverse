@@ -3,10 +3,25 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
+/
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
 /data.js
   Access-Control-Allow-Origin: *
   Content-Type: application/javascript; charset=utf-8
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+
+/data-initial.js
+  Access-Control-Allow-Origin: *
+  Content-Type: application/javascript; charset=utf-8
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
 
 /*.xml
   Access-Control-Allow-Origin: *
@@ -24,15 +39,15 @@
 
 /*.json
   Access-Control-Allow-Origin: *
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Content-Type: application/json; charset=utf-8
 
 /scraped_data/*
   Access-Control-Allow-Origin: *
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Content-Type: application/json; charset=utf-8
 
 /data/*
   Access-Control-Allow-Origin: *
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Content-Type: application/json; charset=utf-8
