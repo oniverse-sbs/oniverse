@@ -193,21 +193,31 @@
 
   function parseRoute() {
     const path = window.location.pathname;
+    const chMatch = path.match(/^\/komik\/([^/]+)\/chapter-?([0-9.]+)/i);
+    if (chMatch) return { type: 'chapter', slug: chMatch[1], chNum: chMatch[2] };
     const match = path.match(/^\/komik\/([^/]+)/);
     if (match) return { type: 'comic', slug: match[1] };
     return { type: 'home' };
   }
 
   function handleRoute(route) {
-    if (route.type === 'comic' && route.slug) {
+    if (route.type === 'chapter' && route.slug && route.chNum) {
+      const series = STATE.allSeries.find(s => {
+        const slug = getSlug(s);
+        return slug === route.slug || slug === decodeURIComponent(route.slug) || s.id === route.slug;
+      }) || { id: '48270276-bd79-4a46-b15e-fdd2cf5655b1', slug: route.slug, title: route.slug.replace(/-/g, ' ').toUpperCase() };
+      
+      const chapters = series.chapters || [{ number: route.chNum, chapter: route.chNum, slug: '' }];
+      let chIdx = chapters.findIndex(c => (c.number || c.chapter) == route.chNum);
+      if (chIdx === -1) chIdx = 0;
+      openReader(series, chapters, chIdx);
+    } else if (route.type === 'comic' && route.slug) {
       const series = STATE.allSeries.find(s => {
         const slug = getSlug(s);
         return slug === route.slug || slug === decodeURIComponent(route.slug);
       });
       if (series) {
         openDetail(series, true);
-      } else {
-        console.warn('Comic not found for slug:', route.slug);
       }
     } else {
       closeDetail(true);
