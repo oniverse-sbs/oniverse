@@ -1391,5 +1391,35 @@
 
   <script src="/data-initial.js?v=20260804_vCANVAS_TOTALLY_DESTROYED"></script>
   <script src="/app.js?v=20260804_vCANVAS_TOTALLY_DESTROYED" defer></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Intercept chapter link clicks to open reader smoothly
+      document.querySelectorAll('.chapter-list a, .ch-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var chNum = (this.textContent || '').replace(/[^0-9.]/g, '');
+          var chSlug = this.getAttribute('data-chapter-id') || '';
+          
+          // Trigger reader in app.js
+          if (window.openReader && window.SERIES_DATA) {
+            var series = window.SERIES_DATA.find(function(s) { 
+              return s.slug === 'one-piece' || s.id === '48270276-bd79-4a46-b15e-fdd2cf5655b1'; 
+            }) || { id: '48270276-bd79-4a46-b15e-fdd2cf5655b1', slug: 'one-piece', title: 'One Piece' };
+            
+            var chapters = series.chapters || [{ number: chNum, chapter: chNum, slug: chSlug }];
+            var chIdx = chapters.findIndex(function(c) { return (c.number || c.chapter) == chNum || c.slug == chSlug; });
+            if (chIdx === -1) chIdx = 0;
+            
+            window.openReader(series, chapters, chIdx);
+          } else {
+            // Fallback navigation to index with query
+            window.location.href = '/?comic=one-piece&ch=' + chNum;
+          }
+        });
+      });
+    });
+  </script>
+
 </body>
 </html>
