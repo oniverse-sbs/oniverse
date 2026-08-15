@@ -1,7 +1,7 @@
 {
   "id": "manga-one-punch-man",
   "slug": "manga-one-punch-man",
-  "title": "Komik One Punch Man",
+  "title": "One Punch Man",
   "alternative_title": "",
   "author": "Unknown",
   "artist": "",
@@ -11,13 +11,13 @@
   "rating": "8.5",
   "views": 69200,
   "status": "Ongoing",
-  "type": "Manhwa",
+  "type": "Manga",
   "genres": [
     "Action",
     "Fantasy"
   ],
-  "latest_chapter": "1",
-  "total_chapters": 1,
+  "latest_chapter": "245",
+  "total_chapters": 245,
   "chapters": [],
   "source": "komiku"
 }

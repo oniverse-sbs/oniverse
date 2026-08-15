@@ -1,7 +1,7 @@
 {
   "id": "the-new-gate",
   "slug": "the-new-gate",
-  "title": "Komik The New Gate",
+  "title": "The New Gate",
   "alternative_title": "",
   "author": "Unknown",
   "artist": "",
@@ -11,13 +11,13 @@
   "rating": "8.5",
   "views": 72400,
   "status": "Ongoing",
-  "type": "Manhwa",
+  "type": "Manga",
   "genres": [
     "Action",
     "Fantasy"
   ],
-  "latest_chapter": "1",
-  "total_chapters": 1,
+  "latest_chapter": "105",
+  "total_chapters": 105,
   "chapters": [],
   "source": "komiku"
 }

@@ -1,7 +1,7 @@
 {
   "id": "the-dragon-of-kunlun",
   "slug": "the-dragon-of-kunlun",
-  "title": "Komik The Dragon of Kunlun",
+  "title": "The Dragon of Kunlun",
   "alternative_title": "",
   "author": "Unknown",
   "artist": "",
@@ -11,13 +11,13 @@
   "rating": "8.5",
   "views": 78800,
   "status": "Ongoing",
-  "type": "Manhwa",
+  "type": "Manhua",
   "genres": [
     "Action",
     "Fantasy"
   ],
-  "latest_chapter": "1",
-  "total_chapters": 1,
+  "latest_chapter": "120",
+  "total_chapters": 120,
   "chapters": [],
   "source": "komiku"
 }
