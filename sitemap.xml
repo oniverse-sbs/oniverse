@@ -110,6 +110,46 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oniverse.sbs/komik/a2ba8fcf-f554-4568-95ea-f0cc997ab394/</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/ac4074b1-2f94-4657-82cf-ef811387db51.jpg</image:loc>
+      <image:title>All Hail the Sect Leaders</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/7701ba39-f6b3-46ab-873f-cbc1fe93fb10/</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/2e4ab6a6-a1ff-4919-a28e-58348f70cca3.jpg</image:loc>
+      <image:title>Player Who Cant Level UP</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/d4e9983e-69eb-4370-b93a-f310b6e81faa/</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/image/ba95371a-2477-41fc-8284-3dc78df2163a.jpg</image:loc>
+      <image:title>Face Genius, 0 Year-Old Top Star</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://oniverse.sbs/komik/cae262f8-ae2c-4626-a9b3-8f2dc6b72117/</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1785596274188_m5kq4a.jpg</image:loc>
+      <image:title>The Wind Mage</image:title>
+    </image:image>
+  </url>
+  <url>
     <loc>https://oniverse.sbs/komik/c8077427-0ad6-4358-9497-98fd338f6425/</loc>
     <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -220,36 +260,6 @@
     </image:image>
   </url>
   <url>
-    <loc>https://oniverse.sbs/komik/a2ba8fcf-f554-4568-95ea-f0cc997ab394/</loc>
-    <lastmod>2026-08-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/ac4074b1-2f94-4657-82cf-ef811387db51.jpg</image:loc>
-      <image:title>All Hail the Sect Leaders</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/cae262f8-ae2c-4626-a9b3-8f2dc6b72117/</loc>
-    <lastmod>2026-08-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/cover/banner_1785596274188_m5kq4a.jpg</image:loc>
-      <image:title>The Wind Mage</image:title>
-    </image:image>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/7701ba39-f6b3-46ab-873f-cbc1fe93fb10/</loc>
-    <lastmod>2026-08-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/9d6ad2df-e5ab-4602-b8ee-51beab0fd4ce.jpg</image:loc>
-      <image:title>Player Who Cant Level UP</image:title>
-    </image:image>
-  </url>
-  <url>
     <loc>https://oniverse.sbs/komik/e9f8b5dd-8558-4e9d-9fe9-e2bf2fe6f165/</loc>
     <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -264,16 +274,6 @@
     <lastmod>2026-08-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://oniverse.sbs/komik/d4e9983e-69eb-4370-b93a-f310b6e81faa/</loc>
-    <lastmod>2026-08-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <image:image>
-      <image:loc>https://assets.shngm.id/thumbnail/image/ba95371a-2477-41fc-8284-3dc78df2163a.jpg</image:loc>
-      <image:title>Face Genius, 0 Year-Old Top Star</image:title>
-    </image:image>
   </url>
   <url>
     <loc>https://oniverse.sbs/komik/marriage-with-a-suspiciously-demure-husband/</loc>
