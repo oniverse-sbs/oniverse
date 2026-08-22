@@ -1451,8 +1451,8 @@
     saveHistory();
     trackRead(series.title);
     
-    // Helper for ultra-fast 1200ms timeout fetch (no long hangs)
-    async function fetchWithTimeout(url, ms = 1200) {
+    // Helper for robust fetch with generous timeout
+    async function fetchWithTimeout(url, ms = 8000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), ms);
       try {
@@ -1482,15 +1482,15 @@
     if (!images.length) {
       try {
         const sid = String(series.id || '');
-        let detailRes = await fetchWithTimeout(`/data/detail/${slug}.json?v=${Date.now()}`, 1500);
+        let detailRes = await fetchWithTimeout(`/data/detail/${slug}.json?v=${Date.now()}`, 4000);
         if (!detailRes || !detailRes.ok) {
           if (sid && sid !== slug) {
-            detailRes = await fetchWithTimeout(`/data/detail/${sid}.json?v=${Date.now()}`, 1500);
+            detailRes = await fetchWithTimeout(`/data/detail/${sid}.json?v=${Date.now()}`, 4000);
           }
         }
         if (detailRes && detailRes.ok) {
           const detailData = await detailRes.json();
-          const targetCh = (detailData.chapters || []).find(c => (c.number || c.chapter) == (ch.number || ch.chapter) || (c.slug && c.slug === ch.slug) || (c.chapter_id && c.chapter_id === ch.slug));
+          const targetCh = (detailData.chapters || []).find(c => (c.number || c.chapter) == (ch.number || ch.chapter) || (c.slug && c.slug === ch.slug) || (c.chapter_id && c.chapter_id === ch.slug) || (c.id && c.id === ch.id));
           if (targetCh && Array.isArray(targetCh.images) && targetCh.images.length > 0) {
             images = targetCh.images.filter(img => typeof img === 'string' && img.trim() && !img.includes('assets.shinigami.ae'));
             if (images.length > 0) ch.images = images;
@@ -1510,7 +1510,7 @@
           `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
         ];
         for (const u of urls) {
-          const res = await fetchWithTimeout(u, 2500);
+          const res = await fetchWithTimeout(u, 4000);
           if (res && res.ok) {
             try {
               const jsonRes = await res.json();
@@ -1543,13 +1543,14 @@
 
         for (const targetUrl of targetUrls) {
           if (images.length > 0) break;
+          // Try direct URL first with 6s timeout, then fall back to proxies
           const urls = [
             targetUrl,
             `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
             `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
           ];
           for (const u of urls) {
-            const res = await fetchWithTimeout(u, 3000);
+            const res = await fetchWithTimeout(u, 6000);
             if (res && res.ok) {
               try {
                 const jsonRes = await res.json();

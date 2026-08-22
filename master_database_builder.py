@@ -124,7 +124,7 @@ for item in raw_catalog:
         'author': master_item['author'],
         'artist': master_item['artist'],
         'genres': master_item['genres'],
-        'chapters': clean_master_chaps
+        'chapters': unified_chaps
     }
 
     detail_path = os.path.join(detail_dir, f"{clean_slug}.json")
