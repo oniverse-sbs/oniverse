@@ -1,8 +1,14 @@
 # OniVerse.SBS Robots.txt
 User-agent: *
 Allow: /
+Allow: /komik/
+Allow: /genre/
 
-Disallow: /data/
+Disallow: /data/detail/
 Disallow: /scraped_data/
 Disallow: /*.json$
 Disallow: /*.py$
+
+# Sitemaps
+Sitemap: https://oniverse.sbs/sitemap.xml
+Sitemap: https://oniverse.sbs/sitemap_index.xml
