@@ -1089,7 +1089,9 @@
         genChaps.push({
           number: String(i),
           chapter: String(i),
-          slug: isKC ? `kc_ch_${kcSlug}_${i}` : `ch_${i}`,
+          // Use null ID for non-KC so reader will fetch from API by series_id + chapter_number
+          id: null,
+          slug: isKC ? `kc_ch_${kcSlug}_${i}` : null,
           kc_index: isKC ? i : null,
           kc_series_slug: isKC ? kcSlug : null,
           date: (s.last_updated || '').slice(0, 10)
@@ -1353,9 +1355,12 @@
           .then(d => {
             if (d && d.retcode === 0 && Array.isArray(d.data) && d.data.length > 0) {
               const mapped = d.data.map(c => ({
+                // Save real UUID in both id and slug fields for reader compatibility
+                id: c.chapter_id || '',
+                slug: c.chapter_id || '',
+                chapter_id: c.chapter_id || '',
                 number: String(c.chapter_number || ''),
                 chapter: String(c.chapter_number || ''),
-                slug: c.chapter_id || '',
                 date: (c.release_date || c.created_at || '').slice(0, 10)
               }));
               if (mapped.length > 0) {
@@ -1529,7 +1534,10 @@
           images = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(p => `https://sv1.imgkc1.my.id/wp-content/uploads/${kcSeries}/ch_${kcIndex}/${p}.jpg`);
         }
       } else if (!images.length) {
-        const chSlug = ch.chapter_id || ch.id || ch.slug || ch.chapter_slug || '';
+        // Only use chSlug if it's a real UUID (not a fake placeholder like 'ch_210' or null)
+        const rawSlug = ch.chapter_id || ch.id || ch.slug || ch.chapter_slug || '';
+        const isRealUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(rawSlug);
+        const chSlug = isRealUUID ? rawSlug : '';
         const seriesId = series.id || series.slug || '';
         
         // Build list of target API endpoints
@@ -1540,6 +1548,7 @@
         if (seriesId && (ch.number || ch.chapter)) {
           targetUrls.push(`https://api.shngm.io/v1/chapter/${seriesId}/detail/${ch.number || ch.chapter}`);
         }
+
 
         for (const targetUrl of targetUrls) {
           if (images.length > 0) break;
