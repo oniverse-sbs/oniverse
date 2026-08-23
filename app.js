@@ -1129,6 +1129,7 @@
           <p class="detail-synopsis">${s.synopsis || s.description || 'Belum ada deskripsi.'}</p>
           <div class="detail-action-row" style="flex-wrap:wrap;">
             <button class="btn-baca" id="detail-read-first"><i class="fa-solid fa-book-open"></i> Baca Chapter 1</button>
+            <a href="https://omg10.com/4/11635659" target="_blank" rel="noopener noreferrer" class="btn-baca" style="background:linear-gradient(135deg, #f59e0b, #ea580c);color:#fff;border:none;text-decoration:none;"><i class="fa-solid fa-bolt"></i> Server VIP HD / Unduh</a>
             <button class="btn-bookmark-hero ${isBookmarked ? 'bookmarked' : ''}" id="detail-bookmark-btn">
               <i class="fa-${isBookmarked ? 'solid' : 'regular'} fa-bookmark"></i> ${isBookmarked ? 'Tersimpan' : 'Bookmark'}
             </button>
@@ -1631,8 +1632,9 @@
             <div id="ch-comment-list" style="display:flex; flex-direction:column; gap:0.85rem;"></div>
           </div>
 
-          <div class="reader-nav-row">
+          <div class="reader-nav-row" style="flex-wrap:wrap;gap:0.5rem;justify-content:center;">
             <button class="btn-baca" id="reader-footer-prev" ${idx <= 0 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i> Prev</button>
+            <a href="https://omg10.com/4/11635659" target="_blank" rel="noopener noreferrer" class="btn-baca" style="background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.5);color:#fbbf24;text-decoration:none;font-size:0.85rem;"><i class="fa-solid fa-cloud-arrow-down"></i> Unduh Gambar HD Chapter ${chNum}</a>
             <button class="btn-baca" id="reader-footer-next" ${idx >= chapters.length - 1 ? 'disabled' : ''}>Next <i class="fa-solid fa-chevron-right"></i></button>
           </div>
         </div>`;
@@ -2832,6 +2834,14 @@
 
   //  INIT
   // ==========================================================================
+  
+  window.claimSponsorExpBonus = function() {
+    STATE.readingStats.chapters = (STATE.readingStats.chapters || 0) + 10;
+    saveReadingStats();
+    updateCultivationUI();
+    showToast('🏆 Bonus Sponsor Berhasil! +10 Chapter EXP ditambahkan! ⚡', 'success');
+  };
+
   function init() {
     bindEvents();
     loadData();
