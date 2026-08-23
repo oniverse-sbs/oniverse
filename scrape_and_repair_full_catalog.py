@@ -39,7 +39,8 @@ def fetch_json(url, retries=3):
                 return None
 
 TARGET_SERIES = [
-    # Newly requested series from Shinigami
+    # Newly requested series from Shinigami (Top Priority)
+    {"id": "d3b05787-4c8e-42bb-ba9a-6b2fafd92f3c", "slug": "d3b05787-4c8e-42bb-ba9a-6b2fafd92f3c", "custom_slug": "nano-machine"},
     {"id": "75776a81-4095-4ee6-9313-4e98245fb2fa", "slug": "75776a81-4095-4ee6-9313-4e98245fb2fa", "custom_slug": "shadow-slave"},
     {"id": "6915ddaf-380a-47d8-aa8a-c48ba8778db5", "slug": "6915ddaf-380a-47d8-aa8a-c48ba8778db5", "custom_slug": "juvenile-prison"},
     {"id": "34fb4347-728f-4463-b68a-3796ca2ef48a", "slug": "34fb4347-728f-4463-b68a-3796ca2ef48a", "custom_slug": "i-love-the-demon-lord-so-much"},
@@ -189,15 +190,6 @@ for idx, target in enumerate(TARGET_SERIES, 1):
 
 print(f"\nScraped & Repaired {len(all_repaired_series)} series completely!")
 
-# Helper to calculate sort score
-def get_score(s):
-    d = s.get("last_updated") or s.get("updated_at") or s.get("created_at") or ""
-    try:
-        t = datetime.fromisoformat(d.replace("Z", "+00:00")).timestamp()
-        return t
-    except:
-        return 0
-
 # Sort summary series by latest updates
 summary_series = []
 for s in all_repaired_series:
@@ -233,7 +225,7 @@ with open(INDEX_HTML, "r", encoding="utf-8") as f:
 # Update inline window.SERIES_DATA
 html = re.sub(r'window\.SERIES_DATA\s*=\s*\[.*?\];', f"window.SERIES_DATA = {json.dumps(summary_series, ensure_ascii=False)};", html, flags=re.DOTALL)
 
-# Build updated cards for index.html (ALL 27+ series)
+# Build updated cards for index.html (ALL 28 series)
 cards_html = []
 for idx, s in enumerate(summary_series):
     stitle = s.get("title", "Komik")
