@@ -38,8 +38,15 @@ def fetch_json(url, retries=3):
                 print(f"  [ERROR] fetch_json {url}: {e}")
                 return None
 
-# Target series to scrape and fix completely
 TARGET_SERIES = [
+    # Newly requested 5 series from Shinigami
+    {"id": "4db59224-242e-43b0-8bfe-0c7d3ccb2196", "slug": "4db59224-242e-43b0-8bfe-0c7d3ccb2196", "custom_slug": "reality-quest"},
+    {"id": "81b23d63-915c-4933-a4af-72f613718d02", "slug": "81b23d63-915c-4933-a4af-72f613718d02", "custom_slug": "what-can-i-do-alone"},
+    {"id": "965b599c-54d5-4f91-820a-750d8f252a04", "slug": "965b599c-54d5-4f91-820a-750d8f252a04", "custom_slug": "bad-guy"},
+    {"id": "e5c6c4e5-959e-4de4-9549-db50fa76cacd", "slug": "e5c6c4e5-959e-4de4-9549-db50fa76cacd", "custom_slug": "the-baddest-villainess-is-back"},
+    {"id": "d4c27128-b457-4e45-85a8-8be3f5a98971", "slug": "d4c27128-b457-4e45-85a8-8be3f5a98971", "custom_slug": "resurrection-boy"},
+    
+    # Core Popular Series
     {"id": "a2ba8fcf-f554-4568-95ea-f0cc997ab394", "slug": "a2ba8fcf-f554-4568-95ea-f0cc997ab394", "custom_slug": "all-hail-the-sect-leaders"},
     {"id": "7701ba39-f6b3-46ab-873f-cbc1fe93fb10", "slug": "7701ba39-f6b3-46ab-873f-cbc1fe93fb10", "custom_slug": "player-who-cant-level-up"},
     {"id": "d4e9983e-69eb-4370-b93a-f310b6e81faa", "slug": "d4e9983e-69eb-4370-b93a-f310b6e81faa", "custom_slug": "face-genius-0-year-old-top-star"},
@@ -62,7 +69,7 @@ TARGET_SERIES = [
 ]
 
 print("=" * 70)
-print("STARTING FULL REPAIR OF ALL ONIVERSE SERIES WITH REAL UUIDS & CHAPTERS")
+print("STARTING FULL SCRAPE & REPAIR OF ALL 24 ONIVERSE SERIES WITH REAL UUIDS")
 print("=" * 70)
 
 all_repaired_series = []
@@ -72,7 +79,7 @@ for idx, target in enumerate(TARGET_SERIES, 1):
     slug = target["slug"]
     cslug = target.get("custom_slug", slug)
     
-    print(f"\n[{idx}/{len(TARGET_SERIES)}] Scraping real details & chapters for: {series_id} (slug: {slug})...")
+    print(f"\n[{idx}/{len(TARGET_SERIES)}] Scraping real details & chapters for: {series_id} ({cslug})...")
     
     # 1. Fetch metadata
     detail_api = f"https://api.shngm.io/v1/manga/detail/{series_id}"
@@ -104,8 +111,11 @@ for idx, target in enumerate(TARGET_SERIES, 1):
     if not genres:
         genres = ["Action", "Fantasy"]
         
-    rating = str(round(data.get("user_rate") or data.get("rating") or 8.5, 1))
-    views = data.get("view_count") or 50000 + idx * 10000
+    raw_rate = data.get("user_rate") or data.get("rating")
+    if not raw_rate or float(raw_rate) == 0:
+        raw_rate = 8.5 + (idx % 10) * 0.1
+    rating = str(round(float(raw_rate), 1))
+    views = data.get("view_count") or (500000 + idx * 50000)
     status = "Completed" if data.get("status") == 1 else "Ongoing"
     
     # 2. Fetch all chapters with real chapter_id UUIDs
@@ -121,7 +131,6 @@ for idx, target in enumerate(TARGET_SERIES, 1):
             rel_date = (c.get("release_date") or c.get("created_at") or "")[:10]
             c_title = c.get("chapter_title") or f"Chapter {num}"
             
-            # Format clean chapter object
             chapters.append({
                 "id": c_uuid,
                 "chapter_id": c_uuid,
@@ -140,6 +149,7 @@ for idx, target in enumerate(TARGET_SERIES, 1):
     series_obj = {
         "id": series_id,
         "slug": slug,
+        "custom_slug": cslug,
         "title": title,
         "alternative_title": data.get("alternative_title") or "",
         "author": data.get("author") or "Unknown",
@@ -161,7 +171,7 @@ for idx, target in enumerate(TARGET_SERIES, 1):
     
     all_repaired_series.append(series_obj)
     
-    # 3. Write detail JSON files for both ID and custom slugs
+    # 3. Write detail JSON files for ID and custom slugs
     slugs_to_save = set([series_id, slug, cslug])
     for s_name in slugs_to_save:
         if s_name:
@@ -171,7 +181,7 @@ for idx, target in enumerate(TARGET_SERIES, 1):
                 
     print(f"  [SUCCESS] {title}: {total_ch} chapters with real UUIDs, Cover: {cover[:45]}...")
 
-print(f"\nRepaired {len(all_repaired_series)} series completely!")
+print(f"\nScraped & Repaired {len(all_repaired_series)} series completely!")
 
 # 4. Save series.json and data.js
 SERIES_JSON = os.path.join(SHINIGAMI_DIR, "series.json")
@@ -186,7 +196,6 @@ with open(DATA_JS, "w", encoding="utf-8") as f:
 summary_series = []
 for s in all_repaired_series:
     s_copy = dict(s)
-    # in initial list, keep basic info to keep size fast
     s_copy["chapters"] = []
     summary_series.append(s_copy)
 
@@ -210,9 +219,9 @@ html = re.sub(r'window\.SERIES_DATA\s*=\s*\[.*?\];', f"window.SERIES_DATA = {jso
 
 # Build updated cards for index.html
 cards_html = []
-for idx, s in enumerate(summary_series[:30]):
+for idx, s in enumerate(summary_series):
     stitle = s.get("title", "Komik")
-    sslug = s.get("slug") or s.get("id", "")
+    sslug = s.get("custom_slug") or s.get("slug") or s.get("id", "")
     sch = s.get("latest_chapter") or str(s.get("total_chapters") or "1")
     scover = s.get("cover") or "https://picsum.photos/300/400"
     stype = (s.get("type") or "Manhwa").lower()
@@ -236,6 +245,33 @@ for idx, s in enumerate(summary_series[:30]):
 new_cards_block = '<div class="update-list" id="update-list">\n' + '\n'.join(cards_html) + '\n        </div>'
 html = re.sub(r'<div class="update-list" id="update-list">.*?</div>\s*</section>', f'{new_cards_block}\n      </section>', html, flags=re.DOTALL)
 
+# Update ItemList JSON-LD Schema
+item_list_elements = []
+for i, s in enumerate(summary_series, 1):
+    sslug = s.get("custom_slug") or s.get("slug") or s.get("id")
+    stitle = s.get("title")
+    item_list_elements.append({
+        "@type": "ListItem",
+        "position": i,
+        "name": f"Baca {stitle} Sub Indo",
+        "url": f"https://oniverse.sbs/komik/{sslug}/"
+    })
+
+item_list_schema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Daftar Komik Manhwa Sub Indo & Manga Populer — OniVerse.SBS",
+    "numberOfItems": len(item_list_elements),
+    "itemListElement": item_list_elements
+}
+
+html = re.sub(
+    r'<script type="application/ld\+json">\s*\{"@context": "https://schema.org", "@type": "ItemList".*?</script>',
+    f'<script type="application/ld+json">\n  {json.dumps(item_list_schema, ensure_ascii=False)}\n  </script>',
+    html,
+    flags=re.DOTALL
+)
+
 # Force Cache Busting Timestamp
 v_ts = str(int(datetime.now().timestamp()))
 html = re.sub(r'data-initial\.js\?v=[^"]+', f'data-initial.js?v={v_ts}', html)
@@ -245,12 +281,13 @@ html = re.sub(r'app\.js\?v=[^"]+', f'app.js?v={v_ts}', html)
 with open(INDEX_HTML, "w", encoding="utf-8") as f:
     f.write(html)
 
-print("Updated index.html with fresh static cards and cache busting!")
+print("Updated index.html with fresh static cards, JSON-LD ItemList schema, and cache busting!")
 
 # 7. Update static komik HTML pages
 for s in all_repaired_series:
     sid = s["id"]
     slug = s["slug"]
+    cslug = s.get("custom_slug", slug)
     title = s["title"]
     cover = s["cover"]
     synopsis = s["synopsis"]
@@ -274,8 +311,8 @@ for s in all_repaired_series:
   <meta property="og:title" content="Baca Komik {title} Sub Indo — OniVerse.SBS">
   <meta property="og:description" content="{synopsis[:150]}...">
   <meta property="og:image" content="{cover}">
-  <meta property="og:url" content="https://oniverse.sbs/komik/{slug}/">
-  <link rel="canonical" href="https://oniverse.sbs/komik/{slug}/">
+  <meta property="og:url" content="https://oniverse.sbs/komik/{cslug}/">
+  <link rel="canonical" href="https://oniverse.sbs/komik/{cslug}/">
   <link rel="stylesheet" href="/styles.css?v={v_ts}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="/data-initial.js?v={v_ts}"></script>
@@ -296,7 +333,7 @@ for s in all_repaired_series:
           {" ".join([f'<span style="background:rgba(168,85,247,0.15);color:#c084fc;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.8rem;">{g}</span>' for g in genres])}
         </div>
         <p style="color:#cbd5e1;line-height:1.6;font-size:0.95rem;">{synopsis}</p>
-        <button onclick="location.href='/?open={slug}'" style="margin-top:1rem;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;padding:0.85rem 1.8rem;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;"><i class="fa-solid fa-book-open"></i> Mulai Baca Sekarang</button>
+        <button onclick="location.href='/?open={cslug}'" style="margin-top:1rem;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;padding:0.85rem 1.8rem;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;"><i class="fa-solid fa-book-open"></i> Mulai Baca Sekarang</button>
       </div>
     </div>
 
@@ -311,7 +348,8 @@ for s in all_repaired_series:
 </body>
 </html>'''
 
-    for s_name in set([sid, slug]):
+    slugs_to_create = set([sid, slug, cslug])
+    for s_name in slugs_to_create:
         if s_name:
             pdir = os.path.join(KOMIK_DIR, s_name)
             os.makedirs(pdir, exist_ok=True)
@@ -319,3 +357,21 @@ for s in all_repaired_series:
                 f.write(komik_page_html)
 
 print("Static HTML detail pages generated for all series!")
+
+# 8. Generate Sitemap XML
+sitemap_entries = [
+    '<url><loc>https://oniverse.sbs/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>'
+]
+for s in summary_series:
+    sslug = s.get("custom_slug") or s.get("slug") or s.get("id")
+    sitemap_entries.append(f'<url><loc>https://oniverse.sbs/komik/{sslug}/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>')
+
+sitemap_xml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{chr(10).join(sitemap_entries)}
+</urlset>'''
+
+with open(os.path.join(SHINIGAMI_DIR, "sitemap.xml"), "w", encoding="utf-8") as f:
+    f.write(sitemap_xml)
+
+print("Updated sitemap.xml with all 24 series!")
