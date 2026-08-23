@@ -65,6 +65,13 @@
   // ==========================================================================
   //  STATE
   // ==========================================================================
+  
+  // Initialize Theme from localStorage
+  const savedTheme = localStorage.getItem('oniverse_theme') || 'default';
+  if (savedTheme !== 'default') {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+
   const STATE = {
     allSeries: [],
     filtered: [],
@@ -1689,12 +1696,129 @@
   }
 
   function closeReader() {
+    stopAutoScroll();
     $('#reader-overlay').classList.add('hidden');
     document.body.style.overflow = '';
     renderContinue();
   }
 
   // Reader progress bar on scroll
+  
+  // ==========================================================================
+  //  THEME SWITCHER MODULE
+  // ==========================================================================
+  function openThemeModal() {
+    const modal = $('#theme-modal-backdrop');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    const currentTheme = localStorage.getItem('oniverse_theme') || 'default';
+    $$('.theme-swatch-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.themeVal === currentTheme);
+    });
+  }
+
+  function closeThemeModal() {
+    $('#theme-modal-backdrop')?.classList.add('hidden');
+  }
+
+  function setTheme(themeVal) {
+    if (themeVal === 'default') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', themeVal);
+    }
+    localStorage.setItem('oniverse_theme', themeVal);
+    $$('.theme-swatch-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.themeVal === themeVal);
+    });
+    const themeNames = {
+      default: 'Midnight Purple',
+      amoled: 'AMOLED Pure Black',
+      cyberpunk: 'Cyberpunk Neon',
+      emerald: 'Emerald Jade',
+      crimson: 'Crimson Gold'
+    };
+    showToast(`Tema ${themeNames[themeVal] || themeVal} diaktifkan! ✨`, 'success');
+  }
+
+
+  // ==========================================================================
+  //  AUTO-SCROLL ENGINE FOR CHAPTER READER
+  // ==========================================================================
+  const AUTOSCROLL = {
+    isRunning: false,
+    speed: 1,
+    reqId: null,
+    lastTimestamp: 0
+  };
+
+  function startAutoScroll() {
+    if (AUTOSCROLL.isRunning) return;
+    AUTOSCROLL.isRunning = true;
+    AUTOSCROLL.lastTimestamp = performance.now();
+
+    $('#btn-header-autoscroll')?.classList.add('active');
+    const hSpan = $('#btn-header-autoscroll span');
+    if (hSpan) hSpan.textContent = 'Jeda';
+
+    $('#btn-autoscroll-toggle')?.classList.add('active');
+    const icon = $('#autoscroll-icon');
+    if (icon) icon.className = 'fa-solid fa-pause';
+    const txt = $('#autoscroll-text');
+    if (txt) txt.textContent = 'Jeda';
+
+    $('#reader-autoscroll-bar')?.classList.remove('hidden');
+
+    const content = $('#reader-content');
+    function step(now) {
+      if (!AUTOSCROLL.isRunning) return;
+      const elapsed = (now - AUTOSCROLL.lastTimestamp) / 1000;
+      AUTOSCROLL.lastTimestamp = now;
+
+      // Smooth scroll speed based on multiplier (~80px/sec at 1x)
+      const delta = Math.max(0.5, AUTOSCROLL.speed * 75 * elapsed);
+      content.scrollTop += delta;
+
+      // Auto-advance or stop at end of chapter
+      if (content.scrollTop + content.clientHeight >= content.scrollHeight - 15) {
+        stopAutoScroll();
+        showToast('Mencapai akhir chapter! 📖', 'info');
+        return;
+      }
+      AUTOSCROLL.reqId = requestAnimationFrame(step);
+    }
+    AUTOSCROLL.reqId = requestAnimationFrame(step);
+  }
+
+  function stopAutoScroll() {
+    AUTOSCROLL.isRunning = false;
+    if (AUTOSCROLL.reqId) cancelAnimationFrame(AUTOSCROLL.reqId);
+    AUTOSCROLL.reqId = null;
+
+    $('#btn-header-autoscroll')?.classList.remove('active');
+    const hSpan = $('#btn-header-autoscroll span');
+    if (hSpan) hSpan.textContent = 'Auto';
+
+    $('#btn-autoscroll-toggle')?.classList.remove('active');
+    const icon = $('#autoscroll-icon');
+    if (icon) icon.className = 'fa-solid fa-play';
+    const txt = $('#autoscroll-text');
+    if (txt) txt.textContent = 'Auto-Scroll';
+  }
+
+  function toggleAutoScroll() {
+    if (AUTOSCROLL.isRunning) stopAutoScroll();
+    else startAutoScroll();
+  }
+
+  function setAutoScrollSpeed(speedVal) {
+    AUTOSCROLL.speed = parseFloat(speedVal) || 1;
+    $$('.btn-speed').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.speed === String(speedVal));
+    });
+    showToast(`Kecepatan Auto-Scroll: ${speedVal}x ⚡`, 'info');
+  }
+
   function setupReaderProgress() {
     const content = $('#reader-content');
     content.addEventListener('scroll', () => {
@@ -1711,11 +1835,14 @@
   function applyFilters() {
     const type = $('#filter-type')?.value || 'all';
     const genre = $('#filter-genre')?.value || 'all';
+    const status = $('#filter-status')?.value || 'all';
+    const chaptersRange = $('#filter-chapters')?.value || 'all';
     const sort = $('#sort-by')?.value || 'latest';
     const search = ($('#search-input')?.value || $('#mobile-search-input')?.value || '').toLowerCase().trim();
 
     let results = [...STATE.allSeries];
 
+    // Search filter
     if (search) {
       results = results.filter(s => {
         const title = (s.title || s.name || '').toLowerCase();
@@ -1725,12 +1852,43 @@
       });
     }
 
-    if (type !== 'all') results = results.filter(s => (s.type || '').toLowerCase() === type.toLowerCase());
-    if (genre !== 'all') results = results.filter(s => getGenres(s).some(g => g.toLowerCase() === genre.toLowerCase()));
+    // Type filter (Manhwa, Manga, Manhua)
+    if (type !== 'all') {
+      results = results.filter(s => (s.type || '').toLowerCase() === type.toLowerCase());
+    }
 
-    if (sort === 'rating') results.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0));
-    else if (sort === 'views') results.sort((a, b) => (b.views || 0) - (a.views || 0));
-    else results.sort((a, b) => parseDateScore(b) - parseDateScore(a));
+    // Genre filter
+    if (genre !== 'all') {
+      results = results.filter(s => getGenres(s).some(g => g.toLowerCase() === genre.toLowerCase()));
+    }
+
+    // Status filter (Ongoing, Completed)
+    if (status !== 'all') {
+      results = results.filter(s => (s.status || '').toLowerCase() === status.toLowerCase());
+    }
+
+    // Chapters count range filter
+    if (chaptersRange !== 'all') {
+      results = results.filter(s => {
+        const count = parseInt(s.total_chapters || s.latest_chapter || s.chapters?.length || 0, 10);
+        if (chaptersRange === '1-50') return count >= 1 && count <= 50;
+        if (chaptersRange === '51-100') return count > 50 && count <= 100;
+        if (chaptersRange === '101-250') return count > 100 && count <= 250;
+        if (chaptersRange === '250+') return count > 250;
+        return true;
+      });
+    }
+
+    // Sorting
+    if (sort === 'rating') {
+      results.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0));
+    } else if (sort === 'views') {
+      results.sort((a, b) => (b.views || 0) - (a.views || 0));
+    } else if (sort === 'title_asc') {
+      results.sort((a, b) => (a.title || a.name || '').localeCompare(b.title || b.name || ''));
+    } else {
+      results.sort((a, b) => parseDateScore(b) - parseDateScore(a));
+    }
 
     STATE.filtered = results;
     STATE.displayCount = STATE.perPage;
@@ -1744,6 +1902,19 @@
       $('#empty-state').classList.remove('hidden');
       $('#load-more-wrap').classList.add('hidden');
     }
+  }
+
+  function resetAllFilters() {
+    if ($('#filter-type')) $('#filter-type').value = 'all';
+    if ($('#filter-genre')) $('#filter-genre').value = 'all';
+    if ($('#filter-status')) $('#filter-status').value = 'all';
+    if ($('#filter-chapters')) $('#filter-chapters').value = 'all';
+    if ($('#sort-by')) $('#sort-by').value = 'latest';
+    if ($('#search-input')) $('#search-input').value = '';
+    if ($('#mobile-search-input')) $('#mobile-search-input').value = '';
+    $('#clear-search-btn')?.classList.add('hidden');
+    applyFilters();
+    showToast('Semua filter berhasil di-reset!', 'info');
   }
 
   // ==========================================================================
@@ -1897,11 +2068,54 @@
       if (r.chapterIdx < r.chapters.length - 1) openReader(r.series, r.chapters, r.chapterIdx + 1);
     };
 
-    // Filters
-    ['filter-type', 'filter-genre', 'sort-by'].forEach(id => {
+    // Smart Multi-Filters
+    ['filter-type', 'filter-genre', 'filter-status', 'filter-chapters', 'sort-by'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', applyFilters);
     });
+
+    // Reset Filters Button
+    $('#reset-filter-btn')?.addEventListener('click', resetAllFilters);
+
+    // Theme Modal & Switcher
+    $('#theme-toggle')?.addEventListener('click', e => {
+      e.preventDefault();
+      openThemeModal();
+    });
+    $('#close-theme-modal-btn')?.addEventListener('click', closeThemeModal);
+    $('#theme-modal-backdrop')?.addEventListener('click', e => {
+      if (e.target.id === 'theme-modal-backdrop') closeThemeModal();
+    });
+    $$('.theme-swatch-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const val = item.dataset.themeVal;
+        if (val) setTheme(val);
+      });
+    });
+
+    // Auto-Scroll Controls
+    $('#btn-header-autoscroll')?.addEventListener('click', () => {
+      $('#reader-autoscroll-bar')?.classList.toggle('hidden');
+      toggleAutoScroll();
+    });
+    $('#btn-autoscroll-toggle')?.addEventListener('click', toggleAutoScroll);
+    $('#btn-autoscroll-close')?.addEventListener('click', () => {
+      stopAutoScroll();
+      $('#reader-autoscroll-bar')?.classList.add('hidden');
+    });
+    $$('.btn-speed').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setAutoScrollSpeed(btn.dataset.speed);
+      });
+    });
+
+    // Pause Auto-Scroll on manual interaction in reader
+    $('#reader-content')?.addEventListener('wheel', () => {
+      if (AUTOSCROLL.isRunning) stopAutoScroll();
+    }, { passive: true });
+    $('#reader-content')?.addEventListener('touchmove', () => {
+      if (AUTOSCROLL.isRunning) stopAutoScroll();
+    }, { passive: true });
 
     // Search
     let searchTimeout;
@@ -1920,6 +2134,13 @@
           const mob = $('#mobile-search-expanded');
           mob.classList.remove('hidden');
           setTimeout(() => $('#mobile-search-input')?.focus(), 50);
+        }
+      }
+      if (e.key === ' ' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        const overlay = $('#reader-overlay');
+        if (overlay && !overlay.classList.contains('hidden')) {
+          e.preventDefault();
+          toggleAutoScroll();
         }
       }
       if (e.key === 'Escape') {
