@@ -38,8 +38,17 @@ def fetch_json(url, retries=3):
                 print(f"  [ERROR] fetch_json {url}: {e}")
                 return None
 
-# MASTER SERIES LIST (38 Legendary Titles for Page 1 Google Domination)
+# MASTER SERIES LIST (45 Titles including 7 New Shinigami Releases)
 TARGET_SERIES = [
+    # 7 New Shinigami Releases (Fresh Update)
+    {"id": "e53a5528-943c-462f-b3ff-004d4aa8c08f", "slug": "e53a5528-943c-462f-b3ff-004d4aa8c08f", "custom_slug": "chronicles-of-the-lazy-sovereign"},
+    {"id": "6a76b7b6-43e6-4a2c-b62a-b8871f27e3d0", "slug": "6a76b7b6-43e6-4a2c-b62a-b8871f27e3d0", "custom_slug": "the-martial-genius-who-remembers-everything"},
+    {"id": "887d8064-1be0-4810-ac92-ce205231d62f", "slug": "887d8064-1be0-4810-ac92-ce205231d62f", "custom_slug": "30-years-have-passed-since-the-prologue"},
+    {"id": "f5bf954a-0978-4408-83a7-12143c8cf683", "slug": "f5bf954a-0978-4408-83a7-12143c8cf683", "custom_slug": "a-painter-who-draws-dungeons"},
+    {"id": "df2abd61-d69d-4e7c-bfe4-8e446af8cfc3", "slug": "df2abd61-d69d-4e7c-bfe4-8e446af8cfc3", "custom_slug": "return-of-the-devourer"},
+    {"id": "881d1199-d03a-4536-8a5c-6afb7056e608", "slug": "881d1199-d03a-4536-8a5c-6afb7056e608", "custom_slug": "ticket-hero-s2"},
+    {"id": "506e7ee5-e93c-488f-9ef5-cd711476217b", "slug": "506e7ee5-e93c-488f-9ef5-cd711476217b", "custom_slug": "tyrant-of-the-otherworld"},
+
     # Top Searched Series (GSC High Volume Queries)
     {"id": "d3b05787-4c8e-42bb-ba9a-6b2fafd92f3c", "slug": "d3b05787-4c8e-42bb-ba9a-6b2fafd92f3c", "custom_slug": "nano-machine"},
     {"id": "5c612573-fe38-42df-8618-dc3de1c9d04a", "slug": "5c612573-fe38-42df-8618-dc3de1c9d04a", "custom_slug": "solo-leveling"},
