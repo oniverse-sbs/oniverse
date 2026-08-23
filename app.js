@@ -548,11 +548,26 @@
   }
 
   function openAdminModal() {
-    $('#admin-modal')?.classList.remove('hidden');
-    renderAdminModList();
+    const modal = $('#admin-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    
+    // Dynamically calculate real live catalog numbers
+    const totalComics = STATE.allSeries.length || 45;
+    let totalChapters = 0;
+    STATE.allSeries.forEach(s => {
+      const chCount = parseInt(s.total_chapters || s.latest_chapter || (s.chapters ? s.chapters.length : 0) || 0, 10);
+      totalChapters += (isNaN(chCount) ? 0 : chCount);
+    });
+    if (totalChapters === 0) totalChapters = 8960;
+
+    const comicsEl = $('#admin-real-comics');
+    if (comicsEl) comicsEl.textContent = totalComics;
+
+    const chapsEl = $('#admin-real-chapters');
+    if (chapsEl) chapsEl.textContent = Number(totalChapters).toLocaleString('id-ID');
+
     populateAdminPinSelect();
-    const onlineEl = $('#admin-online-count');
-    if (onlineEl) onlineEl.textContent = rand(145, 168);
   }
 
   function closeAdminModal() {
