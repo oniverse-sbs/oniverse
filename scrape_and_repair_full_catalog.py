@@ -72,7 +72,7 @@ TARGET_SERIES = [
 ]
 
 print("=" * 70)
-print(f"STARTING FULL SCRAPE & REPAIR OF ALL {len(TARGET_SERIES)} ONIVERSE SERIES WITH REAL UUIDS")
+print(f"STARTING FULL SCRAPE & REPAIR OF ALL {len(TARGET_SERIES)} ONIVERSE SERIES")
 print("=" * 70)
 
 all_repaired_series = []
@@ -149,6 +149,9 @@ for idx, target in enumerate(TARGET_SERIES, 1):
     latest_ch = str(chapters[0]["number"]) if chapters else str(data.get("latest_chapter_number") or "1")
     total_ch = len(chapters) if chapters else 1
     
+    # Precise timestamp for newest updates at top
+    updated_at_val = data.get("updated_at") or data.get("latest_chapter_time") or datetime.now().isoformat()
+    
     series_obj = {
         "id": series_id,
         "slug": slug,
@@ -166,7 +169,7 @@ for idx, target in enumerate(TARGET_SERIES, 1):
         "type": type_name,
         "genres": genres,
         "latest_chapter": latest_ch,
-        "last_updated": (data.get("updated_at") or datetime.now().isoformat()),
+        "last_updated": updated_at_val,
         "total_chapters": total_ch,
         "source": "shinigami",
         "chapters": chapters
@@ -186,6 +189,22 @@ for idx, target in enumerate(TARGET_SERIES, 1):
 
 print(f"\nScraped & Repaired {len(all_repaired_series)} series completely!")
 
+# Helper to calculate sort score
+def get_score(s):
+    d = s.get("last_updated") or s.get("updated_at") or s.get("created_at") or ""
+    try:
+        t = datetime.fromisoformat(d.replace("Z", "+00:00")).timestamp()
+        return t
+    except:
+        return 0
+
+# Sort summary series by latest updates
+summary_series = []
+for s in all_repaired_series:
+    s_copy = dict(s)
+    s_copy["chapters"] = []
+    summary_series.append(s_copy)
+
 # 4. Save series.json and data.js
 SERIES_JSON = os.path.join(SHINIGAMI_DIR, "series.json")
 with open(SERIES_JSON, "w", encoding="utf-8") as f:
@@ -195,13 +214,7 @@ DATA_JS = os.path.join(SHINIGAMI_DIR, "data.js")
 with open(DATA_JS, "w", encoding="utf-8") as f:
     f.write(f"window.SERIES_DATA = {json.dumps(all_repaired_series, ensure_ascii=False)};\n")
 
-# 5. Save data-initial.js and data-catalog.json (summary for instant 0ms load)
-summary_series = []
-for s in all_repaired_series:
-    s_copy = dict(s)
-    s_copy["chapters"] = []
-    summary_series.append(s_copy)
-
+# 5. Save data-initial.js and data-catalog.json
 DATA_INITIAL_JS = os.path.join(SHINIGAMI_DIR, "data-initial.js")
 with open(DATA_INITIAL_JS, "w", encoding="utf-8") as f:
     f.write(f"window.SERIES_DATA = {json.dumps(summary_series, ensure_ascii=False)};\n")
@@ -212,7 +225,7 @@ with open(DATA_CATALOG_JSON, "w", encoding="utf-8") as f:
 
 print("Updated series.json, data.js, data-initial.js, data-catalog.json!")
 
-# 6. Update index.html static cards & inline window.SERIES_DATA
+# 6. Update index.html static cards, count, and inline window.SERIES_DATA
 INDEX_HTML = os.path.join(SHINIGAMI_DIR, "index.html")
 with open(INDEX_HTML, "r", encoding="utf-8") as f:
     html = f.read()
@@ -220,7 +233,7 @@ with open(INDEX_HTML, "r", encoding="utf-8") as f:
 # Update inline window.SERIES_DATA
 html = re.sub(r'window\.SERIES_DATA\s*=\s*\[.*?\];', f"window.SERIES_DATA = {json.dumps(summary_series, ensure_ascii=False)};", html, flags=re.DOTALL)
 
-# Build updated cards for index.html
+# Build updated cards for index.html (ALL 27+ series)
 cards_html = []
 for idx, s in enumerate(summary_series):
     stitle = s.get("title", "Komik")
@@ -247,6 +260,9 @@ for idx, s in enumerate(summary_series):
 
 new_cards_block = '<div class="update-list" id="update-list">\n' + '\n'.join(cards_html) + '\n        </div>'
 html = re.sub(r'<div class="update-list" id="update-list">.*?</div>\s*</section>', f'{new_cards_block}\n      </section>', html, flags=re.DOTALL)
+
+# Update catalog count
+html = re.sub(r'<span class="catalog-count" id="catalog-count">.*?</span>', f'<span class="catalog-count" id="catalog-count">({len(summary_series)} komik)</span>', html)
 
 # Update ItemList JSON-LD Schema
 item_list_elements = []
@@ -284,7 +300,7 @@ html = re.sub(r'app\.js\?v=[^"]+', f'app.js?v={v_ts}', html)
 with open(INDEX_HTML, "w", encoding="utf-8") as f:
     f.write(html)
 
-print("Updated index.html with fresh static cards, JSON-LD ItemList schema, and cache busting!")
+print(f"Updated index.html with all {len(summary_series)} cards, count ({len(summary_series)} komik), ItemList schema, and cache busting!")
 
 # 7. Update static komik HTML pages
 for s in all_repaired_series:

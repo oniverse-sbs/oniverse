@@ -68,8 +68,8 @@
   const STATE = {
     allSeries: [],
     filtered: [],
-    displayCount: 24,
-    perPage: 24,
+    displayCount: 100,
+    perPage: 100,
     currentSlide: 0,
     sliderTimer: null,
     currentDetail: null,
@@ -493,11 +493,7 @@
     });
   }
 
-  const DEFAULT_PINNED_SLUGS = [
-    '4ef0b99b-20d3-4da8-bb73-9c3768f32699', // The Count's Secret Maid (#1)
-    '11ecc266-ead4-4728-b21a-5ac34afb140c', // She's Not Our Daughter! (#2)
-    '56c552be-3ba1-41b8-975e-d77fd4e1bc2c'  // My Bias Gets On The Last Train (#3)
-  ];
+  const DEFAULT_PINNED_SLUGS = [];
   let PINNED_SLUGS = JSON.parse(localStorage.getItem('oniverse_pinned_slugs') || 'null') || DEFAULT_PINNED_SLUGS;
 
   function applyPinnedOrder() {
@@ -603,7 +599,7 @@
 
     // 2. Fetch full catalog instantly with 0ms delay
     try {
-      const res = await fetch('/data-catalog.json?v=20260810_sync_v1');
+      const res = await fetch('/data-catalog.json?v=' + Date.now());
       if (res.ok) {
         const catalog = await res.json();
         if (Array.isArray(catalog) && catalog.length > 0) {
@@ -674,15 +670,18 @@
   function populateGenreFilter() {
     const genreSet = new Set();
     STATE.allSeries.forEach(s => {
-      if (s.genres) s.genres.forEach(g => genreSet.add(g));
-      if (s.genre) s.genre.split(',').forEach(g => genreSet.add(g.trim()));
+      if (s.genres && Array.isArray(s.genres)) s.genres.forEach(g => genreSet.add(g));
+      if (s.genre && typeof s.genre === 'string') s.genre.split(',').forEach(g => genreSet.add(g.trim()));
     });
     const sel = $('#filter-genre');
     if (!sel) return;
+    const currentVal = sel.value || 'all';
+    sel.innerHTML = '<option value="all">Semua Genre</option>';
     [...genreSet].sort().forEach(g => {
       if (g) {
         const opt = document.createElement('option');
         opt.value = g; opt.textContent = g;
+        if (g === currentVal) opt.selected = true;
         sel.appendChild(opt);
       }
     });
@@ -1731,7 +1730,7 @@
 
     if (sort === 'rating') results.sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0));
     else if (sort === 'views') results.sort((a, b) => (b.views || 0) - (a.views || 0));
-    else results.sort((a, b) => (b.last_updated || b.updated || '').localeCompare(a.last_updated || a.updated || ''));
+    else results.sort((a, b) => parseDateScore(b) - parseDateScore(a));
 
     STATE.filtered = results;
     STATE.displayCount = STATE.perPage;
