@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>https://oniverse.sbs/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+<url><loc>https://oniverse.sbs/komik/shadow-slave/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+<url><loc>https://oniverse.sbs/komik/juvenile-prison/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+<url><loc>https://oniverse.sbs/komik/i-love-the-demon-lord-so-much/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
 <url><loc>https://oniverse.sbs/komik/reality-quest/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
 <url><loc>https://oniverse.sbs/komik/what-can-i-do-alone/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
 <url><loc>https://oniverse.sbs/komik/bad-guy/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>

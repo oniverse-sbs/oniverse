@@ -39,7 +39,10 @@ def fetch_json(url, retries=3):
                 return None
 
 TARGET_SERIES = [
-    # Newly requested 5 series from Shinigami
+    # Newly requested series from Shinigami
+    {"id": "75776a81-4095-4ee6-9313-4e98245fb2fa", "slug": "75776a81-4095-4ee6-9313-4e98245fb2fa", "custom_slug": "shadow-slave"},
+    {"id": "6915ddaf-380a-47d8-aa8a-c48ba8778db5", "slug": "6915ddaf-380a-47d8-aa8a-c48ba8778db5", "custom_slug": "juvenile-prison"},
+    {"id": "34fb4347-728f-4463-b68a-3796ca2ef48a", "slug": "34fb4347-728f-4463-b68a-3796ca2ef48a", "custom_slug": "i-love-the-demon-lord-so-much"},
     {"id": "4db59224-242e-43b0-8bfe-0c7d3ccb2196", "slug": "4db59224-242e-43b0-8bfe-0c7d3ccb2196", "custom_slug": "reality-quest"},
     {"id": "81b23d63-915c-4933-a4af-72f613718d02", "slug": "81b23d63-915c-4933-a4af-72f613718d02", "custom_slug": "what-can-i-do-alone"},
     {"id": "965b599c-54d5-4f91-820a-750d8f252a04", "slug": "965b599c-54d5-4f91-820a-750d8f252a04", "custom_slug": "bad-guy"},
@@ -69,7 +72,7 @@ TARGET_SERIES = [
 ]
 
 print("=" * 70)
-print("STARTING FULL SCRAPE & REPAIR OF ALL 24 ONIVERSE SERIES WITH REAL UUIDS")
+print(f"STARTING FULL SCRAPE & REPAIR OF ALL {len(TARGET_SERIES)} ONIVERSE SERIES WITH REAL UUIDS")
 print("=" * 70)
 
 all_repaired_series = []
@@ -374,4 +377,4 @@ sitemap_xml = f'''<?xml version="1.0" encoding="UTF-8"?>
 with open(os.path.join(SHINIGAMI_DIR, "sitemap.xml"), "w", encoding="utf-8") as f:
     f.write(sitemap_xml)
 
-print("Updated sitemap.xml with all 24 series!")
+print(f"Updated sitemap.xml with all {len(summary_series)} series!")

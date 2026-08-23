@@ -1,0 +1,84 @@
+{
+  "id": "75776a81-4095-4ee6-9313-4e98245fb2fa",
+  "slug": "75776a81-4095-4ee6-9313-4e98245fb2fa",
+  "custom_slug": "shadow-slave",
+  "title": "Shadow Slave",
+  "alternative_title": "Shadow Slave",
+  "author": "Unknown",
+  "artist": "",
+  "synopsis": "Tumbuh dalam kemiskinan, Sunny tidak pernah mengharapkan hal baik dari kehidupan.&#x20;\n\nNamun, bahkan dia pun tidak menduga akan terpilih oleh Nightmare Spell dan menjadi salah satu dari Awakened.&#x20;\n\nKelompok elit orang-orang yang diberkahi dengan kekuatan supernatural.\n\nBerpindah ke dunia sihir yang hancur, ia mendapati dirinya menghadapi monster-monster mengerikan dan para Awakened lainnya dalam pertempuran maut untuk bertahan hidup.\n\nLebih buruk lagi, kekuatan bayangan yang ia terima ternyata memiliki efek samping kecil dan berpotensi fatal.\n\nTapi itu tidak akan menghentikannya. Terlahir sebagai budak. Ditakdirkan untuk mati. Dia memilih untuk bertahan hidup.\n\nTidak peduli berapa pun harganya…",
+  "cover": "https://assets.shngm.id/thumbnail/cover/banner_1787194726003_sfiluh.jpg",
+  "thumbnail": "https://assets.shngm.id/thumbnail/cover/banner_1787194726003_sfiluh.jpg",
+  "rating": "8.7",
+  "views": 263582,
+  "status": "Completed",
+  "type": "Manhwa",
+  "genres": [
+    "Action",
+    "Adventure",
+    "Fantasy",
+    "Demon",
+    "Magic"
+  ],
+  "latest_chapter": "5",
+  "last_updated": "2026-08-23T01:52:46Z",
+  "total_chapters": 5,
+  "source": "shinigami",
+  "chapters": [
+    {
+      "id": "2443f804-74e3-4305-8229-a9a2dd5106e7",
+      "chapter_id": "2443f804-74e3-4305-8229-a9a2dd5106e7",
+      "slug": "2443f804-74e3-4305-8229-a9a2dd5106e7",
+      "num": 5,
+      "number": "5",
+      "chapter": "5",
+      "title": "MENTOK!!",
+      "date": "2026-08-20",
+      "pagesCount": 15
+    },
+    {
+      "id": "caa227ac-38e4-4dc1-98e2-5b06de446caf",
+      "chapter_id": "caa227ac-38e4-4dc1-98e2-5b06de446caf",
+      "slug": "caa227ac-38e4-4dc1-98e2-5b06de446caf",
+      "num": 4,
+      "number": "4",
+      "chapter": "4",
+      "title": "Chapter 4",
+      "date": "2026-08-20",
+      "pagesCount": 15
+    },
+    {
+      "id": "7277e574-4898-4f82-a2eb-33ebe39a9815",
+      "chapter_id": "7277e574-4898-4f82-a2eb-33ebe39a9815",
+      "slug": "7277e574-4898-4f82-a2eb-33ebe39a9815",
+      "num": 3,
+      "number": "3",
+      "chapter": "3",
+      "title": "Chapter 3",
+      "date": "2026-08-20",
+      "pagesCount": 15
+    },
+    {
+      "id": "482530e9-b847-4962-b9cd-416b13295fba",
+      "chapter_id": "482530e9-b847-4962-b9cd-416b13295fba",
+      "slug": "482530e9-b847-4962-b9cd-416b13295fba",
+      "num": 2,
+      "number": "2",
+      "chapter": "2",
+      "title": "Chapter 2",
+      "date": "2026-08-20",
+      "pagesCount": 15
+    },
+    {
+      "id": "522e08cc-bbf5-4402-864d-88f5413914ad",
+      "chapter_id": "522e08cc-bbf5-4402-864d-88f5413914ad",
+      "slug": "522e08cc-bbf5-4402-864d-88f5413914ad",
+      "num": 1,
+      "number": "1",
+      "chapter": "1",
+      "title": "Chapter 1",
+      "date": "2026-07-18",
+      "pagesCount": 15
+    }
+  ]
+}
