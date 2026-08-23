@@ -40,7 +40,9 @@ def fetch_json(url, retries=3):
 
 # MASTER SERIES LIST (45 Titles including 7 New Shinigami Releases)
 TARGET_SERIES = [
-    # 7 New Shinigami Releases (Fresh Update)
+    {"id": "224a765b-244a-42ff-8e63-c213f7c092a8", "slug": "regressor-of-the-fallen-family", "custom_slug": "regressor-of-the-fallen-family"},
+    {"id": "ac2a7b76-a5bb-4bf1-a816-02e948857e7c", "slug": "what-a-bountiful-harvest-demon-lord", "custom_slug": "what-a-bountiful-harvest-demon-lord"},
+    {"id": "5c871693-d229-486b-a9dc-a75b02208ad4", "slug": "after-the-high-school-goddess-dumped-me-i-became-a-martial-arts-god", "custom_slug": "after-the-high-school-goddess-dumped-me-i-became-a-martial-arts-god"},
     {"id": "e53a5528-943c-462f-b3ff-004d4aa8c08f", "slug": "e53a5528-943c-462f-b3ff-004d4aa8c08f", "custom_slug": "chronicles-of-the-lazy-sovereign"},
     {"id": "6a76b7b6-43e6-4a2c-b62a-b8871f27e3d0", "slug": "6a76b7b6-43e6-4a2c-b62a-b8871f27e3d0", "custom_slug": "the-martial-genius-who-remembers-everything"},
     {"id": "887d8064-1be0-4810-ac92-ce205231d62f", "slug": "887d8064-1be0-4810-ac92-ce205231d62f", "custom_slug": "30-years-have-passed-since-the-prologue"},
@@ -48,8 +50,6 @@ TARGET_SERIES = [
     {"id": "df2abd61-d69d-4e7c-bfe4-8e446af8cfc3", "slug": "df2abd61-d69d-4e7c-bfe4-8e446af8cfc3", "custom_slug": "return-of-the-devourer"},
     {"id": "881d1199-d03a-4536-8a5c-6afb7056e608", "slug": "881d1199-d03a-4536-8a5c-6afb7056e608", "custom_slug": "ticket-hero-s2"},
     {"id": "506e7ee5-e93c-488f-9ef5-cd711476217b", "slug": "506e7ee5-e93c-488f-9ef5-cd711476217b", "custom_slug": "tyrant-of-the-otherworld"},
-
-    # Top Searched Series (GSC High Volume Queries)
     {"id": "d3b05787-4c8e-42bb-ba9a-6b2fafd92f3c", "slug": "d3b05787-4c8e-42bb-ba9a-6b2fafd92f3c", "custom_slug": "nano-machine"},
     {"id": "5c612573-fe38-42df-8618-dc3de1c9d04a", "slug": "5c612573-fe38-42df-8618-dc3de1c9d04a", "custom_slug": "solo-leveling"},
     {"id": "b80f7a1a-d572-417b-a5e0-9ac6097bf0be", "slug": "b80f7a1a-d572-417b-a5e0-9ac6097bf0be", "custom_slug": "mercenary-enrollment"},
@@ -69,8 +69,6 @@ TARGET_SERIES = [
     {"id": "965b599c-54d5-4f91-820a-750d8f252a04", "slug": "965b599c-54d5-4f91-820a-750d8f252a04", "custom_slug": "bad-guy"},
     {"id": "e5c6c4e5-959e-4de4-9549-db50fa76cacd", "slug": "e5c6c4e5-959e-4de4-9549-db50fa76cacd", "custom_slug": "the-baddest-villainess-is-back"},
     {"id": "d4c27128-b457-4e45-85a8-8be3f5a98971", "slug": "d4c27128-b457-4e45-85a8-8be3f5a98971", "custom_slug": "resurrection-boy"},
-    
-    # Established Catalog
     {"id": "a2ba8fcf-f554-4568-95ea-f0cc997ab394", "slug": "a2ba8fcf-f554-4568-95ea-f0cc997ab394", "custom_slug": "all-hail-the-sect-leaders"},
     {"id": "7701ba39-f6b3-46ab-873f-cbc1fe93fb10", "slug": "7701ba39-f6b3-46ab-873f-cbc1fe93fb10", "custom_slug": "player-who-cant-level-up"},
     {"id": "d4e9983e-69eb-4370-b93a-f310b6e81faa", "slug": "d4e9983e-69eb-4370-b93a-f310b6e81faa", "custom_slug": "face-genius-0-year-old-top-star"},
