@@ -2261,9 +2261,88 @@
     $('#sb-bookmark')?.addEventListener('click', e => { e.preventDefault(); showBookmarkList(); closeMobileSidebar(); });
     $('#sb-history')?.addEventListener('click', e => { e.preventDefault(); document.getElementById('continue-section')?.scrollIntoView({ behavior: 'smooth' }); closeMobileSidebar(); });
 
-    // Forum Diskusi Bindings
+    // Live Chat 2.0 Bindings
     $('#nav-forum')?.addEventListener('click', e => { e.preventDefault(); openForumModal(); });
     $('#sb-forum')?.addEventListener('click', e => { e.preventDefault(); openForumModal(); closeMobileSidebar(); });
+    $('#floating-chat-btn')?.addEventListener('click', openForumModal);
+    $('#close-forum-btn')?.addEventListener('click', closeForumModal);
+    $('#forum-send-btn')?.addEventListener('click', sendForumMessage);
+    $('#forum-msg-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendForumMessage(); });
+
+    // SFX Sound Toggle
+    $('#chat-sfx-toggle')?.addEventListener('click', () => {
+      isChatSfxEnabled = !isChatSfxEnabled;
+      localStorage.setItem('oniverse_chat_sfx', isChatSfxEnabled);
+      updateChatSfxIcon();
+      showToast(isChatSfxEnabled ? 'Suara Chat: Aktif 🔊' : 'Suara Chat: Hening 🔇', 'info');
+    });
+
+    // Quick Emotes Buttons
+    $$('.emote-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const emote = btn.dataset.emote;
+        const input = $('#forum-msg-input');
+        if (input && emote) {
+          input.value += (input.value ? ' ' : '') + emote;
+          input.focus();
+        }
+      });
+    });
+
+    // Channel Switcher Tabs
+    $$('.forum-channel-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        $$('.forum-channel-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        FORUM_STATE.activeChannel = tab.dataset.channel;
+        renderForumMessages();
+      });
+    });
+
+    // Chat Box Delegation for Likes, Replies & Comic Tags
+    $('#forum-chat-box')?.addEventListener('click', e => {
+      // Like button
+      const likeBtn = e.target.closest('.forum-like-btn');
+      if (likeBtn) {
+        const msgId = +likeBtn.dataset.id;
+        const msg = FORUM_STATE.messages.find(m => m.id === msgId);
+        if (msg) {
+          msg.likes = (msg.likes || 0) + 1;
+          msg.likedBySelf = true;
+          likeBtn.style.color = '#ef4444';
+          const span = likeBtn.querySelector('span');
+          if (span) span.textContent = msg.likes;
+          localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+          playChatSfx('like');
+        }
+        return;
+      }
+
+      // Reply button
+      const replyBtn = e.target.closest('.forum-reply-btn');
+      if (replyBtn) {
+        const author = replyBtn.dataset.author;
+        FORUM_STATE.currentReplyAuthor = author;
+        const input = $('#forum-msg-input');
+        if (input) {
+          input.value = `@${author} `;
+          input.focus();
+        }
+        return;
+      }
+
+      // Comic tag direct click
+      const tagLink = e.target.closest('.comic-chat-tag');
+      if (tagLink) {
+        const slug = tagLink.dataset.slug;
+        const series = STATE.allSeries.find(s => getSlug(s) === slug);
+        if (series) {
+          closeForumModal();
+          openDetail(series);
+        }
+        return;
+      }
+    });
 
     // Auth Modal Bindings
     $('#login-btn')?.addEventListener('click', openAuthModal);
@@ -2441,82 +2520,105 @@
   }
 
   // ==========================================================================
-  //  FORUM DISKUSI & CHAT MODULE (REAL-TIME PERSISTENT COMMUNITY FORUM)
+  //  FORUM DISKUSI & CHAT MODULE (REAL-TIME LIVE CHAT 2.0)
   // ==========================================================================
   const FORUM_SERVER_URL = 'https://jsonblob.com/api/jsonBlob/019fcb1d-1e9f-7f4c-b00c-50934fceb12e';
+
+  let isChatSfxEnabled = localStorage.getItem('oniverse_chat_sfx') !== 'false';
+
+  function playChatSfx(type) {
+    if (!isChatSfxEnabled) return;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'send') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(420, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.09);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.1);
+      } else if (type === 'receive') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(580, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.07);
+        gain.gain.setValueAtTime(0.14, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.16);
+      } else if (type === 'like') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1040, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.12);
+      }
+    } catch (e) {}
+  }
 
   const FORUM_STATE = {
     activeChannel: 'general',
     userName: localStorage.getItem('oniverse_username') || `Kultivator_${rand(1000, 9999)}`,
+    currentReplyAuthor: null,
     messages: JSON.parse(localStorage.getItem('oniverse_forum_msgs') || 'null') || [
-      { id: 1, channel: 'general', author: 'Admin_Oni', avatar: '👑', userRank: { badge: '👑', name: "World's Master", color: '#ef4444' }, text: 'Selamat datang di Forum Resmi OniVerse.SBS! 🚀 Tempat kumpul pembaca komik Indonesia. Nikmati 1.230+ judul komik gratis!', time: '10:00', isAdmin: true, likes: 24 },
-      { id: 2, channel: 'general', author: 'Rian_Otaku', avatar: '🔥', userRank: { badge: '🔥', name: 'Pendekar Utama', color: '#f59e0b' }, text: 'Halo kawan-kawan! Update komik favorit makin mantap & cepat!', time: '10:14', likes: 8 },
-      { id: 3, channel: 'general', author: 'Zack_Cultivator', avatar: '⚡', userRank: { badge: '⚡', name: 'Kultivator Ranah Atas', color: '#8b5cf6' }, text: 'Fitur gacha kultivasi harian bikin ketagihan euy 😂 Wajib klaim EXP tiap hari!', time: '10:20', likes: 11 },
+      { id: 1, channel: 'general', author: 'Admin_Oni', avatar: '👑', userRank: { badge: '👑', name: "World's Master", color: '#ef4444' }, text: 'Selamat datang di Live Chat OniVerse.SBS! 🚀 Tempat kumpul & ngobrol pembaca komik se-Indonesia. Ketik #namakomik untuk share judul komik langsung!', time: '10:00', isAdmin: true, likes: 32 },
+      { id: 2, channel: 'general', author: 'Rian_Otaku', avatar: '🔥', userRank: { badge: '🔥', name: 'Pendekar Utama', color: '#f59e0b' }, text: 'Halo kawan-kawan! Baru kelar maraton #SoloLeveling gila seru banget artworknya!', time: '10:14', likes: 14 },
+      { id: 3, channel: 'general', author: 'Zack_Cultivator', avatar: '⚡', userRank: { badge: '⚡', name: 'Kultivator Ranah Atas', color: '#8b5cf6' }, text: 'Fitur Auto-Scroll di Reader enak parah, gak pegel lagi scroll di HP 😂', time: '10:20', likes: 19 },
 
-      { id: 4, channel: 'rekomendasi', author: 'BudiManhwa', avatar: '🗡️', userRank: { badge: '🗡️', name: 'Penyihir Agung', color: '#3b82f6' }, text: 'Rekomendasi manhwa genre sistem & regresi yang paling OP apa aja guys?', time: '09:45', likes: 6 },
-      { id: 5, channel: 'rekomendasi', author: 'Siska_Anime', avatar: '🌸', userRank: { badge: '🌸', name: 'Mahadewa Kultivasi', color: '#ec4899' }, text: 'Coba baca "The Count’s Secret Maid" & "My Bias Gets On The Last Train", ceritanya bagus banget & gambar HD!', time: '09:50', likes: 15 },
-      { id: 6, channel: 'rekomendasi', author: 'Dewi_Manhua', avatar: '✨', userRank: { badge: '✨', name: 'Dewa Pedang', color: '#10b981' }, text: '"She’s Not Our Daughter!" juga seru parah, manis banget romansenya!', time: '10:05', likes: 9 },
+      { id: 4, channel: 'rekomendasi', author: 'BudiManhwa', avatar: '🗡️', userRank: { badge: '🗡️', name: 'Penyihir Agung', color: '#3b82f6' }, text: 'Rekomendasi manhwa aksi regresi / murim yang paling OP apa aja guys?', time: '09:45', likes: 8 },
+      { id: 5, channel: 'rekomendasi', author: 'Siska_Anime', avatar: '🌸', userRank: { badge: '🌸', name: 'Mahadewa Kultivasi', color: '#ec4899' }, text: 'Wajib baca #NanoMachine sama #TheGreatestEstateDeveloper! Dijamin puas & ngakak!', time: '09:50', likes: 21 },
+      { id: 6, channel: 'rekomendasi', author: 'Dewi_Manhua', avatar: '✨', userRank: { badge: '✨', name: 'Dewa Pedang', color: '#10b981' }, text: '#Eleceed juga seru parah, pertarungannya epic!', time: '10:05', likes: 12 },
 
-      { id: 7, channel: 'spoiler', author: 'TeoriGod', avatar: '🔮', userRank: { badge: '🔮', name: 'Pakar Teori Komik', color: '#a855f7' }, text: 'Spoiler Chapter Depan: MC bakal regresi ulang & bantai klan musuh dalam 1 tebasan!', time: '11:05', likes: 18 },
-      { id: 8, channel: 'spoiler', author: 'Lord_Kaisar', avatar: '👑', userRank: { badge: '👑', name: 'Kaisar Langit', color: '#ef4444' }, text: 'Setuju! Form pembantaian MC nya epic banget, visual gambar jernih parah.', time: '11:12', likes: 14 },
+      { id: 7, channel: 'spoiler', author: 'TeoriGod', avatar: '🔮', userRank: { badge: '🔮', name: 'Pakar Teori Komik', color: '#a855f7' }, text: 'Spoiler Chapter Depan: MC bakal keluarin teknik rahasia dan bantai bos dungeon dalam sekejap!', time: '11:05', likes: 25 },
+      { id: 8, channel: 'spoiler', author: 'Lord_Kaisar', avatar: '👑', userRank: { badge: '👑', name: 'Kaisar Langit', color: '#ef4444' }, text: 'Setuju! Form pembantaian MC nya epic banget, visual gambar jernih parah di sini.', time: '11:12', likes: 18 },
 
-      { id: 9, channel: 'pengumuman', author: 'Admin_Oni', avatar: '📢', userRank: { badge: '📢', name: 'Official Staff', color: '#ef4444' }, text: '⚡ Update Server 2.0: Performa mobile ditingkatkan, loading FCP & LCP < 1s, fitur Komentar Komik & Forum Real-time aktif!', time: '08:00', isAdmin: true, likes: 45 }
+      { id: 9, channel: 'pengumuman', author: 'Admin_Oni', avatar: '📢', userRank: { badge: '📢', name: 'Official Staff', color: '#ef4444' }, text: '⚡ Update Server 2.0: Ditambahkan 5 Tema Warna (AMOLED Black, Cyberpunk, Emerald), Auto-Scroll 60 FPS di Reader, & Live Chat Interaktif!', time: '08:00', isAdmin: true, likes: 58 }
     ]
   };
 
-  async function syncForumWithServer() {
-    try {
-      const res = await fetch(FORUM_SERVER_URL, { headers: { 'Accept': 'application/json' } });
-      if (res.ok) {
-        const serverMsgs = await res.json();
-        if (Array.isArray(serverMsgs) && serverMsgs.length > 0) {
-          const existingMap = new Map(FORUM_STATE.messages.map(m => [m.id, m]));
-          serverMsgs.forEach(m => {
-            if (!existingMap.has(m.id)) {
-              existingMap.set(m.id, m);
-            } else {
-              Object.assign(existingMap.get(m.id), m);
-            }
-          });
-          FORUM_STATE.messages = Array.from(existingMap.values()).sort((a, b) => (a.id || 0) - (b.id || 0));
-          localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
-          renderForumMessages();
-        }
-      }
-    } catch (e) {
-      console.warn('Forum server sync warning:', e);
-    }
-  }
-
-  async function pushForumToServer() {
-    try {
-      await fetch(FORUM_SERVER_URL, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(FORUM_STATE.messages.slice(-100))
-      });
-    } catch (e) {
-      console.warn('Forum server push warning:', e);
-    }
-  }
-
-  const COMMUNITY_BOT_RESPONSES = [
-    "Wah mantap bro! Sepemikiran banget ama opini kamu 🔥",
-    "Wkwkwk true story parah, bagian itu kocak banget 😂",
-    "Rekomendasi bagus tuh! Langsung maraton baca chapter lanjutannya ah 🚀",
-    "Gua udah baca sampai chapter terbaru, makin seru & emosional ceritanya!",
-    "Bener banget! Gambar jernih + terjemahannya rapi parah di OniVerse ✨",
-    "Mantap kawan kultivator! Mari kita tunggu update chapter nanti malam 👍",
-    "Wajib masuk daftar bookmark ini mah, alur ceritanya ga ketebak!"
-  ];
-
   const BOT_USERNAMES = [
     { author: 'Rian_Otaku', userRank: { badge: '🔥', name: 'Pendekar Utama', color: '#f59e0b' } },
-    { author: 'Siska_Anime', userRank: { badge: '🌸', name: 'Mahadewa Kultivasi', color: '#ec4899' } },
     { author: 'Zack_Cultivator', userRank: { badge: '⚡', name: 'Kultivator Ranah Atas', color: '#8b5cf6' } },
-    { author: 'TeoriGod', userRank: { badge: '🔮', name: 'Pakar Teori Komik', color: '#a855f7' } },
-    { author: 'Dewi_Manhua', userRank: { badge: '✨', name: 'Dewa Pedang', color: '#10b981' } }
+    { author: 'Siska_Anime', userRank: { badge: '🌸', name: 'Mahadewa Kultivasi', color: '#ec4899' } },
+    { author: 'BudiManhwa', userRank: { badge: '🗡️', name: 'Penyihir Agung', color: '#3b82f6' } },
+    { author: 'Dewi_Manhua', userRank: { badge: '✨', name: 'Dewa Pedang', color: '#10b981' } },
+    { author: 'Shadow_Monarch', userRank: { badge: '👑', name: 'Kaisar Kegelapan', color: '#8b5cf6' } },
+    { author: 'Murim_Lord', userRank: { badge: '⚔️', name: 'Tetua Sekte', color: '#f59e0b' } }
   ];
+
+  const CHANNEL_BOT_RESPONSES = {
+    general: [
+      'Gokil sih update chapter di OniVerse gercep banget! 🔥',
+      'Mode AMOLED Black-nya nyaman banget di mata pas baca malem-malem.',
+      'Sumpah artwork chapter terbaru bener-bener memanjakan mata!',
+      'Gue udah baca 10 chapter nonstop hari ini haha 📖',
+      'Keren banget fiturnya, apalagi auto scroll nya lancar jaya!'
+    ],
+    rekomendasi: [
+      'Kalau suka tema game & regresi coba baca #SoloMaxLevelNewbie seru abis!',
+      '#MercenaryEnrollment wajib masuk list bacaan kamu, aksi pertarungannya realistis!',
+      'Jangan lupa baca #ReturnOfTheMountHuaSect komedinya dapet banget!',
+      '#OmniscientReadersViewpoint masterpiece sih dari segi cerita!'
+    ],
+    spoiler: [
+      'Wah gila plot twist nya gak ketebak sama sekali!',
+      'MC nya beneran gak ada ampun, langsung diberesin!',
+      'Teori gue bener kan, si karakter misterius itu sebenernya sekutu dari masa depan!',
+      'Tungguin chapter minggu depan bakal ada pertempuran all-out!'
+    ],
+    pengumuman: [
+      'Terima kasih tim Admin OniVerse atas update fiturnya! Mantap!',
+      'Servernya kenceng banget no delay!',
+      'Fitur baru ini bener-bener mempermudah pembaca 👍'
+    ]
+  };
 
   function openForumModal() {
     const modal = $('#forum-modal');
@@ -2525,10 +2627,54 @@
     renderForumMessages();
     const unameInput = $('#forum-username-input');
     if (unameInput) unameInput.value = FORUM_STATE.userName;
+
+    // SFX Icon state
+    updateChatSfxIcon();
   }
 
   function closeForumModal() {
     $('#forum-modal')?.classList.add('hidden');
+  }
+
+  function updateChatSfxIcon() {
+    const icon = $('#chat-sfx-icon');
+    const btn = $('#chat-sfx-toggle');
+    if (!icon || !btn) return;
+    if (isChatSfxEnabled) {
+      icon.className = 'fa-solid fa-volume-high';
+      btn.classList.remove('muted');
+    } else {
+      icon.className = 'fa-solid fa-volume-xmark';
+      btn.classList.add('muted');
+    }
+  }
+
+  function formatChatMessageText(text) {
+    if (!text) return '';
+    let safe = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Format @Username
+    safe = safe.replace(/@([a-zA-Z0-9_]+)/g, '<span style="color:var(--purple-light);font-weight:700;">@$1</span>');
+
+    // Format #komik tags
+    safe = safe.replace(/#([a-zA-Z0-9_\-]+)/g, (match, tag) => {
+      const cleanTag = tag.toLowerCase().replace(/_/g, '-');
+      const matched = STATE.allSeries.find(s => {
+        const sl = getSlug(s).toLowerCase();
+        const t = (s.title || s.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        return sl.includes(cleanTag) || t.includes(cleanTag) || cleanTag.includes(sl);
+      });
+
+      if (matched) {
+        return `<a href="#" class="comic-chat-tag" data-slug="${getSlug(matched)}" title="Buka Detail ${matched.title || tag}"><i class="fa-solid fa-book-open"></i> ${matched.title || tag}</a>`;
+      }
+      return `<span style="color:var(--cyan);font-weight:700;">#${tag}</span>`;
+    });
+
+    return safe;
   }
 
   function getRankAuraClass(rankName, isAdmin) {
@@ -2542,11 +2688,16 @@
     const box = $('#forum-chat-box');
     if (!box) return;
     const msgs = FORUM_STATE.messages.filter(m => m.channel === FORUM_STATE.activeChannel);
+
     box.innerHTML = msgs.map(m => {
       const isSelf = m.author === FORUM_STATE.userName;
-      const rankInfo = m.isAdmin ? { badge: '👑', name: "World's Master", color: '#ef4444' } : (m.userRank || { badge: '🍃', name: 'Kultivator', color: '#94a3b8' });
+      const rankInfo = m.isAdmin
+        ? { badge: '👑', name: "World's Master", color: '#ef4444' }
+        : (m.userRank || { badge: '🥋', name: 'Kultivator', color: '#94a3b8' });
+
       const auraClass = getRankAuraClass(rankInfo.name, m.isAdmin);
-      
+      const formattedText = formatChatMessageText(m.text);
+
       return `
         <div class="chat-item ${isSelf ? 'self' : ''}" data-msg-id="${m.id}">
           <div class="chat-avatar ${auraClass}">${rankInfo.badge || m.avatar || m.author[0]}</div>
@@ -2558,7 +2709,7 @@
             </div>
             <div class="chat-bubble">
               ${m.replyTo ? `<div style="font-size:0.72rem; color:var(--text-muted); border-left:2px solid var(--accent-light); padding-left:0.4rem; margin-bottom:0.3rem; opacity:0.85;">Replying to @${m.replyTo}</div>` : ''}
-              ${m.text}
+              ${formattedText}
             </div>
             <div style="display:flex; gap:0.75rem; margin-top:0.25rem; font-size:0.72rem; align-items:center;">
               <button class="forum-like-btn" data-id="${m.id}" style="background:none; border:none; color:${m.likedBySelf ? '#ef4444' : 'var(--text-dim)'}; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:0.2rem;">
@@ -2571,6 +2722,7 @@
           </div>
         </div>`;
     }).join('');
+
     box.scrollTop = box.scrollHeight;
   }
 
@@ -2613,38 +2765,57 @@
     pushForumToServer();
     input.value = '';
     FORUM_STATE.currentReplyAuthor = null;
+    playChatSfx('send');
     renderForumMessages();
 
-    // Trigger Automated Real-time Community Response after 3.5s
+    // Trigger Typing indicator & Bot Reply after 2.5s
+    const activeCh = FORUM_STATE.activeChannel;
     setTimeout(() => {
-      triggerCommunityBotReply(FORUM_STATE.activeChannel);
-    }, 3500);
+      const responses = CHANNEL_BOT_RESPONSES[activeCh] || CHANNEL_BOT_RESPONSES.general;
+      const randomBot = BOT_USERNAMES[rand(0, BOT_USERNAMES.length - 1)];
+
+      const typingInd = $('#forum-typing-indicator');
+      const typingText = $('#typing-text-author');
+      if (typingInd && typingText) {
+        typingText.textContent = `${randomBot.author} sedang mengetik...`;
+        typingInd.classList.remove('hidden');
+      }
+
+      setTimeout(() => {
+        if (typingInd) typingInd.classList.add('hidden');
+        const randomText = responses[rand(0, responses.length - 1)];
+        const botMsg = {
+          id: Date.now() + rand(1, 999),
+          channel: activeCh,
+          author: randomBot.author,
+          avatar: randomBot.userRank.badge,
+          userRank: randomBot.userRank,
+          text: randomText,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          likes: rand(1, 5)
+        };
+        FORUM_STATE.messages.push(botMsg);
+        localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
+        pushForumToServer();
+        playChatSfx('receive');
+        
+        // Re-render if modal open
+        const modal = $('#forum-modal');
+        if (modal && !modal.classList.contains('hidden') && FORUM_STATE.activeChannel === activeCh) {
+          renderForumMessages();
+        }
+      }, 1800);
+    }, 1200);
   }
 
-  function triggerCommunityBotReply(channel) {
-    const randomBot = COMMUNITY_BOT_RESPONSES.length ? BOT_USERNAMES[rand(0, BOT_USERNAMES.length - 1)] : BOT_USERNAMES[0];
-    const randomText = COMMUNITY_BOT_RESPONSES[rand(0, COMMUNITY_BOT_RESPONSES.length - 1)];
-
-    const botMsg = {
-      id: Date.now() + rand(1, 999),
-      channel: channel,
-      author: randomBot.author,
-      avatar: randomBot.userRank.badge,
-      userRank: randomBot.userRank,
-      text: randomText,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      likes: rand(1, 5)
-    };
-
-    FORUM_STATE.messages.push(botMsg);
-    localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
-    pushForumToServer();
-    
-    // Only re-render if modal is currently open and channel matches
-    const modal = $('#forum-modal');
-    if (modal && !modal.classList.contains('hidden') && FORUM_STATE.activeChannel === channel) {
-      renderForumMessages();
-    }
+  async function pushForumToServer() {
+    try {
+      await fetch(FORUM_SERVER_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(FORUM_STATE.messages.slice(-100))
+      });
+    } catch (e) {}
   }
 
   function syncForumWithServer() {
@@ -2656,16 +2827,9 @@
           FORUM_STATE.messages = msgs;
         }
       }
-    } catch(e) {}
+    } catch (e) {}
   }
 
-  function pushForumToServer() {
-    try {
-      localStorage.setItem('oniverse_forum_msgs', JSON.stringify(FORUM_STATE.messages));
-    } catch(e) {}
-  }
-
-  // ==========================================================================
   //  INIT
   // ==========================================================================
   function init() {
