@@ -641,6 +641,12 @@
   }
 
   function openAdminModal() {
+    // HARD ENCRYPTED GATE: Reject if not authenticated
+    const isAuth = sessionStorage.getItem('oniverse_admin_auth') === 'true';
+    if (!isAuth) {
+      openAdminAuthModal();
+      return;
+    }
     const modal = $('#admin-modal');
     if (!modal) return;
     modal.classList.remove('hidden');
@@ -2546,7 +2552,7 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('admin') === '1' || urlParams.get('admin') === 'true') {
-      setTimeout(() => { openAdminModal(); }, 500);
+      setTimeout(() => { handleAdminAccess(); }, 500);
     }
 
     // Welcome Sponsored Pop-up Ad (Triggered once every 24 hours, not every session)
