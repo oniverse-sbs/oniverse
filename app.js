@@ -874,7 +874,7 @@
   //  TRENDING ROW
   // ==========================================================================
   function renderTrending() {
-    const trending = STATE.allSeries
+    const trending = [...STATE.allSeries]
       .sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
       .slice(0, 15);
 
