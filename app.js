@@ -547,6 +547,99 @@
     showToast('📌 Urutan Pin berhasil di-reset ke default!', 'info');
   }
 
+  
+  // ==========================================================================
+  //  ADMIN SECURITY & MASTER PIN AUTHENTICATION
+  // ==========================================================================
+  const DEFAULT_ADMIN_PIN = '7799';
+
+  function getMasterAdminPin() {
+    return localStorage.getItem('oniverse_admin_pin') || DEFAULT_ADMIN_PIN;
+  }
+
+  function handleAdminAccess() {
+    const isAuth = sessionStorage.getItem('oniverse_admin_auth') === 'true';
+    if (isAuth) {
+      openAdminModal();
+    } else {
+      openAdminAuthModal();
+    }
+  }
+
+  function openAdminAuthModal() {
+    const authModal = $('#admin-auth-modal');
+    if (!authModal) return;
+    authModal.classList.remove('hidden');
+    const pinInput = $('#admin-pin-input');
+    const errEl = $('#admin-auth-error-msg');
+    if (errEl) errEl.classList.add('hidden');
+    if (pinInput) {
+      pinInput.value = '';
+      pinInput.type = 'password';
+      setTimeout(() => pinInput.focus(), 150);
+    }
+  }
+
+  function closeAdminAuthModal() {
+    $('#admin-auth-modal')?.classList.add('hidden');
+  }
+
+  function verifyAdminPin() {
+    const pinInput = $('#admin-pin-input');
+    const errEl = $('#admin-auth-error-msg');
+    if (!pinInput) return;
+
+    const enteredPin = pinInput.value.trim();
+    const correctPin = getMasterAdminPin();
+
+    if (enteredPin === correctPin) {
+      sessionStorage.setItem('oniverse_admin_auth', 'true');
+      closeAdminAuthModal();
+      openAdminModal();
+      showToast('🔓 Autentikasi Berhasil! Selamat datang, Owner OniVerse.', 'success');
+    } else {
+      if (errEl) errEl.classList.remove('hidden');
+      pinInput.style.borderColor = '#ef4444';
+      pinInput.value = '';
+      showToast('⛔ PIN Salah! Akses ditolak.', 'error');
+    }
+  }
+
+  function saveNewAdminPin() {
+    const newPinInput = $('#admin-new-pin-input');
+    if (!newPinInput || !newPinInput.value.trim()) {
+      showToast('Masukkan PIN baru yang valid!', 'warning');
+      return;
+    }
+    const newPin = newPinInput.value.trim();
+    if (newPin.length < 4) {
+      showToast('PIN minimal harus 4 karakter / digit!', 'warning');
+      return;
+    }
+    localStorage.setItem('oniverse_admin_pin', newPin);
+    newPinInput.value = '';
+    showToast('✅ Master PIN Owner berhasil diperbarui & disimpan aman!', 'success');
+  }
+
+  function logoutAdmin() {
+    sessionStorage.removeItem('oniverse_admin_auth');
+    closeAdminModal();
+    showToast('🔒 Dashboard Admin berhasil dikunci / Logout.', 'info');
+  }
+
+  function togglePinVisibility() {
+    const pinInput = $('#admin-pin-input');
+    const eyeIcon = $('#pin-eye-icon');
+    if (!pinInput) return;
+    if (pinInput.type === 'password') {
+      pinInput.type = 'text';
+      if (eyeIcon) eyeIcon.className = 'fa-solid fa-eye-slash';
+    } else {
+      pinInput.type = 'password';
+      if (eyeIcon) eyeIcon.className = 'fa-solid fa-eye';
+    }
+  }
+
   function openAdminModal() {
     const modal = $('#admin-modal');
     if (!modal) return;
@@ -2417,6 +2510,20 @@
 
     // Admin Dashboard Bindings
     $('#close-admin-btn')?.addEventListener('click', closeAdminModal);
+
+    // Admin Security PIN Listeners
+    $('#submit-admin-pin-btn')?.addEventListener('click', verifyAdminPin);
+    $('#close-admin-auth-btn')?.addEventListener('click', closeAdminAuthModal);
+    $('#admin-pin-input')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        verifyAdminPin();
+      }
+    });
+    $('#toggle-pin-visibility')?.addEventListener('click', togglePinVisibility);
+    $('#admin-save-pin-btn')?.addEventListener('click', saveNewAdminPin);
+    $('#admin-logout-btn')?.addEventListener('click', logoutAdmin);
+
     $('#admin-broadcast-btn')?.addEventListener('click', adminBroadcastMessage);
     $('#admin-clear-chat-btn')?.addEventListener('click', adminClearChat);
     $('#admin-refresh-data-btn')?.addEventListener('click', () => { location.reload(); });
@@ -2753,7 +2860,7 @@
     if (userText === '/admin') {
       input.value = '';
       closeForumModal();
-      openAdminModal();
+      handleAdminAccess();
       return;
     }
 
