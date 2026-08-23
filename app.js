@@ -2863,12 +2863,7 @@
 
     const userText = input.value.trim();
 
-    if (userText === '/admin') {
-      input.value = '';
-      closeForumModal();
-      handleAdminAccess();
-      return;
-    }
+
 
     if (uInput && uInput.value.trim()) {
       FORUM_STATE.userName = uInput.value.trim();
@@ -2971,6 +2966,37 @@
   };
 
   function init() {
+
+    // ========================================================================
+    //  SECRET OWNER GATEWAY (Hidden URL & Secret Hotkey)
+    //  Secret URL: https://oniverse.sbs/?owner=jett-portal-7799 or #owner-portal-7799
+    //  Secret Hotkey: Ctrl + Alt + A
+    // ========================================================================
+    function checkSecretOwnerAccess() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hash = window.location.hash || '';
+      
+      const isSecretParam = urlParams.get('owner') === 'jett-portal-7799' || urlParams.get('portal') === 'jett-master-7799';
+      const isSecretHash = hash.includes('owner-portal-7799') || hash.includes('jett-master-7799');
+
+      if (isSecretParam || isSecretHash) {
+        setTimeout(() => {
+          handleAdminAccess();
+        }, 400);
+      }
+    }
+
+    // Secret Owner Hotkey (Ctrl + Alt + A)
+    window.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        handleAdminAccess();
+      }
+    });
+
+    checkSecretOwnerAccess();
+    window.addEventListener('hashchange', checkSecretOwnerAccess);
+
     bindEvents();
     loadData();
     updateBookmarkCount();
